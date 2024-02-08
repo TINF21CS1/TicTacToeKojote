@@ -1,13 +1,12 @@
-from typing import Any
 from gamestate import GameState
 
 class RuleBase:
     def __init__(self, playfield_dimensions: (int, int) = (3,3)):
-        self._playfiled_dimensions = playfield_dimensions
+        self._playfield_dimensions = playfield_dimensions
 
     @property
     def playfield_dimensions(self) -> (int, int):
-        return self._playfiled_dimensions
+        return self._playfield_dimensions
 
     def is_move_valid(self, state: GameState, new_position: (int, int)) -> bool:
         if state.playfield_value(new_position) == 0:
