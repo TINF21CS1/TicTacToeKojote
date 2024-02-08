@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from .base_frame import base_frame
-from .field import Field
+from .field_frame import Field
 
 class Menu(base_frame):
     def __init__(self, master):
