@@ -4,6 +4,7 @@ from tkinter import font as tkfont
 import sys
 
 from .menu import Menu
+from .endscreen import EndScreen
 
 class Root(tk.Tk):
     def __init__(self):
@@ -24,7 +25,7 @@ class Root(tk.Tk):
         self.frames = {}
         self.current_frame = None
 
-        self.show(Menu, True)
+        self.show(EndScreen, True)
 
     def show(self, Frame, cache=False):
         if(self.current_frame != None):
@@ -49,6 +50,9 @@ class Root(tk.Tk):
 
     def show_menu(self):
         self.show(Menu)
+
+    def show_endscreen(self):
+        self.show(EndScreen)
 
     def start_mainloop(self):
         self.mainloop()
