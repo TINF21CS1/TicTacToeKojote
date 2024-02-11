@@ -21,7 +21,6 @@ class Root(tk.Tk):
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
         self.title("Tic Tac Toe Kojote")
         self.geometry("700x500")
-        self.iconbitmap(sys.executable)
         self.frames = {}
         self.current_frame = None
 
