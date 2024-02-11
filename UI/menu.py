@@ -10,7 +10,17 @@ class Menu(base_frame):
         self._display_widgets()
 
     def _create_widgets(self):
-        self.button = tk.Button(self, text='Play', command=lambda: self.master.show(Field))
+        
+        self.btnField = tk.Button(self, width=20, height=5, text='Play', command=lambda: self.master.show(Field))
+        self.btnMulti = tk.Button(self, width=20, height=5, text='Multiplayer')#, command=lambda: self.master.show(Multiplayer))
+        self.btnStats = tk.Button(self, width=20, height=5, text='Statistics')#, command=lambda: self.master.show(Statistics))
+        self.btnExit = tk.Button(self, width=20, height=5, text='Exit', command=lambda: self.master.destroy())
+        
 
     def _display_widgets(self):
-        self.button.pack(fill="both", expand=True)
+
+        # display the buttons created in the _create_widgets method
+        self.btnField.pack(fill=tk.Y, expand=True)
+        self.btnMulti.pack(fill=tk.Y, expand=True)
+        self.btnStats.pack(fill=tk.Y, expand=True)
+        self.btnExit.pack(fill=tk.Y, expand=True)
