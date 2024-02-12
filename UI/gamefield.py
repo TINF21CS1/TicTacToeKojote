@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from .end_screen import win_screen, loose_screen
+#from .endscreen import WinScreen, LooseScreen
 from .network import game_input
 
 class gamefield(tk.Frame):
@@ -40,9 +40,9 @@ class gamefield_controller:
 
     def trigger_end(self, win: bool = True):
         if win:
-            self.view.master.master.show(win_screen)
+            self.view.master.master.show(WinScreen)
         else:
-            self.view.master.master.show(loose_screen)
+            self.view.master.master.show(LooseScreen)
 
     def change_active_player(self, player_id: int):
         for i, player in enumerate(self.view.master.player):
