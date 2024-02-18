@@ -19,7 +19,7 @@ class GameState:
 
     _playfield: list[list[int]]
     _finished: bool
-    _winner: int
+    _winner: int = None
 
     def __init__(self, playfiled_dimensions: tuple[int, int] = (3,3)):
         """
@@ -93,3 +93,13 @@ class GameState:
             int: The value at the specified position on the playfield.
         """
         return self._playfield[position[0]][position[1]]
+
+    @property
+    def playfield_dimensions(self) -> tuple[int, int]:
+        """
+        Returns the size of the playfield.
+
+        Returns:
+            tuple[int, int]: The size of the playfield.
+        """
+        return (len(self._playfield), len(self._playfield[0]))

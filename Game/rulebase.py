@@ -72,14 +72,18 @@ class RuleBase:
                 return
 
         # Check vertical lines
-        for column in state.playfield.T:
+        for column in transpose(state.playfield):
             if len(set(column)) == 1 and column[0] != 0:
                 state.set_winner(column[0])
                 return
 
         # Check diagonals
-        diagonal1 = [state.playfield[i][i] for i in range(min(state.playfield_dimensions))]
-        diagonal2 = [state.playfield[i][j] for i, j in zip(range(min(state.playfield_dimensions)), range(max(state.playfield_dimensions)-1, -1, -1))]
+        if state.playfield_dimensions[0] != state.playfield_dimensions[1]:
+            # playfield is not square and thus has no diagonal winning condition
+            return
+
+        diagonal1 = [state.playfield[i][i] for i in range(state.playfield_dimensions[0])]
+        diagonal2 = [state.playfield[i][j] for i in range(state.playfield_dimensions[0]) for j in range(state.playfield_dimensions[0], -1)]
         if len(set(diagonal1)) == 1 and diagonal1[0] != 0:
             state.set_winner(diagonal1[0])
             return
@@ -91,7 +95,7 @@ class RuleBase:
             state.set_winner(0)
             return
 
-        return 0
+        return
 
     def is_game_state_valid(self, state: GameState) -> bool:
         """
@@ -122,3 +126,16 @@ class RuleBase:
 
         """
         return ""  # TODO
+
+def transpose(matrix: list[list[int]]) -> list[list[int]]:
+    """
+    Transpose a matrix.
+
+    Args:
+        matrix (list[list[int]]): The matrix to transpose.
+
+    Returns:
+        list[list[int]]: The transposed matrix.
+
+    """
+    return [list(row) for row in zip(*matrix)]
