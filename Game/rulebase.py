@@ -41,6 +41,9 @@ class RuleBase:
             ValueError: If the playfield value is invalid.
 
         """
+        if self.is_game_state_valid(state) == False:
+            raise ValueError("Invalid game state")
+
         if state.playfield_value(new_position) == 0:
             return True
         elif state.playfield_value(new_position) == 1 or state.playfield_value(new_position) == 2:
@@ -59,6 +62,9 @@ class RuleBase:
             None.
             Sets the winner of the game in given state if there is one.
         """
+        if self.is_game_state_valid(state) == False:
+            raise ValueError("Invalid game state")
+
         # Check horizontal lines
         for row in state.playfield:
             if len(set(row)) == 1 and row[0] != 0:
@@ -98,7 +104,9 @@ class RuleBase:
             bool: True if the game state is valid, False otherwise.
 
         """
-        return True  # TODO
+        count_1 = sum(row.count(1) for row in state.playfield)
+        count_2 = sum(row.count(2) for row in state.playfield)
+        return abs(count_1 - count_2) <= 1
 
     def explain(self, state: GameState, prev: (int, int), new: (int, int)) -> str:
         """
