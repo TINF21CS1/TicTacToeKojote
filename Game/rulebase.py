@@ -12,11 +12,11 @@ class RuleBase:
 
     """
 
-    def __init__(self, playfield_dimensions: (int, int) = (3,3)):
+    def __init__(self, playfield_dimensions: tuple[int, int] = (3,3)):
         self._playfield_dimensions = playfield_dimensions
 
     @property
-    def playfield_dimensions(self) -> (int, int):
+    def playfield_dimensions(self) -> tuple[int, int]:
         """
         Get the dimensions of the playfield.
 
@@ -26,7 +26,7 @@ class RuleBase:
         """
         return self._playfield_dimensions
 
-    def is_move_valid(self, state: GameState, new_position: (int, int)) -> bool:
+    def is_move_valid(self, state: GameState, new_position: tuple[int, int]) -> bool:
         """
         Check if a move is valid.
 
@@ -108,7 +108,7 @@ class RuleBase:
         count_2 = sum(row.count(2) for row in state.playfield)
         return abs(count_1 - count_2) <= 1
 
-    def explain(self, state: GameState, prev: (int, int), new: (int, int)) -> str:
+    def explain(self, state: GameState, prev: tuple[int, int], new: tuple[int, int]) -> str:
         """
         Generate an explanation for a move.
 

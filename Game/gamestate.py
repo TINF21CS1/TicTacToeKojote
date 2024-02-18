@@ -17,11 +17,11 @@ class GameState:
         playfield_value(self, position: (int, int)) -> int: Returns the value at the specified position on the playfield.
     """
 
-    _playfield: [int][int]
+    _playfield: list[list[int]]
     _finished: bool
     _winner: int
 
-    def __init__(self, playfiled_dimensions: (int, int) = (3,3)):
+    def __init__(self, playfiled_dimensions: tuple[int, int] = (3,3)):
         """
         Initializes a new instance of the GameState class.
 
@@ -32,7 +32,7 @@ class GameState:
         self._finished = False
         self._winner = 0
     
-    def set_player_position(self, player: int, new_position: (int, int)):
+    def set_player_position(self, player: int, new_position: tuple[int, int]):
         """
         Sets the position of a player on the playfield.
 
@@ -73,7 +73,7 @@ class GameState:
         return self._finished
     
     @property
-    def playfield(self) -> [int][int]:
+    def playfield(self) -> list[list[int]]:
         """
         Returns the playfield of the game.
 
@@ -83,7 +83,7 @@ class GameState:
         return self._playfield
 
     @property
-    def playfield_value(self, position: (int, int)) -> int:
+    def playfield_value(self, position: tuple[int, int]) -> int:
         """
         Returns the value at the specified position on the playfield.
 
