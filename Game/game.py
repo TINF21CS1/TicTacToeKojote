@@ -14,7 +14,7 @@ class Game:
         """
         self._id: int = 1 #TODO count up
         self.state = GameState()
-        self.players: list = [player1, player2]
+        self.players: list = [None, player1, player2]
         self.rule_base = rule_base
 
     def move(self, player: int, new_position: (int, int)) -> Player | None:
