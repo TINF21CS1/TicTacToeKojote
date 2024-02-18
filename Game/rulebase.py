@@ -1,23 +1,64 @@
 from gamestate import GameState
 
 class RuleBase:
+    """
+    Represents the rule base for a Tic-Tac-Toe game.
+
+    Args:
+        playfield_dimensions (tuple[int, int]): The dimensions of the playfield (default: (3, 3)).
+
+    Attributes:
+        playfield_dimensions (tuple[int, int]): The dimensions of the playfield.
+
+    """
+
     def __init__(self, playfield_dimensions: (int, int) = (3,3)):
         self._playfield_dimensions = playfield_dimensions
 
     @property
     def playfield_dimensions(self) -> (int, int):
+        """
+        Get the dimensions of the playfield.
+
+        Returns:
+            tuple[int, int]: The dimensions of the playfield.
+
+        """
         return self._playfield_dimensions
 
     def is_move_valid(self, state: GameState, new_position: (int, int)) -> bool:
+        """
+        Check if a move is valid.
+
+        Args:
+            state (GameState): The current game state.
+            new_position (tuple[int, int]): The new position to check.
+
+        Returns:
+            bool: True if the move is valid, False otherwise.
+
+        Raises:
+            ValueError: If the playfield value is invalid.
+
+        """
         if state.playfield_value(new_position) == 0:
             return True
         elif state.playfield_value(new_position) == 1 or state.playfield_value(new_position) == 2:
             return False
         else:
             raise ValueError("Invalid playfield value")
-    
-    # returns the winning player id
+
     def check_win(self, state: GameState) -> int:
+        """
+        Check if there is a winner in the current game state.
+
+        Args:
+            state (GameState): The current game state.
+
+        Returns:
+            int: The player number (1 or 2) if there is a winner, 0 otherwise.
+
+        """
         # Check horizontal lines
         for row in state.playfield:
             if len(set(row)) == 1 and row[0] != 0:
@@ -39,7 +80,29 @@ class RuleBase:
         return 0
 
     def is_game_state_valid(self, state: GameState) -> bool:
-        return True #TODO
-    
+        """
+        Check if the current game state is valid.
+
+        Args:
+            state (GameState): The current game state.
+
+        Returns:
+            bool: True if the game state is valid, False otherwise.
+
+        """
+        return True  # TODO
+
     def explain(self, state: GameState, prev: (int, int), new: (int, int)) -> str:
-        return "" #TODO
+        """
+        Generate an explanation for a move.
+
+        Args:
+            state (GameState): The current game state.
+            prev (tuple[int, int]): The previous position.
+            new (tuple[int, int]): The new position.
+
+        Returns:
+            str: The explanation for the move.
+
+        """
+        return ""  # TODO
