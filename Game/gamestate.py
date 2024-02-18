@@ -82,7 +82,6 @@ class GameState:
         """
         return self._playfield
 
-    @property
     def playfield_value(self, position: tuple[int, int]) -> int:
         """
         Returns the value at the specified position on the playfield.
