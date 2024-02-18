@@ -18,27 +18,26 @@ class RuleBase:
     
     # returns the winning player id
     def check_win(self, state: GameState) -> int:
-        return self._check_win_horizontal(state) or self._check_win_vertical(state) or self._check_win_diagonal(state)
-    
-    def _check_win_horizontal(self, state: GameState) -> int:
+        # Check horizontal lines
         for row in state.playfield:
-            if row[0] == row[1] == row[2] and row[0] != 0:
+            if len(set(row)) == 1 and row[0] != 0:
                 return row[0]
+
+        # Check vertical lines
+        for column in state.playfield.T:
+            if len(set(column)) == 1 and column[0] != 0:
+                return column[0]
+
+        # Check diagonals
+        diagonal1 = [state.playfield[i][i] for i in range(min(state.playfield_dimensions))]
+        diagonal2 = [state.playfield[i][j] for i, j in zip(range(min(state.playfield_dimensions)), range(max(state.playfield_dimensions)-1, -1, -1))]
+        if len(set(diagonal1)) == 1 and diagonal1[0] != 0:
+            return diagonal1[0]
+        elif len(set(diagonal2)) == 1 and diagonal2[0] != 0:
+            return diagonal2[0]
+
         return 0
-    
-    def _check_win_vertical(self, state: GameState) -> int:
-        for i in range(3):
-            if state.playfield[0][i] == state.playfield[1][i] == state.playfield[2][i] and state.playfield[0][i] != 0:
-                return state.playfield[0][i]
-        return 0
-    
-    def _check_win_diagonal(self, state: GameState) -> int:
-        if state.playfield[0][0] == state.playfield[1][1] == state.playfield[2][2] and state.playfield[0][0] != 0:
-            return state.playfield[0][0]
-        elif state.playfield[0][2] == state.playfield[1][1] == state.playfield[2][0] and state.playfield[0][2] != 0:
-            return state.playfield[0][0]
-        return 0        
-    
+
     def is_game_state_valid(self, state: GameState) -> bool:
         return True #TODO
     
