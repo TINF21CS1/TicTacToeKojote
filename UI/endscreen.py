@@ -9,10 +9,9 @@ class EndScreen(base_frame):
         self._display_widgets()
 
     def _create_widgets(self, message):
-        from .menu import Menu
         self.lblWinner = tk.Label(self, width=20, height=5, bg="white", text=message)
         self.btnPlayAgain = tk.Button(self, width=20, height=5, text="Play Again", command=lambda: self.master.show(Field))
-        self.btnMainMenu = tk.Button(self, text="Main Menu", width=20, height=5, command=lambda: self.master.show(Menu))
+        self.btnMainMenu = tk.Button(self, text="Main Menu", width=20, height=5, command=lambda: self.master.show_menu)
 
     def _display_widgets(self):
         self.lblWinner.pack()
