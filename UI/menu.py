@@ -2,6 +2,7 @@ import tkinter as tk
 
 from .base_frame import base_frame
 from .field_frame import Field
+from .lobby import Lobby
 
 class Menu(base_frame):
     def __init__(self, master):
@@ -12,7 +13,7 @@ class Menu(base_frame):
     def _create_widgets(self):
         
         self.btnField = tk.Button(self, width=20, height=5, text='Play', command=lambda: self.master.show(Field))
-        self.btnMulti = tk.Button(self, width=20, height=5, text='Multiplayer')#, command=lambda: self.master.show(Multiplayer))
+        self.btnMulti = tk.Button(self, width=20, height=5, text='Multiplayer', command=lambda: self.master.show(Lobby))
         self.btnStats = tk.Button(self, width=20, height=5, text='Statistics')#, command=lambda: self.master.show(Statistics))
         self.btnExit = tk.Button(self, width=20, height=5, text='Exit', command=lambda: self.master.destroy())
         
