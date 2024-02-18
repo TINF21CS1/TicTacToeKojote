@@ -17,16 +17,13 @@ class Game:
         self.players: list = [None, player1, player2]
         self.rule_base = rule_base
 
-    def move(self, player: int, new_position: (int, int)) -> Player | None:
+    def move(self, player: int, new_position: tuple[int, int]):
         """
         Makes a move in the game.
 
         Args:
             player (int): The player making the move.
-            new_position ((int, int)): The new position to place the player's move.
-
-        Returns:
-            Player | None: The winning player if a move made them win, otherwise None.
+            new_position (tuple[int, int]): The new position to place the player's move.
         
         Raises:
             ValueError: If the move is illegal.
@@ -35,8 +32,3 @@ class Game:
             raise ValueError("Illegal move")
         
         self.state.set_player_position(player, new_position)
-
-        if winner := (self.rule_base.check_win(self.state) != 0):
-            return self.players[winner]
-        else:
-            return None

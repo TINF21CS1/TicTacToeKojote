@@ -52,7 +52,7 @@ class GameState:
         Sets the winner of the game.
 
         Args:
-            winner (int): The id of the winning player.
+            winner (int): The id of the winning player. 0 if draw.
         """
         self._finished = True
         self._winner = winner

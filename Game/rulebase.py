@@ -48,7 +48,7 @@ class RuleBase:
         else:
             raise ValueError("Invalid playfield value")
 
-    def check_win(self, state: GameState) -> int:
+    def check_win(self, state: GameState):
         """
         Check if there is a winner in the current game state.
 
@@ -56,26 +56,34 @@ class RuleBase:
             state (GameState): The current game state.
 
         Returns:
-            int: The player number (1 or 2) if there is a winner, 0 otherwise.
-
+            None.
+            Sets the winner of the game in given state if there is one.
         """
         # Check horizontal lines
         for row in state.playfield:
             if len(set(row)) == 1 and row[0] != 0:
-                return row[0]
+                state.set_winner(row[0])
+                return
 
         # Check vertical lines
         for column in state.playfield.T:
             if len(set(column)) == 1 and column[0] != 0:
-                return column[0]
+                state.set_winner(column[0])
+                return
 
         # Check diagonals
         diagonal1 = [state.playfield[i][i] for i in range(min(state.playfield_dimensions))]
         diagonal2 = [state.playfield[i][j] for i, j in zip(range(min(state.playfield_dimensions)), range(max(state.playfield_dimensions)-1, -1, -1))]
         if len(set(diagonal1)) == 1 and diagonal1[0] != 0:
-            return diagonal1[0]
+            state.set_winner(diagonal1[0])
+            return
         elif len(set(diagonal2)) == 1 and diagonal2[0] != 0:
-            return diagonal2[0]
+            state.set_winner(diagonal2[0])
+        
+        # Check draw
+        if 0 not in state.playfield:
+            state.set_winner(0)
+            return
 
         return 0
 
