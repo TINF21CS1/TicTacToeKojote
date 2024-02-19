@@ -1,6 +1,6 @@
 import tkinter as tk
 
-#from .endscreen import WinScreen, LooseScreen
+from .endscreen import WinScreen, LooseScreen
 from .network import game_input
 
 class gamefield(tk.Frame):

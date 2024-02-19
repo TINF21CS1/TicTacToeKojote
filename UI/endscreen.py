@@ -1,6 +1,6 @@
 import tkinter as tk
 from .base_frame import base_frame
-from .field_frame import Field
+#from .field_frame import Field
 
 class EndScreen(base_frame):
     def __init__(self, master, message):
@@ -10,7 +10,7 @@ class EndScreen(base_frame):
 
     def _create_widgets(self, message):
         self.lblWinner = tk.Label(self, width=20, height=5, bg="white", text=message)
-        self.btnPlayAgain = tk.Button(self, width=20, height=5, text="Play Again", command=lambda: self.master.show(Field))
+        #self.btnPlayAgain = tk.Button(self, width=20, height=5, text="Play Again", command=lambda: self.master.show(Field))
         self.btnMainMenu = tk.Button(self, text="Main Menu", width=20, height=5, command=lambda: self.master.show_menu)
 
     def _display_widgets(self):
