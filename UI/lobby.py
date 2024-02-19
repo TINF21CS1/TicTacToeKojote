@@ -93,15 +93,14 @@ class NetworkPlayerFrame(playerFrame):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
+        self.btnStart.config(state=tk.DISABLED)
 
     def _create_widgets(self):
-        self.lblStrength = tk.Label(self, text="Strength")
-        self.optStrength = tk.OptionMenu(self, tk.StringVar(), "Easy", "Medium", "Expert")
+        self.lblWait = tk.Label(self, text="Waiting for Player to join")
 
     def _display_widgets(self):
         #self.columnconfigure([0,1], weight=1)
-        self.lblStrength.grid(column=0, row=1, sticky=tk.E+tk.W)
-        self.optStrength.grid(column=1, row=1, sticky=tk.E+tk.W)
+        self.lblWait.grid(column=0, row=1, sticky=tk.E+tk.W, columnspan=2)
 
 class playerdisplay(tk.Frame):
     def __init__(self, master, player):
@@ -133,7 +132,7 @@ class playerdisplay(tk.Frame):
             case "AI":
                 self.playerOptions = AIPlayerFrame(self)
             case "Network":
-                pass
+                self.playerOptions = NetworkPlayerFrame(self)
             case _:
                 self.playerOptions = tk.Frame(self)
         self.playerOptions.grid(column=0, row=2, sticky=tk.E+tk.W)
@@ -156,15 +155,17 @@ class Lobby(base_frame):
         self.playerType[0] = playerdisplay(self, 0)
         self.playerType[1] = playerdisplay(self, 1)
         self.lblTimer = tk.Label(self, text="")
+        self.btnBack = tk.Button(self, text="Back", command=lambda: self.master.show_menu())
 
     def _display_widgets(self):
-        self.columnconfigure([0,10], weight=10)
+        self.columnconfigure([1,9], weight=10)
         self.columnconfigure(5, weight=1)
         self.lblheading.grid(column=0, row=0, columnspan=11, sticky=tk.E+tk.W)
         self.lbllocation.grid(column=0, row=1, columnspan=11, sticky=tk.E+tk.W)
-        self.playerType[0].grid(column=0, row=2, sticky=tk.N+tk.E+tk.W)
-        self.playerType[1].grid(column=10, row=2, sticky=tk.N+tk.E+tk.W)
+        self.playerType[0].grid(column=0, row=2, sticky=tk.N+tk.E+tk.W, columnspan=2)
+        self.playerType[1].grid(column=9, row=2, sticky=tk.N+tk.E+tk.W, columnspan=2)
         self.lblTimer.grid(column=0, row=100, columnspan=11, sticky=tk.E+tk.W)
+        self.btnBack.grid(column=10, row=101, sticky=tk.E+tk.W)
 
     def start(self, player, set=None):
         if(set != None):
