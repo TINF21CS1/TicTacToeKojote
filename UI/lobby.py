@@ -1,5 +1,4 @@
 import tkinter as tk
-import time
 
 from .base_frame import base_frame
 from .field_frame import Field
@@ -138,8 +137,9 @@ class playerdisplay(tk.Frame):
         self.playerOptions.grid(column=0, row=2, sticky=tk.E+tk.W)
 
 class Lobby(base_frame):
-    def __init__(self, master):
+    def __init__(self, master, address, *args):
         super().__init__(master)
+        self.address = address
         self.player = list()
         self.player_ready = [False]*2
         self.ready = tk.BooleanVar(self, value=False)
@@ -150,7 +150,7 @@ class Lobby(base_frame):
 
     def _create_widgets(self):
         self.lblheading = tk.Label(self, width=20, height=5, bg="white", text="Lobby")
-        self.lbllocation = tk.Label(self, text="at local")
+        self.lbllocation = tk.Label(self, text=f"at {self.address}")
         self.playerType = [None]*2
         self.playerType[0] = playerdisplay(self, 0)
         self.playerType[1] = playerdisplay(self, 1)
