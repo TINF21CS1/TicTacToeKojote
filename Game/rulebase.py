@@ -91,7 +91,7 @@ class RuleBase:
             state.set_winner(diagonal2[0])
         
         # Check draw
-        if 0 not in state.playfield:
+        if 0 not in [item for row in state.playfield for item in row]:
             state.set_winner(0)
             return
 
