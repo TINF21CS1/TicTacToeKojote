@@ -42,14 +42,14 @@ class RuleBase:
 
         """
         if self.is_game_state_valid(state) == False:
-            raise ValueError("Invalid game state")
+            raise ValueError("Invalid game state. This should not happen and should be investigated.")
 
         if state.playfield_value(new_position) == 0:
             return True
         elif state.playfield_value(new_position) == 1 or state.playfield_value(new_position) == 2:
-            return False
+            raise ValueError("This space is already taken. Pick a free space!")
         else:
-            raise ValueError("Invalid playfield value")
+            raise ValueError("Invalid playfield value. This should not happen and should be investigated.")
 
     def check_win(self, state: GameState):
         """
@@ -111,21 +111,6 @@ class RuleBase:
         count_1 = sum(row.count(1) for row in state.playfield)
         count_2 = sum(row.count(2) for row in state.playfield)
         return abs(count_1 - count_2) <= 1
-
-    def explain(self, state: GameState, prev: tuple[int, int], new: tuple[int, int]) -> str:
-        """
-        Generate an explanation for a move.
-
-        Args:
-            state (GameState): The current game state.
-            prev (tuple[int, int]): The previous position.
-            new (tuple[int, int]): The new position.
-
-        Returns:
-            str: The explanation for the move.
-
-        """
-        return ""  # TODO
 
 def transpose(matrix: list[list[int]]) -> list[list[int]]:
     """

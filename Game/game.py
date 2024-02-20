@@ -28,7 +28,10 @@ class Game:
         Raises:
             ValueError: If the move is illegal.
         """
-        if not self.rule_base.is_move_valid(self.state, new_position):
-            raise ValueError("Illegal move")
+        try:
+            self.rule_base.is_move_valid(self.state, new_position)
+            self.state.set_player_position(player, new_position)
+        except ValueError as e:
+            # TODO: Call a function in networking to display the error
+            print(e)
         
-        self.state.set_player_position(player, new_position)
