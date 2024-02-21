@@ -13,6 +13,8 @@ class Root(tk.Tk):
         start_height = 300
         min_height = 250
 
+        self.devOptions = False
+
         self.geometry(f"{start_width}x{start_height}")
         self.minsize(width=min_width, height=min_height)
         self.grid_columnconfigure(0, weight=1)

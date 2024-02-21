@@ -1,8 +1,11 @@
 import tkinter as tk
 
 from .base_frame import base_frame
-from .field_frame import Field
-from .lobby import Lobby
+from .customLobby import CustomLobby
+from .single import Singleplayer
+from .multi import Multiplayer
+from .profile import Profile
+from .credits import Credits
 
 class Menu(base_frame):
     def __init__(self, master, *args):
@@ -12,43 +15,32 @@ class Menu(base_frame):
         self.address_toogle = False
 
     def _create_widgets(self):
-        
-        self.btnField = tk.Button(self, width=20, height=5, text='Play / Start Lobby', command=self._start)
-        self.btnMulti = tk.Button(self, width=20, height=5, text='Connect to Lobby', command=lambda: self._toogle_address(state=True))
-        self.btnStats = tk.Button(self, width=20, height=5, text='Statistics')#, command=lambda: self.master.show(Statistics))
-        self.btnExit = tk.Button(self, width=20, height=5, text='Exit', command=lambda: self.master.destroy())
-
-        self.lblAddr = tk.Label(self, text="Address")
-        self.inputLobby =  tk.Entry(self)
-        self.btnConnect = tk.Button(self, text="Connect", command=self._start)
-        
+        self.lblTitle = tk.Label(self, text='TicTacToe-Kojote', font=self.master.title_font)
+        self.btnSingle = tk.Button(self, text='Singleplayer', command=lambda *args: self.master.show(Singleplayer))
+        self.btnMulti = tk.Button(self, text='Multiplayer', command=lambda*args : self.master.show(Multiplayer))
+        self.btnCustom = tk.Button(self, text='Custom Game', command=lambda *args: self.master.show(CustomLobby))
+        self.btnProfile = tk.Button(self, text='Profile', command=lambda *args: self.master.show(Profile))
+        self.btnCredits = tk.Button(self, text='Credits', command=lambda *args: self.master.show(Credits))
+        self.btnExit = tk.Button(self, text='Exit', command=lambda: self.master.destroy())
 
     def _display_widgets(self):
-
-        self.columnconfigure([0,10], weight=1)
+        self.columnconfigure([0, 6], weight=1)
+        self.columnconfigure([1, 5], weight=2)
+        self.columnconfigure([2, 4], weight=4)
+        self.columnconfigure([3], weight=2)
+        self.rowconfigure([0, 11], weight=1)
+        self.rowconfigure([2], weight=2)
+        self.rowconfigure([4, 6, 10, 12], weight=4)
+        self.rowconfigure([3, 5, 7, 11, 13], weight=2)
         # display the buttons created in the _create_widgets method
-        self.btnField.grid(sticky=tk.E+tk.W, column=3, row=0, columnspan=5)
-        self.btnMulti.grid(sticky=tk.E+tk.W, column=3, row=1, columnspan=5)
-        self.btnStats.grid(sticky=tk.E+tk.W, column=3, row=3, columnspan=5)
-        self.btnExit.grid(sticky=tk.E+tk.W, column=3, row=4, columnspan=5)
+        self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
+        self.btnSingle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4, columnspan=3)
+        self.btnMulti.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6, columnspan=3)
+        self.btnProfile.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10, columnspan=3)
+        self.btnCredits.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=12, columnspan=3)
+        self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
-    def _toogle_address(self, state=None):
-        if state == None:
-            state = not self.address_toogle
-        if state != self.address_toogle:
-            if state:
-                self.lblAddr.grid(sticky=tk.E+tk.W, column=4, row=2)
-                self.inputLobby.grid(sticky=tk.E+tk.W, column=5, row=2)
-                self.btnConnect.grid(sticky=tk.E+tk.W, column=6, row=2)
-            else:
-                self.lblAddr.grid_forget()
-                self.inputLobby.grid_forget()
-                self.btnConnect.grid_forget()
-            self.address_toogle = state
-
-    def _start(self):
-        if((address:=self.inputLobby.get())==""):
-            self.master.start_server()
-            self.master.show(Lobby, "localhost")
-        else:
-            self.master.show(Lobby, address)
+        if(self.master.devOptions):
+            self.rowconfigure([8], weight=4)
+            self.rowconfigure([9], weight=2)
+            self.btnCustom.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, columnspan=3)
