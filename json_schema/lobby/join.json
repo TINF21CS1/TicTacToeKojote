@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "lobby/join",
+    "title": "Client joins the lobby",
+    "description": "Game Client joins the lobby, and sends the player's profile",
+    "type": "object",
+    "properties": {
+        "message_type": {
+            "description": "The message type",
+            "type": "string",
+            "const": "lobby/join"
+        },
+        "profile": {
+            "description": "The profile object of the player",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "The id of the player",
+                    "type": "number"
+                },
+                "name": {
+                    "description": "The name of the player",
+                    "type": "string"
+                },
+                "color": {
+                    "description": "The color of the player",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 16777215
+                }
+            },
+            "required": [ "id", "name", "color"]
+        }
+    },
+    "required": [ "message_type", "profile"]
+}

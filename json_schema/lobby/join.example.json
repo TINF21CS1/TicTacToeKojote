@@ -1,0 +1,8 @@
+{
+    "message_type": "lobby/join",
+    "profile": {
+        "id": 1,
+        "name": "boris",
+        "color": 123
+    }
+}
