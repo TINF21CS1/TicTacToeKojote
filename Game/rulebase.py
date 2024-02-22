@@ -47,7 +47,7 @@ class RuleBase:
         if state.playfield_value(new_position) == 0:
             return True
         elif state.playfield_value(new_position) == 1 or state.playfield_value(new_position) == 2:
-            raise ValueError("This space is already taken. Pick a free space!")
+            raise ValueError(f"The space ({new_position[0]}, {new_position[1]}) is already taken. Pick a free space!")
         else:
             raise ValueError("Invalid playfield value. This should not happen and should be investigated.")
 
