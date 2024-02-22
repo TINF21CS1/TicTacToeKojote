@@ -1,6 +1,7 @@
 from player import Player
 from gamestate import GameState
 from rulebase import RuleBase
+import uuid
 
 class Game:
     def __init__(self, player1: Player, player2: Player, rule_base: RuleBase = RuleBase()):
@@ -12,7 +13,8 @@ class Game:
             player2 (Player): The second player.
             rule_base (RuleBase, optional): The rule base for the game. Defaults to RuleBase().
         """
-        self._id: int = 1 #TODO count up
+        self._uuid: uuid.UUID = uuid.uuid4()
+        self._id: int =  self._uuid.int
         self.state = GameState()
         self.players: list = [None, player1, player2]
         self.rule_base = rule_base
