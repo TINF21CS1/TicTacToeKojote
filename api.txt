@@ -1,0 +1,34 @@
+/lobby/
+    get_status()
+        -> list of available network players
+        -> selected player or None
+        -> ready status of both players
+
+/game/
+    start(
+        - list of two players
+        - list of observers (optional)
+    )
+        to all players (and observers optional)
+        -> list of players with symboles
+        -> game state as list[9]
+        -> active player
+        -> bool win=False
+    make_move(
+        - coordinates
+    )
+    0:  to all players (and observers optional)
+        -> game state as list[9]
+        -> active player
+        -> bool win
+    1:  to sender
+        -> errorcode
+        -> errormessage
+
+/chat/
+    message(
+        - text
+    )
+        to all player (and observers optional)
+        -> sender
+        -> text
