@@ -1,3 +1,4 @@
+from statistics import Statistics
 import uuid
 
 class Player:
@@ -25,7 +26,7 @@ class RemotePlayer(Player):
         statistics (Statistics): The statistics of the player.
     """
     def __init__(self, id: int, display_name: str, statistics: Statistics):
-        super(id, display_name, statistics)
+        super().__init__(id, display_name, statistics)
 
 class LocalPlayer(Player):
     """
@@ -37,7 +38,7 @@ class LocalPlayer(Player):
         statistics (Statistics): The statistics of the player.
     """
     def __init__(self, id: int, display_name: str, statistics: Statistics):
-        super(id, display_name, statistics)
+        super().__init__(id, display_name, statistics)
 
 class ComputerPlayer(Player):
     """
@@ -49,4 +50,4 @@ class ComputerPlayer(Player):
         statistics (Statistics): The statistics of the player.
     """
     def __init__(self, id: int, display_name: str, statistics: Statistics):
-        super(id, display_name, statistics)
+        super().__init__(id, display_name, statistics)
