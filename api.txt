@@ -1,34 +1,24 @@
-/lobby/
-    get_status()
-        -> list of available network players
-        -> selected player or None
-        -> ready status of both players
+lobby/join
+    -> player-profile
+    <- statistics
+    b- current players, player status
 
-/game/
-    start(
-        - list of two players
-        - list of observers (optional)
-    )
-        to all players (and observers optional)
-        -> list of players with symboles
-        -> game state as list[9]
-        -> active player
-        -> bool win=False
-    make_move(
-        - coordinates
-    )
-    0:  to all players (and observers optional)
-        -> game state as list[9]
-        -> active player
-        -> bool win
-    1:  to sender
-        -> errorcode
-        -> errormessage
+lobby/kick
+    -> player-profile
+    b- player kicked
 
-/chat/
-    message(
-        - text
-    )
-        to all player (and observers optional)
-        -> sender
-        -> text
+lobby/ready
+    -> own ready status
+    b- ready status of all players
+    ( b- all ready, game starting )
+
+game/make_move
+    -> coordinates
+    b- gamestate, active_player || ( <- errormessage ) || b- game finished, (winner)
+
+chat/message
+    -> text
+    b- player, text
+
+[[Player Leaves Game (Socket connClose)]]
+    b- player left game, game finished, winner
