@@ -1,0 +1,221 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "server_to_client_TicTacToe",
+    "title": "Server sends updates to the client in the TicTacToe program",
+    "description": "The schema for the server to send updates to the client in the TicTacToe program",
+    "type": "object",
+    "properties": {
+        "message_type": {
+            "description": "The message type",
+            "type": "string",
+            "enum": ["game/start", "lobby/status", "statistics/statistics", "game/turn", "game/error", "game/end", "chat/receive"]
+        }
+    },
+    "required": ["message_type"], 
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "game/start"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "starting_player": {
+                        "description": "Shows whether the receiving player is the starting player",
+                        "type": "boolean"
+                    }
+                },
+                "required": ["starting_player"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "lobby/status"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "players": {
+                        "description": "The players in the lobby",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "uuid": {
+                                    "description": "The UUID of a player. This is only send to the admin of the lobby. Other players receive null.",
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "display_name": {
+                                    "description": "The display name of a player",
+                                    "type": "string"
+                                },
+                                "color": {
+                                    "description": "The color of a player",
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 16777215
+                                },
+                                "ready": {
+                                    "description": "Whether the player is ready",
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": ["display_name", "color", "ready"]
+                        }
+                    }
+                },
+                "required": ["players"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "statistics/statistics"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "statistics": {
+                        "$comment": "TODO: Implement the statistics schema",
+                        "description": "The statistics of the player",
+                        "type": "object",
+                        "properties": {
+                            "wins": {
+                                "description": "The number of wins",
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "losses": {
+                                "description": "The number of losses",
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "draws": {
+                                "description": "The number of draws",
+                                "type": "integer",
+                                "minimum": 0
+                            }
+                        },
+                        "required": ["wins", "losses", "draws"]
+                    }
+                },
+                "required": ["statistics"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "game/turn"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "updated_playfield": {
+                        "description": "The updated playfield",
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "enum": [0, 1, 2]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }, 
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "next_player": {
+                        "description": "Shows whether the receiving player is the next moving player",
+                        "type": "boolean"
+                    }
+                },
+                "required": ["updated_playfield", "next_player"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "game/error"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "error_message": {
+                        "description": "The error message",
+                        "type": "string"
+                    }
+                },
+                "required": ["error_message"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "game/end"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "winner": {
+                        "description": "Shows whether the receiving player is the winner. If null, the game ended in a draw",
+                        "type": "boolean"
+                    },
+                    "final_playfield": {
+                        "description": "The final playfield",
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "enum": [0, 1, 2]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }, 
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "required": ["final_playfield"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": {
+                        "const": "chat/receive"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "sender_display_name": {
+                        "description": "The name of the sender",
+                        "type": "string"
+                    },
+                    "message": {
+                        "description": "The message",
+                        "type": "string"
+                    }
+                },
+                "required": ["sender_display_name", "message"]
+            }
+        }
+    ]
+}

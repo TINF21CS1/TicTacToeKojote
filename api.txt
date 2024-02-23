@@ -1,24 +1,24 @@
 lobby/join
-    -> player-profile
-    <- statistics
-    b- current players, player status
+    -> player-profile (lobby/join)
+    <- statistics (statistics/statistics)
+    b- current players, player status (lobby/status)
 
 lobby/kick
-    -> player-profile
-    b- player kicked
+    -> player-profile (lobby/kick)
+    b- player kicked (lobby/status)
 
 lobby/ready
-    -> own ready status
-    b- ready status of all players
-    ( b- all ready, game starting )
+    -> own ready status (lobby/ready)
+    b- ready status of all players (lobby/status)
+    ( b- all ready, game starting ) (game/start)
 
 game/make_move
-    -> coordinates
-    b- gamestate, active_player || ( <- errormessage ) || b- game finished, (winner)
+    -> coordinates (game/make_move)
+    b- gamestate, active_player (game/turn) || ( <- errormessage ) (game/error) || b- game finished, (winner) (game/end)
 
 chat/message
-    -> text
-    b- player, text
+    -> text (chat/message)
+    b- player, text (chat/receive)
 
 [[Player Leaves Game (Socket connClose)]]
-    b- player left game, game finished, winner
+    b- player left game, game finished, winner (game/end)
