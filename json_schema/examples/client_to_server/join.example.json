@@ -1,7 +1,7 @@
 {
     "message_type": "lobby/join",
     "profile": {
-        "id": 1,
+        "uuid": "c4f0eccd-a6a4-4662-999c-17669bc23d5e",
         "name": "boris",
         "color": 3319955
     }

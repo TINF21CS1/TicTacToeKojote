@@ -1,4 +1,4 @@
 {
     "message_type": "game/start",
-    "current_player": 0
+    "current_player_uuid": "c4f0eccd-a6a4-4662-999c-17669bc23d5e"
 }

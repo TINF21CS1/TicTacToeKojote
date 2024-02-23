@@ -11,7 +11,7 @@ logger = logging.getLogger()
 class Lobby:
     def __init__(self, admin:Player) -> None:
         self._players = [admin]
-        self._readystatus: dict = {admin.id, False}
+        self._readystatus: dict = {admin.uuid, False}
         self._game = None
         self._inprogress = False
         
@@ -39,8 +39,8 @@ class Lobby:
                         await websocket.send("Game in progress, cannot join") # TODO jsonify
                         break
 
-                    self._players.append(Player(message_json["profile"]["id"], message_json["profile"]["display_name"], message_json["profile"]["color"]))
-                    self._readystatus[message_json["profile"]["id"]] = False
+                    self._players.append(Player(uuid=message_json["profile"]["uuid"], display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"]))
+                    self._readystatus[message_json["profile"]["uuid"]] = False
 
                     # await websocket.send( ## STATISTICS ## )
                     await websocket.broadcast(json.dumps({
@@ -56,7 +56,7 @@ class Lobby:
                 
                 case "lobby/ready":
 
-                    self._readystatus[message_json["profile"]["id"]] = True
+                    self._readystatus[message_json["profile"]["uuid"]] = True
 
                     await websocket.broadcast(json.dumps({
                         "message_type": "lobby/status",
@@ -93,5 +93,5 @@ class Lobby:
 
 
 if __name__ == "__main__":
-    asyncio.run(Lobby.start_server(port = 8765, admin = Player(0, "admin", 0xffffff)))
+    asyncio.run(Lobby.start_server(port = 8765, admin = Player(uuid=0, display_name="admin", color=0xffffff)))
 
