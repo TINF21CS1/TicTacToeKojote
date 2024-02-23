@@ -41,7 +41,7 @@
                                 "maximum": 16777215
                             }
                         },
-                        "required": [ "uuid", "name", "color"]
+                        "required": [ "uuid", "display_name", "color"]
                     }
                 }, 
                 "required": [ "profile"]
