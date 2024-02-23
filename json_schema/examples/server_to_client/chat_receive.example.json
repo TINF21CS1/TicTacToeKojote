@@ -1,0 +1,5 @@
+{
+    "message_type": "chat/receive",
+    "sender_display_name": "Player1",
+    "message": "Hello, world!"
+}

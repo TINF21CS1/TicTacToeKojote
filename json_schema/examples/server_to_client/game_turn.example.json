@@ -1,0 +1,9 @@
+{
+    "message_type": "game/turn",
+    "updated_playfield": [
+        [0, 1, 2],
+        [2, 0, 1],
+        [1, 2, 0]
+    ],
+    "next_player": true
+}
