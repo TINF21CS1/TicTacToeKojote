@@ -1,36 +1,145 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "lobby/join",
-    "title": "Client joins the lobby",
-    "description": "Game Client joins the lobby, and sends the player's profile",
+    "$id": "client_to_server_TicTacToe",
+    "title": "Clients perform actions in the TicTacToe program",
+    "description": "The schema for the messages sent from the client to the server in the TicTacToe program",
     "type": "object",
     "properties": {
         "message_type": {
             "description": "The message type",
             "type": "string",
-            "const": "lobby/join"
-        },
-        "profile": {
-            "description": "The profile object of the player",
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "The id of the player",
-                    "type": "number"
-                },
-                "name": {
-                    "description": "The name of the player",
-                    "type": "string"
-                },
-                "color": {
-                    "description": "The color of the player",
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 16777215
-                }
-            },
-            "required": [ "id", "name", "color"]
+            "enum": ["lobby/join", "lobby/kick", "lobby/ready", "game/make_move", "chat/message"]
         }
     },
-    "required": [ "message_type", "profile"]
+    "required": [ "message_type"],
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/join" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "profile": {
+                        "description": "The profile object of the player",
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The id of the player",
+                                "type": "number"
+                            },
+                            "name": {
+                                "description": "The name of the player",
+                                "type": "string"
+                            },
+                            "color": {
+                                "description": "The color of the player",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 16777215
+                            }
+                        },
+                        "required": [ "id", "name", "color"]
+                    }
+                }, 
+                "required": [ "profile"]
+            }
+        }, 
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/kick" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "admin_player_id": {
+                        "description": "The id of the player with admin rights",
+                        "type": "number"
+                    },
+                    "kick_player_id": {
+                        "description": "The id of the player to kick",
+                        "type": "number"
+                    }
+                },
+                "required": [ "admin_player_id", "kick_player_id"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/ready" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_id": {
+                        "description": "The id of the player who changed the ready status",
+                        "type": "number"
+                    },
+                    "ready": {
+                        "description": "The ready status of the player",
+                        "type": "boolean"
+                    }
+                },
+                "required": [ "player_id", "ready"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "game/make_move" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_id": {
+                        "description": "The id of the player who made the move",
+                        "type": "number"
+                    },
+                    "move": {
+                        "description": "The move to make",
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "description": "The x coordinate of the move",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 2
+                            },
+                            "y": {
+                                "description": "The y coordinate of the move",
+                                "type": "number", 
+                                "minimum": 0,
+                                "maximum": 2
+                            }
+                        },
+                        "required": [ "x", "y"]
+                    }
+                },
+                "required": [ "player_id", "move"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "chat/message" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_id": {
+                        "description": "The id of the player who sent the message",
+                        "type": "number"
+                    },
+                    "message": {
+                        "description": "The message to send",
+                        "type": "string"
+                    }
+                },
+                "required": [ "player_id", "message"]
+            }
+        }
+    ]
 }
