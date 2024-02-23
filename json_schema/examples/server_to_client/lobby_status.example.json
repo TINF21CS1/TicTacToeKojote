@@ -2,13 +2,15 @@
     "message_type": "lobby/status",
     "players": [
         {
-            "display_name": "admin",
-            "color": 16777215,
+            "uuid": "123e4567-e89b-12d3-a456-426614174000",
+            "display_name": "Player1",
+            "color": 16711680,
             "ready": true
         },
         {
-            "display_name": "boris",
-            "color": 3319955,
+            "uuid": "c56e118d-e89b-12d3-a456-426614174000",
+            "display_name": "Player2",
+            "color": 65280,
             "ready": false
         }
     ]

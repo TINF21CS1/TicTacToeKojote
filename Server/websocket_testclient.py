@@ -5,7 +5,7 @@ from websockets.sync.client import connect
 import json
 
 def hello():
-    with connect("ws://localhost:8001") as websocket:
+    with connect("ws://localhost:8765") as websocket:
 
         obj = {
             "message_type": "asdf",

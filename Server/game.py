@@ -37,3 +37,12 @@ class Game:
             # TODO: Call a function in networking to display the error
             print(e)
         
+    @property
+    def current_player_uuid(self) -> str:
+        """
+        Returns the UUID string of the current player.
+
+        Returns:
+            str: The UUID string of the current player.
+        """
+        return str(self.players[self.state.current_player].uuid)

@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 
 class Player:
     """
@@ -9,14 +9,8 @@ class Player:
         display_name (str): The name displayed for the player.
         statistics (Statistics): The statistics of the player.
     """
-    def __init__(self, display_name: str, color: int, uuid: str = None):
-        if uuid:
-            self._uuid: uuid.UUID = uuid.UUID(id)
-        else:
-            self._uuid: uuid.UUID = uuid.uuid4()
+    def __init__(self, display_name: str, color: int, uuid: str, ready:bool = False):
+        self.uuid: UUID = UUID(uuid)
         self.display_name = display_name
         self.color = color
-
-    @property
-    def uuid(self):
-        return self._uuid
+        self.ready = ready

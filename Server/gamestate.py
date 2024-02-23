@@ -1,3 +1,5 @@
+import random
+
 class GameState:
     """
     Represents the state of a Tic-Tac-Toe game.
@@ -20,17 +22,19 @@ class GameState:
     _playfield: list[list[int]]
     _finished: bool
     _winner: int = None
+    _current_player: int = None
 
-    def __init__(self, playfiled_dimensions: tuple[int, int] = (3,3)):
+    def __init__(self, playfield_dimensions: tuple[int, int] = (3,3)):
         """
         Initializes a new instance of the GameState class.
 
         Args:
-            playfiled_dimensions (tuple[int, int], optional): The dimensions of the playfield. Defaults to (3, 3).
+            playfield_dimensions (tuple[int, int], optional): The dimensions of the playfield. Defaults to (3, 3).
         """
-        self._playfield = [[0 for _ in range(playfiled_dimensions[0])] for _ in range(playfiled_dimensions[1])]
+        self._playfield = [[0 for _ in range(playfield_dimensions[0])] for _ in range(playfield_dimensions[1])]
         self._finished = False
         self._winner = 0
+        self._current_player = random.randint(1,2)
     
     def set_player_position(self, player: int, new_position: tuple[int, int]):
         """
@@ -103,3 +107,13 @@ class GameState:
             tuple[int, int]: The size of the playfield.
         """
         return (len(self._playfield), len(self._playfield[0]))
+    
+    @property
+    def current_player(self) -> int:
+        """
+        Returns the id of the current player.
+
+        Returns:
+            int: The id of the current player.
+        """
+        return self._current_player

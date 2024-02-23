@@ -23,12 +23,13 @@
             },
             "then": {
                 "properties": {
-                    "starting_player": {
-                        "description": "Shows whether the receiving player is the starting player",
-                        "type": "boolean"
+                    "starting_player_uuid": {
+                        "description": "The UUID of the starting player",
+                        "type": "string",
+                        "format": "uuid"
                     }
                 },
-                "required": ["starting_player"]
+                "required": ["starting_player_uuid"]
             }
         },
         {
@@ -48,7 +49,7 @@
                             "type": "object",
                             "properties": {
                                 "uuid": {
-                                    "description": "The UUID of a player. This is only send to the admin of the lobby. Other players receive null.",
+                                    "description": "The UUID of a player.",
                                     "type": "string",
                                     "format": "uuid"
                                 },
@@ -67,7 +68,7 @@
                                     "type": "boolean"
                                 }
                             },
-                            "required": ["display_name", "color", "ready"]
+                            "required": ["display_name", "color", "ready", "uuid"]
                         }
                     }
                 },
@@ -84,31 +85,63 @@
             },
             "then": {
                 "properties": {
-                    "statistics": {
+                    "server_statistics": {
                         "$comment": "TODO: Implement the statistics schema",
-                        "description": "The statistics of the player",
-                        "type": "object",
-                        "properties": {
-                            "wins": {
-                                "description": "The number of wins",
-                                "type": "integer",
-                                "minimum": 0
+                        "description": "The statistics of the players on the server",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "profile": {
+                                    "description": "The profile object of the player",
+                                    "type": "object",
+                                    "properties": {
+                                        "uuid": {
+                                            "description": "The uuid of the player",
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "display_name": {
+                                            "description": "The name of the player",
+                                            "type": "string"
+                                        },
+                                        "color": {
+                                            "description": "The color of the player",
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 16777215
+                                        }
+                                    },
+                                    "required": [ "uuid", "display_name", "color"]
+                                },
+                                "statistics": {
+                                    "description": "The statistics of a player",
+                                    "type": "object",
+                                    "properties": {
+                                        "wins": {
+                                            "description": "The number of wins",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "losses": {
+                                            "description": "The number of losses",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "draws": {
+                                            "description": "The number of draws",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": ["wins", "losses", "draws"]
+                                }
                             },
-                            "losses": {
-                                "description": "The number of losses",
-                                "type": "integer",
-                                "minimum": 0
-                            },
-                            "draws": {
-                                "description": "The number of draws",
-                                "type": "integer",
-                                "minimum": 0
-                            }
-                        },
-                        "required": ["wins", "losses", "draws"]
+                            "required": ["profile", "statistics"]
+                        }
                     }
                 },
-                "required": ["statistics"]
+                "required": ["server_statistics"]
             }
         },
         {
@@ -136,12 +169,13 @@
                         "minItems": 3,
                         "maxItems": 3
                     },
-                    "next_player": {
-                        "description": "Shows whether the receiving player is the next moving player",
-                        "type": "boolean"
+                    "next_player_uuid": {
+                        "description": "The UUID of the next player",
+                        "type": "string",
+                        "format": "uuid"
                     }
                 },
-                "required": ["updated_playfield", "next_player"]
+                "required": ["updated_playfield", "next_player_uuid"]
             }
         },
         {
@@ -172,9 +206,10 @@
             },
             "then": {
                 "properties": {
-                    "winner": {
+                    "winner_uuid": {
                         "description": "Shows whether the receiving player is the winner. If null, the game ended in a draw",
-                        "type": "boolean"
+                        "type": "string",
+                        "format": "uuid"
                     },
                     "final_playfield": {
                         "description": "The final playfield",
@@ -205,16 +240,17 @@
             },
             "then": {
                 "properties": {
-                    "sender_display_name": {
-                        "description": "The name of the sender",
-                        "type": "string"
+                    "sender_uuid": {
+                        "description": "The UUID of the sender",
+                        "type": "string",
+                        "format": "uuid"
                     },
                     "message": {
                         "description": "The message",
                         "type": "string"
                     }
                 },
-                "required": ["sender_display_name", "message"]
+                "required": ["sender_uuid", "message"]
             }
         }
     ]

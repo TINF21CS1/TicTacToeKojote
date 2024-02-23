@@ -30,7 +30,7 @@
                                 "type": "string",
                                 "format": "uuid"
                             },
-                            "name": {
+                            "display_name": {
                                 "description": "The name of the player",
                                 "type": "string"
                             },

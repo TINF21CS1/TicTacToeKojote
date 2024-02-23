@@ -5,16 +5,19 @@ import asyncio
 import websockets
 import logging
 import json
+from jsonschema import validate, ValidationError
 
 logger = logging.getLogger()
 
 class Lobby:
-    def __init__(self, admin:Player) -> None:
-        self._players = [admin]
-        self._readystatus: dict = {admin.uuid, False}
+    def __init__(self, admin:Player, port: int = 8765) -> None:
+        self._players = {admin.uuid : admin}
         self._game = None
         self._inprogress = False
-        
+        self._port = port
+
+        with open("./json_schema/client_to_server.json", "r") as f:
+            self._json_schema = json.load(f)
 
     async def handler(self, websocket):
         while True:
@@ -30,23 +33,28 @@ class Lobby:
             logger.info(f"Received: {message}")
             
             message_json = json.loads(message)
+            
+            # Validate JSON
+            try:
+                validate(instance=message_json, schema=self._json_schema)
+            except ValidationError as e:
+                logger.error(e)
+                break
+
             match message_json["message_type"]:
-                
-                
+
                 case "lobby/join":
 
                     if self._inprogress:
                         await websocket.send("Game in progress, cannot join") # TODO jsonify
                         break
 
-                    self._players.append(Player(uuid=message_json["profile"]["uuid"], display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"]))
-                    self._readystatus[message_json["profile"]["uuid"]] = False
+                    self._players[message_json["profile"]["uuid"]] = Player(uuid=message_json["profile"]["uuid"], display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
                     # await websocket.send( ## STATISTICS ## )
                     await websocket.broadcast(json.dumps({
                         "message_type": "lobby/status",
-                        "players": self._players,
-                        "ready_status": self._readystatus
+                        "players": self._players.values(),
                     }))
                 
 
@@ -56,22 +64,21 @@ class Lobby:
                 
                 case "lobby/ready":
 
-                    self._readystatus[message_json["profile"]["uuid"]] = True
+                    self._players[message_json["player_uuid"]].ready = True
 
                     await websocket.broadcast(json.dumps({
                         "message_type": "lobby/status",
-                        "players": self._players,
-                        "ready_status": self._readystatus
+                        "players": self._players.values(),
                     }))
 
-                    if all(self._readystatus.values() & len(self._players) == 2):
+                    if all([player.ready for player in self._players.values()]) & len(self._players) == 2:
                         # TODO add error messages for why game cant start with not enough or too many ready players
                         # all players are ready, start the game
                         rulebase = RuleBase()
-                        self._game = Game(player1 = self._players[0], player2 = self._players[1], rulebase = rulebase)
+                        self._game = Game(player1 = self._players.values()[0], player2 = self._players.values()[1], rulebase = rulebase)
                         await websocket.broadcast(json.dumps({
                             "message_type": "game/start",
-                            "current_player": self._game.state.current_player,
+                            "starting_player_uuid": self._game.current_player_uuid,
                         }))
                 
                 
@@ -87,11 +94,12 @@ class Lobby:
                     await websocket.send("Invalid Message Type")
         
 
-    async def start_server(self, port: int = 8765):
-        async with websockets.serve(self.handler, host = "", port = port):
+    async def start_server(self):
+        async with websockets.serve(self.handler, host = "", port = self._port):
             await asyncio.Future()  # run forever
 
 
 if __name__ == "__main__":
-    asyncio.run(Lobby.start_server(port = 8765, admin = Player(uuid=0, display_name="admin", color=0xffffff)))
+    lobby = Lobby(port = 8765, admin = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff))
+    asyncio.run(lobby.start_server())
 
