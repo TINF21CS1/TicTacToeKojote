@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import annotations
 import asyncio
 from websockets.client import connect
-import websockets
 import json
 from Server.player import Player
 from Server.websocket_server import Lobby
@@ -10,24 +10,91 @@ import logging
 from jsonschema import validate, ValidationError
 from threading import Thread
 
-logging.basicConfig(level=logging.DEBUG)
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-async def new_game(player: Player, message_handler, port:int = 8765):
+async def create_game(player: Player, message_handler, port:int = 8765) -> tuple[GameClient, asyncio.Task, Thread]:
+    """Start a new game with the given player and message handler. Therefore, create a new server thread and connect to it.
+
+    This function __has__ to be run in an asyncio event loop. Wrap it in an async function which you then call with `asyncio.run(my_wrapper_function())`. Reminder: `asyncio.run()` can only be called once in a program. Calling `asyncio.run(create_game())` directly will not terminate since the server thread is not joined and the listening task is not awaited.
+
+    For an example see `my_example()` and `my_handler()`.
+    
+    Args:
+        player (Player): The player that wants to start a new game.
+        message_handler ([type]): The message handler that is called whenever a message is received from the server.
+        port (int, optional): The port to start the server on. Defaults to 8765.
+    
+    Returns:
+        GameClient: The game client that is connected to the server and can be used to send messages to the server. (methods are documented in the class itself)
+        asyncio.Task: The listening task that listens for messages from the server. It should be awaited at the end of the program.
+        Thread: The thread that runs the server. It should be joined at the end of the program.
+    """
+    
     lobby = Lobby(port = port, admin = player)
     server = Thread(target=lobby.run, daemon=True) # TODO: Maybe remove daemon=True and add a proper shutdown function for database etc.
     server.start()
 
-    client = GameClient("127.0.0.1", 8765, player, message_handler)
+    client = GameClient("localhost", port, player, message_handler)
     await client.connect()
     listening_task = asyncio.create_task(client.listen())
     await asyncio.create_task(client.join_lobby())
-    
-    await listening_task
 
-    return
+    return client, listening_task, server
+
+async def join_game(player: Player, message_handler, ip:str, port:int = 8765) -> tuple[GameClient, asyncio.Task]:
+    """Join an existing game with the given player and message handler.
+
+    This function __has__ to be run in an asyncio event loop. Wrap it in an async function which you then call with `asyncio.run(my_wrapper_function())`. Reminder: `asyncio.run()` can only be called once in a program. Calling `asyncio.run(join_game())` directly will not terminate since the listening task is not awaited.
+
+    For an example see `my_example()` and `my_handler()`.
+    
+    Args:
+        player (Player): The player that wants to join the game.
+        message_handler ([type]): The message handler that is called whenever a message is received from the server.
+        ip (str): The IP address of the server.
+        port (int): The port of the server.
+    
+    Returns:
+        GameClient: The game client that is connected to the server and can be used to send messages to the server. (methods are documented in the class itself)
+        asyncio.Task: The listening task that listens for messages from the server. It should be awaited at the end of the program.
+    """
+    
+    client = GameClient(ip, port, player, message_handler)
+    await client.connect()
+    listening_task = asyncio.create_task(client.listen())
+    await asyncio.create_task(client.join_lobby())
+
+    return client, listening_task
 
 class GameClient:
+    """Represents a client for the game server. It can be used to connect to the server, send messages and listen for messages from the server.
+
+    Args:
+        ip (str): The IP address of the server.
+        port (int): The port of the server.
+        player (Player): The player that wants to connect to the server.
+        handler ([type]): The message handler that is called whenever a message is received from the server. See `my_handler` for an example.
+        
+    Attributes:
+        _ip (str): The IP address of the server.
+        _port (int): The port of the server.
+        _player (Player): The player that wants to connect to the server.
+        _handler ([type]): The message handler that is called whenever a message is received from the server.
+        _websocket ([type]): The websocket connection to the server.
+        _opponent ([type]): The opponent of the player.
+        _current_player ([type]): The current player.
+        _symbol ([type]): The symbol of the player.
+        _lobby_status ([type]): The status of the lobby.
+        _game_status ([type]): The status of the game.
+        _statistics ([type]): The statistics of the game.
+        _chat_history ([type]): The chat history of the game.
+        _winner ([type]): The winner of the game.
+        _statistics ([type]): The statistics of the game.
+        _json_schema ([type]): The JSON schema for the messages from the server.
+    """
+    
     def __init__(self, ip:str, port:int, player:Player, handler) -> None:
         self._ip = ip
         self._port = port
@@ -41,8 +108,8 @@ class GameClient:
         self._lobby_status = []
         self._game_status = [[0,0,0],[0,0,0],[0,0,0]]
         self._statistics = None
-        self.chat_history = []
-        self.winner = None
+        self._chat_history = []
+        self._winner = None
         self._statistics = None
 
         with open("./json_schema/server_to_client.json", "r") as f:
@@ -92,7 +159,7 @@ class GameClient:
                     logger.error(f"Game error: {message_json['error_message']}") 
                 case "chat/receive":
                     sender = self.get_player_by_uuid(message_json["sender_uuid"])
-                    self.chat_history.append((sender, message_json["message"]))
+                    self._chat_history.append((sender, message_json["message"]))
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
                     continue
@@ -150,7 +217,9 @@ class GameClient:
     async def close(self):
         await self._websocket.close()
 
-async def my_handler(client:GameClient, message_type:str):
+#### Examples ####
+
+async def example_handler(client:GameClient, message_type:str):
     """Example handler for the game client. This function is called whenever a message is received from the server.
     
     *** Please do not use any busy waiting or blocking code in this function as it will completely halt the listening. ***
@@ -188,15 +257,36 @@ async def my_handler(client:GameClient, message_type:str):
             pass
     return
 
-async def test():
-    player = Player("test", 1, "c4f0eccd-a6a4-4662-999c-17669bc23d5e")
-    client = GameClient("127.0.0.1", 8765, player, my_handler)
-    await client.connect()
-    listening_task = asyncio.create_task(client.listen())
-    await asyncio.create_task(client.join_lobby())
-    await asyncio.sleep(5)
-    await asyncio.create_task(client.lobby_ready()) 
+async def new_server_example():
+    # Setting up the game
+    player = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff)
+    client, listening_task, server = await create_game(player, example_handler)
+
+    # Do something with the client
+    await client.lobby_ready()
+    await client.game_make_move(0, 0)
+    await client.chat_message("Hello World")
+
+    # Closing the connection
+    await client.close()
+
+    # Wrapping up the listening task and the server thread
+    await listening_task
+    server.join(timeout=1)
+
+async def client_join_example():
+    # Setting up the connection
+    player = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff)
+    client, listening_task = await join_game(player, example_handler, "localhost")
+
+    # Joining the lobby
+    await client.join_lobby()
+
+    # Closing the connection
+    await client.close()
+
+    # Wrapping up the listening task
     await listening_task
 
 if __name__ == "__main__":
-    asyncio.run(new_game(Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff), my_handler))
+    asyncio.run(client_join_example())
