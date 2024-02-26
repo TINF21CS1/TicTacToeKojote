@@ -62,6 +62,7 @@ async def join_game(player: Player, message_handler, ip:str, port:int = 8765) ->
     client = GameClient(ip, port, player, message_handler)
     await client.connect()
     listening_task = asyncio.create_task(client.listen())
+    
     await asyncio.create_task(client.join_lobby())
 
     return client, listening_task

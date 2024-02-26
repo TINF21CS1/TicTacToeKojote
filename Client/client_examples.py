@@ -63,8 +63,10 @@ async def client_join_example():
     player = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff)
     client, listening_task = await join_game(player, example_handler, "localhost")
 
-    # Joining the lobby
-    await client.join_lobby()
+    # Do something with the client
+    await client.lobby_ready()
+    await client.game_make_move(0, 0)
+    await client.chat_message("Hello World")
 
     # Closing the connection
     await client.close()
