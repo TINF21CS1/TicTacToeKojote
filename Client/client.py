@@ -95,21 +95,26 @@ class GameClient:
     """
     
     def __init__(self, ip:str, port:int, player:Player, handler) -> None:
-        self._ip = ip
-        self._port = port
-        self._player = player
-        self._handler = handler
+        self._ip: str = ip
+        self._port: int = port
+        self._handler: function = handler
 
-        self._opponent = None
-        self._current_player = None
-        self._symbol = None
+        # Player info
+        self._player: Player = player
+        self._player_number: int = None
+        self._symbol: str = None
 
-        self._lobby_status = []
-        self._game_status = [[0,0,0],[0,0,0],[0,0,0]]
-        self._statistics = None
-        self._chat_history = []
-        self._winner = None
-        self._statistics = None
+        # Opponent info
+        self._opponent: Player = None
+        self._opponent_number: int = None
+
+        # Game info
+        self._current_player: Player = None
+        self._lobby_status: list = []
+        self._game_status: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
+        self._statistics = None # TODO
+        self._chat_history: list[str] = []
+        self._winner: Player = None
 
         with open("./json_schema/server_to_client.json", "r") as f:
             self._json_schema = json.load(f)
@@ -142,9 +147,13 @@ class GameClient:
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
                         self._current_player = self._player  
                         self._symbol = "X"
+                        self._player_number = 1
+                        self._opponent_number = 2
                     else:
                         self._current_player = self._opponent
                         self._symbol = "O"
+                        self._opponent_number = 1
+                        self._player_number = 2
                 case "game/end":
                     self._winner = self.get_player_by_uuid(message_json["winner_uuid"])
                     self._game_status = message_json["final_playfield"]
