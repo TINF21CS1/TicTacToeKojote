@@ -2,6 +2,7 @@ from Server.player import Player
 from Server.gamestate import GameState
 from Server.rulebase import RuleBase
 import uuid
+from random import shuffle
 
 class Game:
     def __init__(self, player1: Player, player2: Player, rule_base: RuleBase = RuleBase()):
@@ -16,7 +17,9 @@ class Game:
         self._uuid: uuid.UUID = uuid.uuid4()
         self._id: int =  self._uuid.int
         self.state = GameState()
-        self.players: list = [None, player1, player2]
+        players = [player1, player2]
+        shuffle(players)
+        self.players: list = [None] +  players
         self.rule_base = rule_base
 
     def move(self, player: int, new_position: tuple[int, int]):

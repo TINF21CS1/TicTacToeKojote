@@ -34,7 +34,7 @@ class GameState:
         self._playfield = [[0 for _ in range(playfield_dimensions[0])] for _ in range(playfield_dimensions[1])]
         self._finished = False
         self._winner = 0
-        self._current_player = random.randint(1,2)
+        self._current_player = 1
     
     def set_player_position(self, player: int, new_position: tuple[int, int]):
         """
