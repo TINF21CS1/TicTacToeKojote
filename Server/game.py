@@ -1,6 +1,6 @@
-from player import Player
-from gamestate import GameState
-from rulebase import RuleBase
+from Server.player import Player
+from Server.gamestate import GameState
+from Server.rulebase import RuleBase
 import uuid
 
 class Game:

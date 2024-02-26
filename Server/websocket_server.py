@@ -1,6 +1,6 @@
-from game import Game
-from player import Player
-from rulebase import RuleBase
+from Server.game import Game
+from Server.player import Player
+from Server.rulebase import RuleBase
 import asyncio
 import websockets
 import logging
@@ -104,8 +104,9 @@ class Lobby:
         async with websockets.serve(self.handler, host = "", port = self._port):
             await asyncio.Future()  # run forever
 
+    def run(self):
+        asyncio.run(self.start_server())
 
 if __name__ == "__main__":
     lobby = Lobby(port = 8765, admin = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff))
-    asyncio.run(lobby.start_server())
-
+    lobby.run()

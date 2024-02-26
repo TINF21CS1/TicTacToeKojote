@@ -1,4 +1,4 @@
-from gamestate import GameState
+from Server.gamestate import GameState
 
 class RuleBase:
     """
