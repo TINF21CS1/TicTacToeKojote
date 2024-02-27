@@ -3,7 +3,7 @@ import asyncio
 from Server.player import Player
 from Client.client import *
 
-async def example_handler(client:GameClient, message_type:str):
+async def example_handler(client:GameClient, message_type:str): # TODO: Do this as a method of GameClient
     """Example handler for the game client. This function is called whenever a message is received from the server.
     
     *** Please do not use any busy waiting or blocking code in this function as it will completely halt the listening. ***
@@ -44,7 +44,7 @@ async def example_handler(client:GameClient, message_type:str):
 async def new_server_example():
     # Setting up the game
     player = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff)
-    client, listening_task, server = await create_game(player, example_handler)
+    client, listening_task, server_thread = await create_game(player, example_handler)
 
     # Do something with the client
     await client.lobby_ready()
@@ -56,7 +56,7 @@ async def new_server_example():
 
     # Wrapping up the listening task and the server thread
     await listening_task
-    server.join(timeout=1)
+    server_thread.join(timeout=1)
 
 async def client_join_example():
     # Setting up the connection

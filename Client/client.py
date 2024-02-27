@@ -7,6 +7,8 @@ from Server.websocket_server import Lobby
 import logging
 from jsonschema import validate, ValidationError
 from threading import Thread
+from queue import Queue
+import tkinter as tk
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -31,8 +33,8 @@ async def create_game(player: Player, message_handler, port:int = 8765) -> tuple
     """
     
     lobby = Lobby(port = port, admin = player)
-    server = Thread(target=lobby.run, daemon=True) # TODO: Maybe remove daemon=True and add a proper shutdown function for database etc.
-    server.start()
+    server_thread = Thread(target=lobby.run, daemon=True) # TODO: Maybe remove daemon=True and add a proper shutdown function for database etc.
+    server_thread.start()
 
     client = GameClient("localhost", port, player, message_handler)
     await client.connect()
@@ -195,7 +197,7 @@ class GameClient:
         }
         await self._websocket.send(json.dumps(msg))
 
-    async def lobby_kick(self, player_to_kick:Player):
+    async def lobby_kick(self, player_to_kick_index:int):
         msg = {
             "message_type": "lobby/kick",
             "admin_player_uuid": str(self._player.uuid),
@@ -224,3 +226,45 @@ class GameClient:
 
     async def close(self):
         await self._websocket.close()
+
+def client_thread(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue, player: Player, ip:str, port:int = 8765) -> Thread:
+    thread = Thread(target=client_thread_function, args=(tk_root, in_queue, out_queue), daemon=True)
+    thread.start()
+    return thread
+
+    # Tkinter Event: <<input>>
+    out_queue.put(("game/turn", {}))
+    tk_root.event_generate("<<server_message_received>>", when="tail")
+
+    match message_type:
+        case "lobby/status":
+            # -> [Player]
+            pass
+        case "game/start":
+            # starting_player: Player
+            # starting_player_symbol: bool (True = X, False = O)
+            # opponent: Player
+            # opponent_symbol: bool (True = X, False = O)
+            pass
+        case "game/end":
+            # winner: Player | None
+            # final_playfield: [[int]] (1 = O, 2 = X, 0 = empty)
+            client.close()
+            return
+            pass
+        case "game/turn":
+            # next_player: Player
+            # playfield: [[int]] (1 = O, 2 = X, 0 = empty)
+            pass
+        case "statistics/statistics":
+            pass
+        case "game/error":
+            # error_message: str
+            pass
+        case "chat/receive":
+            # sender: Player
+            # message: str
+            pass
+    return
+
+    return thread
