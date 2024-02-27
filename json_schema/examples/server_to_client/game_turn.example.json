@@ -1,0 +1,9 @@
+{
+    "message_type": "game/turn",
+    "updated_playfield": [
+        [0, 1, 2],
+        [2, 0, 1],
+        [1, 2, 0]
+    ],
+    "next_player_uuid": "123e4567-e89b-12d3-a456-426614174000"
+}
