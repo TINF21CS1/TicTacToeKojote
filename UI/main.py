@@ -4,7 +4,6 @@ from tkinter import font as tkfont
 import sys
 
 from .menu import Menu
-from.endscreen import WinScreen
 
 class Root(tk.Tk):
     def __init__(self):
@@ -13,6 +12,8 @@ class Root(tk.Tk):
         min_width = 400
         start_height = 300
         min_height = 250
+
+        self.devOptions = False
 
         self.geometry(f"{start_width}x{start_height}")
         self.minsize(width=min_width, height=min_height)
@@ -27,7 +28,7 @@ class Root(tk.Tk):
 
         self.show(Menu, True)
 
-    def show(self, Frame, cache=False):
+    def show(self, Frame, *args, cache=False):
         if(self.current_frame != None):
             try:
                 self.current_frame.grid_forget()
@@ -39,7 +40,7 @@ class Root(tk.Tk):
                 self.add_frame(Frame)
             frame = self.frames[Frame.__name__]
         else:
-            frame = Frame(self)
+            frame = Frame(self, *args)
             frame.grid(row=0, column=0, sticky="nsew")
         self.current_frame = frame
         return frame
@@ -53,6 +54,9 @@ class Root(tk.Tk):
 
     def start_mainloop(self):
         self.mainloop()
+
+    def start_server(self):
+        pass
 
 def main():
     app = Root()

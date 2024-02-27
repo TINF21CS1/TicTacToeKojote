@@ -59,7 +59,7 @@ class field_controller():
         self.view.close.config(command=self.view.master.show_menu)
 
 class Field(base_frame):
-    def __init__(self, master):
+    def __init__(self, master, *args):
         super().__init__(master)
         self._create_widgets()
         self.controller = field_controller(self)
