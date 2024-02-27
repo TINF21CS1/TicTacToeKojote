@@ -4,7 +4,7 @@ from .base_frame import base_frame
 from .field_frame import Field
 
 class Credits(base_frame):
-    def __init__(self, master, *args):
+    def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()

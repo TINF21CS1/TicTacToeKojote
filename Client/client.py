@@ -227,6 +227,9 @@ class GameClient:
     async def close(self):
         await self._websocket.close()
 
+def client_thread_function(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue) -> None:
+    pass
+
 def client_thread(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue, player: Player, ip:str, port:int = 8765) -> Thread:
     thread = Thread(target=client_thread_function, args=(tk_root, in_queue, out_queue), daemon=True)
     thread.start()

@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import _tkinter
 from tkinter import font as tkfont
-import sys
+from queue import Queue
 
 from .menu import Menu
 
@@ -14,6 +14,10 @@ class Root(tk.Tk):
         min_height = 250
 
         self.devOptions = False
+        self.player = None
+        self.network_events = {}
+        self.out_queue = Queue()
+        self.in_queue = Queue()
 
         self.geometry(f"{start_width}x{start_height}")
         self.minsize(width=min_width, height=min_height)
@@ -28,7 +32,7 @@ class Root(tk.Tk):
 
         self.show(Menu, True)
 
-    def show(self, Frame, *args, cache=False):
+    def show(self, Frame, *args, cache=False, **kwargs):
         if(self.current_frame != None):
             try:
                 self.current_frame.grid_forget()
@@ -40,8 +44,9 @@ class Root(tk.Tk):
                 self.add_frame(Frame)
             frame = self.frames[Frame.__name__]
         else:
-            frame = Frame(self, *args)
-            frame.grid(row=0, column=0, sticky="nsew")
+            frame = Frame(self, *args, **kwargs)
+            if(frame != None):
+                frame.grid(row=0, column=0, sticky="nsew")
         self.current_frame = frame
         return frame
         
@@ -57,6 +62,10 @@ class Root(tk.Tk):
 
     def start_server(self):
         pass
+
+    def network_event_handler(self, event):
+        args = self.in_queue.get()
+        self.network_events.get(event, lambda *args: None)(*args)
 
 def main():
     app = Root()

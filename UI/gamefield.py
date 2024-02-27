@@ -1,7 +1,6 @@
 import tkinter as tk
 
 from .endscreen import EndScreen
-from .network import game_input
 
 class gamefield(tk.Frame):
     def __init__(self, master):
@@ -28,7 +27,7 @@ class gamefield_controller:
     
     def _bind(self):
         for position, button in self.view.fields.items():
-            button.config(command=lambda e=position: game_input(self, e))
+            button.config(command=lambda e=position: self._game_input(self, e))
 
     def draw_field(self, matrix=None, position=None, value=None): #either matrix as a 3x3 list or position and value need to be provided
         if matrix != None:
@@ -38,12 +37,16 @@ class gamefield_controller:
         else:
             self.view.fields[position].config(text=value)
 
-    def trigger_end(self, win: bool = True):
-        if win:
-            self.view.master.master.show(EndScreen, True)
-        else:
-            self.view.master.master.show(EndScreen, False)
-
     def change_active_player(self, player_id: int):
         for i, player in enumerate(self.view.master.player):
             player.highlight(i == player_id)
+
+    def turn(self, *args):
+        root = self.view.master.master
+        queue = root.in_queue.get()
+        self.draw_field(matrix=queue['playfield'])
+        self.change_active_player(queue['next_player'])
+
+    def _game_input(self, position):
+        root = self.view.master.master
+        root.out_queue.put({'game/move': position})

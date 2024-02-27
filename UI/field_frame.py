@@ -3,7 +3,8 @@ from enum import Enum, auto
 
 from .base_frame import base_frame
 from .gamefield import gamefield, gamefield_controller
-from .network import get_player
+from .endscreen import EndScreen
+from .messages import messages
 
 class player_type(Enum):
     local = auto()
@@ -48,22 +49,36 @@ class player(tk.Frame):
         self.symbol.grid(row=1, column=1)
 
 class field_controller():
-    def __init__(self, view):
+    def __init__(self, view, players):
         self.view = view
         sub_controller = gamefield_controller(self.view.gamefield)
-        for i, player in enumerate(self.view.player):
-            player.set(**get_player(i))
+        for player_lbl, player in zip(self.view.player, players):
+            player_lbl.set(player.display_name, player_type.unknown)
         self._bind()
 
     def _bind(self):
         self.view.close.config(command=self.view.master.show_menu)
 
+    def end(self, *args):
+        root = self.view.master
+        queue = root.in_queue.get()
+        root.show(EndScreen, queue['win'])
+
+    def error(self, *args):
+        root = self.view.master
+        queue = root.in_queue.get()
+        msg = messages(type='move', message=queue['error_message'])
+        msg.display()
+
 class Field(base_frame):
-    def __init__(self, master, *args):
+    def __init__(self, master, *args, start_player, start_symbol, opponent, opponent_symbol, **kwargs):
         super().__init__(master)
         self._create_widgets()
-        self.controller = field_controller(self)
+        self.controller = field_controller(self, tuple(start_player, opponent))
         self._display_widgets()
+        self.bind("<<game/turn>>", self.controller.sub_controller.turn)
+        self.bind("<<game/end>>", self.controller.end)
+        self.bind("<<game/error>>", self.controller.error)
 
     def _create_widgets(self):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)

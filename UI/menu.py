@@ -8,7 +8,7 @@ from .profile import Profile
 from .credits import Credits
 
 class Menu(base_frame):
-    def __init__(self, master, *args):
+    def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()

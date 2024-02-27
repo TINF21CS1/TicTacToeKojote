@@ -1,10 +1,11 @@
 import tkinter as tk
 
 from .base_frame import base_frame
-from .field_frame import Field
+from .multi import Join
+from .field_frame import player_type
 
 class Singleplayer(base_frame):
-    def __init__(self, master, *args):
+    def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
@@ -12,8 +13,8 @@ class Singleplayer(base_frame):
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Choose your opponent', font=self.master.title_font)
-        self.btnStrong = tk.Button(self, text='Strong AI', command=lambda *args: self.master.show(Field))
-        self.btnWeak = tk.Button(self, text='Weak AI', command=lambda *args: self.master.show(Field))
+        self.btnStrong = tk.Button(self, text='Strong AI', command=lambda *args: self.master.show(Join, opponent=player_type.ai))
+        self.btnWeak = tk.Button(self, text='Weak AI', command=lambda *args: self.master.show(Join, opponent=player_type.ai))
         self.btnExit = tk.Button(self, text='Menu', command=lambda *args: self.master.show_menu())
 
     def _display_widgets(self):

@@ -2,19 +2,30 @@ import tkinter as tk
 
 from .base_frame import base_frame
 from .field_frame import Field
+from .profile import Profile
+from Client.client import client_thread
+from .field_frame import player_type
 
 class Join(base_frame):
-    def __init__(self, master, *args):
+    def __init__(self, master, *args, opponent=player_type.unknown, **kwargs):
         super().__init__(master)
-        self._create_widgets()
+        self._create_widgets(opponent)
         self._display_widgets()
-        self.address_toogle = False
+        self.playerlist = []
+        self.bind('<<lobby/status>>', self._update_lobby)
+        self.bind('<<game/start>>', self._start_game)
+        if opponent != player_type.unknown:
+            pass #create server
 
-    def _create_widgets(self):
-        self.lblTitle = tk.Label(self, text='Waiting for players to join', font=self.master.title_font)
+    def _create_widgets(self, opponent):
+        title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent == player_type.ai else 'Play local game against a friend'
+        self.lblTitle = tk.Label(self, text=title, font=self.master.title_font)
+        self.btnRdy = tk.Button(self, text='Ready', command=lambda *args: self.master.out_queue.put({'lobby/ready':True}))
+        if opponent == player_type.local:
+            self.btnRdy2 = tk.Button(self, text='Ready', command=lambda *args: self.master.out_queue.put({'lobby/ready':True}))
         self.btnExit = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
-    def _display_widgets(self):
+    def _display_widgets(self,):
         self.columnconfigure([0, 6], weight=1)
         self.columnconfigure([1, 5], weight=2)
         self.columnconfigure([2, 4], weight=4)
@@ -25,7 +36,23 @@ class Join(base_frame):
         self.rowconfigure([3, 5, 7, 9, 11], weight=2)
         # display the buttons created in the _create_widgets method
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
+        self.btnRdy.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=10)
+        if hasattr(self, 'btnRdy2'):
+            self.btnRdy2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+
+    def _update_lobby(self, event):
+        queue = self.master.in_queue.get()
+        for player in queue['player']:
+            self.playerlist.append([tk.Label(self, text=player.display_name),
+                                    tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'lobby/kick':uuid}))])
+        for i, player in enumerate(self.playerlist):
+            player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i, columnspan=2)
+            player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
+
+    def _start_game(self, event):
+        queue = self.master.in_queue.get()
+        self.master.show(Field, **queue)
 
 class Lobby_Overview(tk.Frame):
     def __init__(self, master):
@@ -38,7 +65,7 @@ class Lobby_Overview(tk.Frame):
 
         self.btnManual = tk.Button(self, text="Join by address", command=lambda *args: self.manually())
         self.etrAddress = tk.Entry(self)
-        self.btnConnect = tk.Button(self, text="Connect", command=lambda *args: self.master.master.show(Join))
+        self.btnConnect = tk.Button(self, text="Connect", command=lambda *args: self._connect())
 
     def _display_widgets(self):
         self.columnconfigure([0, 2, 4], weight=1)
@@ -54,7 +81,17 @@ class Lobby_Overview(tk.Frame):
         self.etrAddress.grid(column=1, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
         self.btnConnect.grid(column=3, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
 
+    def _connect(self):
+        root = self.master.master
+        root.network_client = client_thread(self, in_queue=root.out_queue, out_queue=root.in_queue, player=root.player, ip=self.etrAddress.get())
+        root.show(Join)
+
 class Multiplayer(base_frame):
+    def __new__(cls, master, *args, **kwargs):
+        if(master.player == None):
+            return Profile(master, *args, return_to=Multiplayer, **kwargs)
+        return super().__new__(cls, *args, **kwargs)
+
     def __init__(self, master, *args):
         super().__init__(master)
         self._create_widgets()
@@ -63,8 +100,8 @@ class Multiplayer(base_frame):
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Multiplayer', font=self.master.title_font)
-        self.btnNew = tk.Button(self, text='Create a new online game', command=lambda *args: self.master.show(Join))
-        self.btnLocal = tk.Button(self, text='Create local Game', command=lambda*args : self.master.show(Field))
+        self.btnNew = tk.Button(self, text='Create a new online game', command=lambda *args: self.master.show(Join, opponent=player_type.network))
+        self.btnLocal = tk.Button(self, text='Create local Game', command=lambda*args : self.master.show(Join, opponent=player_type.local))
         self.lobbyOverview = Lobby_Overview(self)
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
