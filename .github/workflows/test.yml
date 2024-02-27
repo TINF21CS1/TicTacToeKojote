@@ -11,4 +11,4 @@ jobs:
       uses: actions/setup-python@v2
 
     - name: Run tests
-      run: for file in $(find . -name "test_*.py"); do python $file; done
+      run: python -m unittest

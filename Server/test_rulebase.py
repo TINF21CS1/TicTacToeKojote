@@ -1,5 +1,5 @@
-from gamestate import GameState
-from rulebase import RuleBase
+from Server.gamestate import GameState
+from Server.rulebase import RuleBase
 import unittest
 
 class TestRuleBase(unittest.TestCase):
