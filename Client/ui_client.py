@@ -22,16 +22,16 @@ class GameClientUI(GameClient):
 
     For the rest of the attributes and methods see the `GameClient` class.
     """
-    def __init__(self, ip:str, port:int, player:Player, tk_root:tk.Tk, in_queue:Queue, out_queue:Queue) -> None:
+    def __init__(self, ip:str, port:int, player:Player, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue) -> None:
         self._tk_root = tk_root
-        self._in_queue = in_queue
-        self._out_queue = out_queue
+        self._in_queue = out_queue
+        self._out_queue = in_queue
         super().__init__(ip, port, player)
     
     @classmethod
-    async def join_game(cls, player: Player, ip: str, tk_root:tk.Tk, in_queue:Queue, out_queue:Queue, port: int = 8765) -> tuple[GameClientUI, asyncio.Task]:
+    async def join_game(cls, player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765) -> tuple[GameClientUI, asyncio.Task]:
         
-        client = cls(ip, port, player, tk_root, in_queue, out_queue)
+        client = cls(ip, port, player, tk_root, out_queue, in_queue)
         
         await client.connect()
         listening_task = asyncio.create_task(client.listen())
@@ -91,18 +91,17 @@ class GameClientUI(GameClient):
 
         return
 
-async def client_thread_function(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue, player: Player, ip:str, port:int) -> None:
+async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int) -> None:
     """The function that is run in the client thread. It connects to the server. It sends and receives messages."""
 
-    client, listening_task = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, in_queue=in_queue, out_queue=out_queue, port=port)
+    client, listening_task = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
 
     while client._websocket.open:
         # Send messages to the server
         try:
-            message: dict = out_queue.get_nowait()
+            message: dict = in_queue.get_nowait()
         except Empty:
             await asyncio.sleep(0.1)
-            logger.warning("Out queue is empty")
             continue
 
         logger.warning(f"Sending: {message}")
@@ -111,29 +110,29 @@ async def client_thread_function(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue,
                 case "lobby/join":
                     pass
                 case "lobby/ready":
-                    await client.lobby_ready(message["args"])
+                    await client.lobby_ready(**message["args"])
                 case "lobby/kick":
-                    await client.lobby_kick(message["args"])
+                    await client.lobby_kick(**message["args"])
                 case "game/make_move":
-                    await client.game_make_move(message["args"])
+                    await client.game_make_move(**message["args"])
                 case "chat/message":
                     pass
                 case _:
-                    logger.error(f"Unknown message type received from UI in out_queue: {message['message_type']}")
+                    logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
                     continue
             
-            out_queue.task_done()
+            in_queue.task_done()
 
     await listening_task
 
     return
 
-def asyncio_thread_wrapper(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue, player: Player, ip:str, port:int):
+def asyncio_thread_wrapper(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int):
     """Wrapper function to run the client thread function in an asyncio event loop."""
-    asyncio.run(client_thread_function(tk_root, in_queue, out_queue, player, ip, port))
+    asyncio.run(client_thread_function(tk_root, out_queue, in_queue, player, ip, port))
 
-def client_thread(tk_root:tk.Tk, in_queue:Queue, out_queue:Queue, player: Player, ip:str, port:int = 8765) -> Thread:
+def client_thread(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int = 8765) -> Thread:
     """Start a new client thread that connects to the server and sends and receives messages."""
-    thread = Thread(target=asyncio_thread_wrapper, args=(tk_root, in_queue, out_queue, player, ip , port), daemon=True)
+    thread = Thread(target=asyncio_thread_wrapper, args=(tk_root, out_queue, in_queue, player, ip , port), daemon=True)
     thread.start()
     return thread
