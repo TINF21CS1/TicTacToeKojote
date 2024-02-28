@@ -3,7 +3,7 @@ import tkinter as tk
 from .base_frame import base_frame
 from .field_frame import Field
 from .profile import Profile
-from Client.client import client_thread
+from Client.ui_client import client_thread
 from .field_frame import player_type
 
 class Join(base_frame):
