@@ -7,6 +7,7 @@ from queue import Queue, Empty
 import tkinter as tk
 from Client.client import GameClient
 import logging
+from jsonschema import ValidationError
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -24,32 +25,48 @@ class GameClientUI(GameClient):
     """
     def __init__(self, ip:str, port:int, player:Player, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue) -> None:
         self._tk_root = tk_root
-        self._in_queue = out_queue
-        self._out_queue = in_queue
+        self._in_queue = in_queue
+        self._out_queue = out_queue
         super().__init__(ip, port, player)
     
     @classmethod
-    async def join_game(cls, player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765) -> tuple[GameClientUI, asyncio.Task]:
+    async def join_game(cls, player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765) -> tuple[GameClientUI, asyncio.Task, asyncio.Task]:
         
         client = cls(ip, port, player, tk_root, out_queue, in_queue)
-        
         await client.connect()
-        listening_task = asyncio.create_task(client.listen())
         await asyncio.create_task(client.join_lobby())
+        return client
+    
+    async def listen(self):
+        try:
+            async with asyncio.timeout(0.1):
+                logger.info("Waiting for message")
+                message = await self._websocket.recv()
+                logger.info(f"Received: {message}")
+        except asyncio.TimeoutError:
+            return
         
-        return client, listening_task
+        logger.info(f"Received: {message}")
+
+        try:
+            message_type = await self._preprocess_message(message)
+        except ValidationError as e:
+            logger.error(e)
+            return
+        
+        await self._message_handler(message_type)
     
     async def _message_handler(self, message_type: str):
         # Receive messages from the server
         match message_type:
             case "lobby/status":
-                self._in_queue.put({
+                self._out_queue.put({
                     "message_type": "lobby/status", 
                     "player": self._lobby_status
                 })
                 self._tk_root.event_generate("<<lobby/status>>", when="tail")
             case "game/start":
-                self._in_queue.put({
+                self._out_queue.put({
                     "message_type": "game/start",
                     "starting_player": self._current_player,
                     "starting_player_symbol": self._symbol == "X",
@@ -58,7 +75,7 @@ class GameClientUI(GameClient):
                 })
                 self._tk_root.event_generate("<<game/start>>", when="tail")
             case "game/end":
-                self._in_queue.put({
+                self._out_queue.put({
                     "message_type": "game/end",
                     "winner": self._winner,
                     "win": self._winner == self._player,
@@ -67,7 +84,7 @@ class GameClientUI(GameClient):
                 self._tk_root.event_generate("<<game/end>>", when="tail")
                 self.client.close()
             case "game/turn":
-                self._in_queue.put({
+                self._out_queue.put({
                     "message_type": "game/turn",
                     "next_player": int(self._current_player == self._opponent),
                     "playfield": self._game_status
@@ -76,13 +93,13 @@ class GameClientUI(GameClient):
             case "statistics/statistics":
                 pass
             case "game/error":
-                self._in_queue.put({
+                self._out_queue.put({
                     "message_type": "game/error",
                     "error_message": self._error_history[-1]
                 })
                 self._tk_root.event_generate("<<game/error>>", when="tail")  
             case "chat/receive":
-                self._in_queue.put({
+                self._out_queue.put({
                     "message_type": "chat/receive",
                     "sender": self._chat_history[-1][0],
                     "message": self._chat_history[-1][1]
@@ -90,42 +107,44 @@ class GameClientUI(GameClient):
                 self._tk_root.event_generate("<<chat/receive>>", when="tail")
 
         return
-
-async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int) -> None:
-    """The function that is run in the client thread. It connects to the server. It sends and receives messages."""
-
-    client, listening_task = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
-
-    while client._websocket.open:
+    
+    async def await_commands(self):
         # Send messages to the server
         try:
-            message: dict = in_queue.get_nowait()
+            logger.info("Trying to get message from in_queue")
+            message: dict = self._in_queue.get_nowait()
         except Empty:
             await asyncio.sleep(0.1)
-            continue
+            return
 
-        logger.warning(f"Sending: {message}")
+        logger.info(f"Sending: {message}")
+
         if message:
             match message["message_type"]:
                 case "lobby/join":
                     pass
                 case "lobby/ready":
-                    await client.lobby_ready(**message["args"])
+                    await self.lobby_ready(message["args"])
                 case "lobby/kick":
-                    await client.lobby_kick(**message["args"])
+                    await self.lobby_kick(message["args"])
                 case "game/make_move":
-                    await client.game_make_move(**message["args"])
+                    await self.game_make_move(message["args"])
                 case "chat/message":
                     pass
                 case _:
                     logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
-                    continue
+                    return
             
-            in_queue.task_done()
+            self._in_queue.task_done()
 
-    await listening_task
+async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int) -> None:
+    """The function that is run in the client thread. It connects to the server. It sends and receives messages."""
 
-    return
+    client = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
+
+    while client._websocket.open:
+        await asyncio.create_task(client.listen())
+        await asyncio.create_task(client.await_commands())
 
 def asyncio_thread_wrapper(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int):
     """Wrapper function to run the client thread function in an asyncio event loop."""

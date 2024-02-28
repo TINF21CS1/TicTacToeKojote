@@ -139,13 +139,28 @@ class GameClient:
         async for message in self._websocket:
             logger.info(f"Received: {message}")
 
+            try:
+                message_type = await self._preprocess_message(message)
+            except ValidationError as e:
+                logger.error(e)
+                continue
+            
+            await self._message_handler(message_type)
+
+    def get_player_by_uuid(self, uuid:str):
+        for player in self._lobby_status:
+            if str(player.uuid) == uuid:
+                return player
+        return None
+    
+    async def _preprocess_message(self, message:str):
             message_json = json.loads(message)
             
             try:
                 validate(instance=message_json, schema=self._json_schema)
             except ValidationError as e:
                 logger.error(e)
-                continue
+                raise ValidationError(e)
 
             match message_json["message_type"]:
                 case "lobby/status":
@@ -153,7 +168,7 @@ class GameClient:
                 case "game/start":
                     if len(self._lobby_status) != 2:
                         logger.error("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
-                        continue
+                        raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
 
                     self._opponent = self._lobby_status[0] if self._lobby_status[0]["uuid"] != str(self._player.uuid) else self._lobby_status[1]
 
@@ -184,16 +199,10 @@ class GameClient:
                     self._chat_history.append((sender, message_json["message"]))
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
-                    continue
-            
-            await self._message_handler(message_json["message_type"])
+                    raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
+                
+            return message_json["message_type"]
 
-    def get_player_by_uuid(self, uuid:str):
-        for player in self._lobby_status:
-            if str(player.uuid) == uuid:
-                return player
-        return None
-    
     async def _message_handler(self, message_type:str):
         """Example handler for the game client. This function is called whenever a message is received from the server.
         
