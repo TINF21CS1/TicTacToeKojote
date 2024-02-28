@@ -49,4 +49,4 @@ class gamefield_controller:
 
     def _game_input(self, position):
         root = self.view.master.master
-        root.out_queue.put({'game/move': position})
+        root.out_queue.put({'message_type': 'game/make_move', 'args': position})

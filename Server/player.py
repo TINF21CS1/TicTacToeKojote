@@ -1,28 +1,33 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 class Player:
     """
     Represents a player in the game.
     
     Attributes:
-        display_name (str): The name displayed for the player.
+        uuid (UUID): The UUID of the player.
+        display_name (str): The display name of the player.
         color (int): The color of the player.
-        uuid (str): The unique identifier of the player.
         ready (bool): Whether the player is ready to start the game.
     """
-    def __init__(self, display_name: str, color: int, uuid: str, ready:bool = False):
-        self.uuid: UUID = UUID(uuid)
+    def __init__(self, display_name: str, color: int, uuid: UUID = uuid4(), ready:bool = False):
+        self.uuid: UUID = uuid
         self.display_name = display_name
         self.color = color
         self.ready = ready
 
-    def __dict__(self) -> dict:
+    def as_dict(self) -> dict:
         return {
             "display_name": self.display_name,
             "color": self.color,
             "uuid": str(self.uuid),
             "ready": self.ready
         }
+    
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Player):
+            return False
+        return self.uuid == other.uuid
     
     @classmethod
     def from_dict(cls, player_dict: dict):

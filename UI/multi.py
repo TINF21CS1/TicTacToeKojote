@@ -20,9 +20,9 @@ class Join(base_frame):
     def _create_widgets(self, opponent):
         title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent == player_type.ai else 'Play local game against a friend'
         self.lblTitle = tk.Label(self, text=title, font=self.master.title_font)
-        self.btnRdy = tk.Button(self, text='Ready', command=lambda *args: self.master.out_queue.put({'lobby/ready':True}))
+        self.btnRdy = tk.Button(self, text='Ready', command=lambda *args: self.master.out_queue.put({'message_type': 'lobby/ready', 'args' : True}))
         if opponent == player_type.local:
-            self.btnRdy2 = tk.Button(self, text='Ready', command=lambda *args: self.master.out_queue.put({'lobby/ready':True}))
+            self.btnRdy2 = tk.Button(self, text='Ready', command=lambda *args: self.master.out_queue.put({'message_type': 'lobby/ready', 'args' : True}))
         self.btnExit = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
     def _display_widgets(self,):
@@ -45,7 +45,7 @@ class Join(base_frame):
         queue = self.master.in_queue.get()
         for player in queue['player']:
             self.playerlist.append([tk.Label(self, text=player.display_name),
-                                    tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'lobby/kick':uuid}))])
+                                    tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : uuid}))])
         for i, player in enumerate(self.playerlist):
             player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i, columnspan=2)
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)

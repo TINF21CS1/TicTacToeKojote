@@ -3,13 +3,7 @@ from uuid import UUID, uuid4
 
 from .base_frame import base_frame
 from .field_frame import Field
-
-class Player:
-    def __init__(self, display_name: str, color: int):
-        self.uuid: UUID = uuid4()
-        self.display_name = display_name
-        self.color = color
-        self.ready = False
+from Server.player import Player
 
 class NewProfile(base_frame):
     def __init__(self, master, *args, **kwargs):
@@ -52,7 +46,7 @@ class NewProfile(base_frame):
 
 class Profile(base_frame):
     def __new__(cls, master, *args, **kwargs):
-        if(master.player == None):
+        if not master.player:
             return NewProfile(master, *args, **kwargs)
         return super().__new__(cls, *args, **kwargs)
     

@@ -6,6 +6,7 @@ import websockets
 import logging
 import json
 from jsonschema import validate, ValidationError
+from uuid import UUID
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -48,12 +49,12 @@ class Lobby:
                             await websocket.send("Game in progress, cannot join") # TODO jsonify
                             break
 
-                        self._players[message_json["profile"]["uuid"]] = Player(uuid=message_json["profile"]["uuid"], display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
+                        self._players[message_json["profile"]["uuid"]] = Player(uuid=UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
                         # await websocket.send( ## STATISTICS ## )
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
-                            "players": [player.__dict__() for player in self._players.values()],
+                            "players": [player.as_dict() for player in self._players.values()],
                         }))
                     
 
@@ -67,7 +68,7 @@ class Lobby:
 
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
-                            "players":  [player.__dict__() for player in self._players.values()],
+                            "players":  [player.as_dict() for player in self._players.values()],
                         }))
 
                         if all([player.ready for player in self._players.values()]) & len(self._players) == 2:
@@ -108,5 +109,5 @@ class Lobby:
         asyncio.run(self.start_server())
 
 if __name__ == "__main__":
-    lobby = Lobby(port = 8765, admin = Player(uuid="c4f0eccd-a6a4-4662-999c-17669bc23d5e", display_name="admin", color=0xffffff))
+    lobby = Lobby(port = 8765, admin = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff))
     lobby.run()
