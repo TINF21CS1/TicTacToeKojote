@@ -65,7 +65,7 @@ class GameClient:
         # Game info
         self._current_player: Player = None
         self._lobby_status: list[str] = []
-        self._game_status: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
+        self._playfield: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
         self._statistics = None # TODO
         self._chat_history: list[str] = []
         self._winner: Player = None
@@ -182,9 +182,9 @@ class GameClient:
                         self._player_number = 2
                 case "game/end":
                     self._winner = self.get_player_by_uuid(message_json["winner_uuid"])
-                    self._game_status = message_json["final_playfield"]
+                    self._playfield = message_json["final_playfield"]
                 case "game/turn":
-                    self._game_status = message_json["updated_playfield"]
+                    self._playfield = message_json["updated_playfield"]
                     self._current_player = self.get_player_by_uuid(message_json["next_player_uuid"])
                 case "statistics/statistics":
                     # TODO: Add statistics handling
@@ -250,7 +250,7 @@ class GameClient:
         msg = {
             "message_type": "lobby/ready",
             "player_uuid": str(self._player.uuid),
-            "ready": True
+            "ready": ready
         }
         await self._websocket.send(json.dumps(msg))
 
