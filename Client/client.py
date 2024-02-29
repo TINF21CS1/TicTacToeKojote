@@ -7,8 +7,6 @@ from Server.websocket_server import Lobby
 import logging
 from jsonschema import validate, ValidationError
 from threading import Thread
-from queue import Queue, Empty
-import tkinter as tk
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
