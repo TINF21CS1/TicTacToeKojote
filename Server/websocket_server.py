@@ -29,9 +29,7 @@ class Lobby:
         while True:
             try:
                 message = await websocket.recv()
-
                 logger.info(f"Received: {message}")
-            
                 message_json = json.loads(message)
                 
                 # Validate JSON
@@ -44,24 +42,22 @@ class Lobby:
                 match message_json["message_type"]:
 
                     case "lobby/join":
-
                         if self._inprogress:
                             await websocket.send("Game in progress, cannot join") # TODO jsonify
                             break
 
                         self._players[message_json["profile"]["uuid"]] = Player(uuid=UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
-                        # await websocket.send( ## STATISTICS ## )
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
                             "players": [player.as_dict() for player in self._players.values()],
                         }))
-                    
+
 
                     case "lobby/kick":
                         pass
-                    
-                    
+
+ 
                     case "lobby/ready":
 
                         self._players[message_json["player_uuid"]].ready = True
@@ -81,18 +77,51 @@ class Lobby:
                                 "message_type": "game/start",
                                 "starting_player_uuid": self._game.current_player_uuid,
                             }))
-                    
-                    
+
+
                     case "game/make_move":
-                        pass
-                    
-                    
+                        # check if move can be made
+                        if not self._inprogress:
+                            await websocket.send(json.dumps({"message_type": "game/error", "error": "Game not in progress"}))
+                            break
+                        if message_json["player_uuid"] != self._game.current_player_uuid:
+                            await websocket.send(json.dumps({"message_type": "game/error", "error": "Not your turn"}))
+                            break
+                        
+                        # make move, catch illegal move
+                        try:
+                            self._game.move(self._players(message_json["player_uuid"]), message_json["move"])
+                        except ValueError as e:
+                            await websocket.send(json.dumps({"message_type": "game/error", "error": str(e)}))
+                        
+                        # check for winning state
+                        if self._game.finished:
+                            websockets.broadcast(self._connections, json.dumps({
+                                "message_type": "game/end",
+                                "winner_uuid": self._game.winner.uuid,
+                                "final_playfiled": self._game.playfield,
+                            }))
+                            self._inprogress = False
+                        
+                        # announce new game state
+                        else:
+                            websockets.broadcast(self._connections, json.dumps({
+                                "message_type": "game/turn",
+                                "updated_playfield": self._game.playfield,
+                                "next_player_uuid": self._game.current_player_uuid,
+                            }))
+
+
                     case "chat/message":
-                        pass
-                    
-                    
+                        websockets.broadcast(self._connections, json.dumps({
+                            "message_type": "chat/receive",
+                            "sender_uuid": message_json["player_uuid"],
+                            "message": message_json["message"],
+                        }))
+
+
                     case _:
-                        await websocket.send("Invalid Message Type")
+                        await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
 
             except websockets.ConnectionClosedOK:
                 logger.info("Connection Closed from Client-Side")
