@@ -29,7 +29,7 @@ class GameClient:
         _lobby_status (list[str]): The status of the lobby. Contains all players in the lobby.
         _game_status (list[list[int]]): The status of the game. Contains the current playfield.
         _statistics: The statistics of the game. TODO
-        _chat_history (list[str]): The chat history of the game. Contains all messages sent in the game.
+        _chat_history (list[tuple[Player, str]]): The chat history of the game. Contains all messages sent in the game.
         _winner (Player): The winner of the game. None if the game is not finished yet or it is a draw.
         _error_history (list[str]): The error history of the game. Contains all errors that occurred for this client.
         _json_schema (dict): The JSON schema that is used to validate incoming messages.
@@ -67,7 +67,7 @@ class GameClient:
         self._lobby_status: list[str] = []
         self._playfield: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
         self._statistics = None # TODO
-        self._chat_history: list[str] = []
+        self._chat_history: list[tuple[Player, str]] = []
         self._winner: Player = None
         self._error_history: list[str] = []
 
