@@ -145,13 +145,13 @@ class GameClient:
             
             await self._message_handler(message_type)
 
-    def get_player_by_uuid(self, uuid:str):
+    def get_player_by_uuid(self, uuid:str) -> Player:
         for player in self._lobby_status:
             if str(player.uuid) == uuid:
                 return player
         return None
     
-    async def _preprocess_message(self, message:str):
+    async def _preprocess_message(self, message:str) -> str:
             message_json = json.loads(message)
             
             try:
