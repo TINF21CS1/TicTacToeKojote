@@ -7,6 +7,7 @@ from Server.websocket_server import Lobby
 import logging
 from jsonschema import validate, ValidationError
 from threading import Thread
+from uuid import UUID
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -254,11 +255,11 @@ class GameClient:
         }
         await self._websocket.send(json.dumps(msg))
 
-    async def lobby_kick(self, player_to_kick_index:int):
+    async def lobby_kick(self, player_to_kick:UUID):
         msg = {
             "message_type": "lobby/kick",
             "admin_player_uuid": str(self._player.uuid),
-            "kick_player_uuid": str(self._lobby_status[player_to_kick_index].uuid)
+            "kick_player_uuid": str(player_to_kick)
         }
         await self._websocket.send(json.dumps(msg))
                                    
