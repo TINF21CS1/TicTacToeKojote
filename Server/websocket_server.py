@@ -67,11 +67,13 @@ class Lobby:
                             "players":  [player.as_dict() for player in self._players.values()],
                         }))
 
-                        if all([player.ready for player in self._players.values()]) & len(self._players) == 2:
+                        if all([player.ready for player in self._players.values()]) and len(self._players) == 2:
                             # TODO add error messages for why game cant start with not enough or too many ready players
                             # all players are ready, start the game
                             rulebase = RuleBase()
-                            self._game = Game(player1 = self._players.values()[0], player2 = self._players.values()[1], rulebase = rulebase)
+                            self._game = Game(player1 = list(self._players.values())[0], player2 = list(self._players.values())[1], rule_base = rulebase)
+
+                            self._inprogress = True
                             
                             websockets.broadcast(self._connections, json.dumps({
                                 "message_type": "game/start",
@@ -123,8 +125,9 @@ class Lobby:
                     case _:
                         await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
 
-            except websockets.ConnectionClosedOK:
+            except (websockets.ConnectionClosedOK, websockets.ConnectionClosedError, websockets.ConnectionClosed):
                 logger.info("Connection Closed from Client-Side")
+                self._connections.remove(websocket)
                 # TODO: Add handling when game is not over yet
                 break
             # TODO: Catch other errors for disconnects
@@ -138,5 +141,5 @@ class Lobby:
         asyncio.run(self.start_server())
 
 if __name__ == "__main__":
-    lobby = Lobby(port = 8765, admin = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff))
+    lobby = Lobby(port = 8765, admin = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff, ready=True))
     lobby.run()
