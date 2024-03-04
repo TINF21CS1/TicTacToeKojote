@@ -27,8 +27,8 @@ if __name__ == "__main__":
     ai_context = AIContext(weak_ai)
     # run the strategy
     ai_context.run_strategy()
-    # create strong ai strategy
-    strong_ai = ai_strategy.AdvancedAIStrategy()
+    # create strong ai strategy: set arg to true to indicate that it is the second AI-player in the game(this is needed if AIs play against each other)
+    strong_ai = ai_strategy.AdvancedAIStrategy(True)
     # set the strategy
     strong_context = AIContext(strong_ai)
     # run the strategy

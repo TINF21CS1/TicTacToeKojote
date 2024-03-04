@@ -8,19 +8,17 @@ import random
 
 class AIStrategy(ABC, GameClient):
 
-    def __init__(self, ip: str="localhost", port:int=8765, player:Player=None):
+    def __init__(self, second_player: bool):
         self._strength = "Placeholder"
         self._good_luck_message = "Good luck!"
         self._good_game_message_lost = "Good game! You played well."
         self._good_game_message_won = "Good game! I'll have better luck next time."
         self._good_game_message_draw = "Good game! We are evenly matched."
         self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
+        self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._rulebase = RuleBase()
-
-        self._ai_player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._ai_uuid)
-        if player is not None:
-            self._ai_player = player
-        super().__init__(ip, port, self._ai_player)
+        self._ip = "127.0.0.1"
+        self._port = 8765
 
     def thread_entry(self):
         asyncio.run(self.run())
@@ -28,8 +26,17 @@ class AIStrategy(ABC, GameClient):
     async def run(self):
 
         # The AI-UUID is hardcoded so that it can be excluded from statistics
-        await self.join_game(self._ai_player, "localhost")
+        await self.join_game()
         await self.lobby_ready()
+        print("test")
+
+    async def join_game(self):
+        
+        await self.connect()
+        self._listening_task = asyncio.create_task(self.listen())
+        
+        await asyncio.create_task(self.join_lobby())
+
 
 
     async def _message_handler(self, message_type: str):
@@ -39,14 +46,16 @@ class AIStrategy(ABC, GameClient):
                 # AI does not need this
                 pass
             case "game/start":
+                print("start")
                 self.wish_good_luck()
             
             case "game/end":
                 self.say_good_game()
+                await self.close()
+                await self._listening_task
 
             case "game/turn":
                 if self._current_player.uuid == self._ai_uuid:
-                    self.update_gamestate()
                     self.do_turn()
                 
             case "statistics/statistics":
@@ -91,13 +100,14 @@ class AIStrategy(ABC, GameClient):
 
 class WeakAIStrategy(AIStrategy):
     
-    def __init__(self, ip: str="localhost", port:int=8765, player:Player=None):
-        super().__init__(ip, port, player)
+    def __init__(self, second_player: bool = False):
+        super().__init__(second_player)
         self._strength = "Weak"
         self._good_luck_message = "Good luck! I'm still learning so please have mercy on me."
         self._good_game_message_lost = "Good game! I will try to do better next time."
         self._good_game_message_won = "Good game! I can't believe I won!"
         self._good_game_message_draw = "Good game! I' happy I didn't lose."
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
     
     async def do_turn(self):
 
@@ -107,13 +117,14 @@ class WeakAIStrategy(AIStrategy):
 
 class AdvancedAIStrategy(AIStrategy):
 
-    def __init__(self, ip: str="localhost", port:int=8765, player:Player=None):
-        super().__init__(ip, port, player)
+    def __init__(self, second_player: bool = False):
+        super().__init__(second_player)
         self._strength = "Advanced"
         self._good_luck_message = "Good luck! I hope you are ready for a challenge."
         self._good_game_message_lost = "Good game! I admire your skills."
         self._good_game_message_won = "Good game! I hope you learned something from me."
         self._good_game_message_draw = "Good game! I hope you are ready for a rematch."
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
 
     async def do_turn(self):
         """
