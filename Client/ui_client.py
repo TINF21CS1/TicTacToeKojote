@@ -40,9 +40,8 @@ class GameClientUI(GameClient):
     async def listen(self):
         try:
             async with asyncio.timeout(0.1):
-                logger.info("Waiting for message")
+                logger.debug("Waiting for message")
                 message = await self._websocket.recv()
-                logger.info(f"Received: {message}")
         except asyncio.TimeoutError:
             return
         
@@ -79,7 +78,7 @@ class GameClientUI(GameClient):
                     "message_type": "game/end",
                     "winner": self._winner,
                     "win": self._winner == self._player,
-                    "final_playfield": self._game_status
+                    "final_playfield": self._playfield
                 })
                 self._tk_root.event_generate("<<game/end>>", when="tail")
                 self.client.close()
@@ -87,7 +86,7 @@ class GameClientUI(GameClient):
                 self._out_queue.put({
                     "message_type": "game/turn",
                     "next_player": int(self._current_player == self._opponent),
-                    "playfield": self._game_status
+                    "playfield": self._playfield
                 })
                 self._tk_root.event_generate("<<game/turn>>", when="tail")
             case "statistics/statistics":
@@ -111,7 +110,7 @@ class GameClientUI(GameClient):
     async def await_commands(self):
         # Send messages to the server
         try:
-            logger.info("Trying to get message from in_queue")
+            logger.debug("Trying to get message from in_queue")
             message: dict = self._in_queue.get_nowait()
         except Empty:
             await asyncio.sleep(0.1)

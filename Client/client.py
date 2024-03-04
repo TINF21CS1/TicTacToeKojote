@@ -7,8 +7,7 @@ from Server.websocket_server import Lobby
 import logging
 from jsonschema import validate, ValidationError
 from threading import Thread
-from queue import Queue, Empty
-import tkinter as tk
+from uuid import UUID
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +30,7 @@ class GameClient:
         _lobby_status (list[str]): The status of the lobby. Contains all players in the lobby.
         _game_status (list[list[int]]): The status of the game. Contains the current playfield.
         _statistics: The statistics of the game. TODO
-        _chat_history (list[str]): The chat history of the game. Contains all messages sent in the game.
+        _chat_history (list[tuple[Player, str]]): The chat history of the game. Contains all messages sent in the game.
         _winner (Player): The winner of the game. None if the game is not finished yet or it is a draw.
         _error_history (list[str]): The error history of the game. Contains all errors that occurred for this client.
         _json_schema (dict): The JSON schema that is used to validate incoming messages.
@@ -67,9 +66,9 @@ class GameClient:
         # Game info
         self._current_player: Player = None
         self._lobby_status: list[str] = []
-        self._game_status: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
+        self._playfield: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
         self._statistics = None # TODO
-        self._chat_history: list[str] = []
+        self._chat_history: list[tuple[Player, str]] = []
         self._winner: Player = None
         self._error_history: list[str] = []
 
@@ -147,13 +146,13 @@ class GameClient:
             
             await self._message_handler(message_type)
 
-    def get_player_by_uuid(self, uuid:str):
+    def get_player_by_uuid(self, uuid:str) -> Player:
         for player in self._lobby_status:
             if str(player.uuid) == uuid:
                 return player
         return None
     
-    async def _preprocess_message(self, message:str):
+    async def _preprocess_message(self, message:str) -> str:
             message_json = json.loads(message)
             
             try:
@@ -170,7 +169,7 @@ class GameClient:
                         logger.error("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
                         raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
 
-                    self._opponent = self._lobby_status[0] if self._lobby_status[0]["uuid"] != str(self._player.uuid) else self._lobby_status[1]
+                    self._opponent = self._lobby_status[0] if self._lobby_status[0].uuid is not str(self._player.uuid) else self._lobby_status[1]
 
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
                         self._current_player = self._player  
@@ -184,9 +183,9 @@ class GameClient:
                         self._player_number = 2
                 case "game/end":
                     self._winner = self.get_player_by_uuid(message_json["winner_uuid"])
-                    self._game_status = message_json["final_playfield"]
+                    self._playfield = message_json["final_playfield"]
                 case "game/turn":
-                    self._game_status = message_json["updated_playfield"]
+                    self._playfield = message_json["updated_playfield"]
                     self._current_player = self.get_player_by_uuid(message_json["next_player_uuid"])
                 case "statistics/statistics":
                     # TODO: Add statistics handling
@@ -252,15 +251,15 @@ class GameClient:
         msg = {
             "message_type": "lobby/ready",
             "player_uuid": str(self._player.uuid),
-            "ready": True
+            "ready": bool(ready)
         }
         await self._websocket.send(json.dumps(msg))
 
-    async def lobby_kick(self, player_to_kick_index:int):
+    async def lobby_kick(self, player_to_kick:UUID):
         msg = {
             "message_type": "lobby/kick",
             "admin_player_uuid": str(self._player.uuid),
-            "kick_player_uuid": str(self._lobby_status[player_to_kick_index].uuid)
+            "kick_player_uuid": str(player_to_kick)
         }
         await self._websocket.send(json.dumps(msg))
                                    
