@@ -83,7 +83,7 @@ class Lobby_Overview(tk.Frame):
 
     def _connect(self):
         root = self.master.master
-        root.network_client = client_thread(self, in_queue=root.out_queue, out_queue=root.in_queue, player=root.player, ip=self.etrAddress.get())
+        root.network_client = client_thread(root, in_queue=root.out_queue, out_queue=root.in_queue, player=root.player, ip=self.etrAddress.get())
         root.show(Join)
 
 class Multiplayer(base_frame):
