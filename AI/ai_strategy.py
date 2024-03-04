@@ -5,20 +5,25 @@ from Server.rulebase import RuleBase
 from Server.gamestate import GameState
 import asyncio
 import random
+import logging
+import copy
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class AIStrategy(ABC, GameClient):
 
     def __init__(self, second_player: bool):
+        
         self._strength = "Placeholder"
         self._good_luck_message = "Good luck!"
         self._good_game_message_lost = "Good game! You played well."
         self._good_game_message_won = "Good game! I'll have better luck next time."
         self._good_game_message_draw = "Good game! We are evenly matched."
-        self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
-        self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._rulebase = RuleBase()
         self._ip = "127.0.0.1"
         self._port = 8765
+        super().__init__(self._ip, self._port, self._player)
 
     def thread_entry(self):
         asyncio.run(self.run())
@@ -27,15 +32,18 @@ class AIStrategy(ABC, GameClient):
 
         # The AI-UUID is hardcoded so that it can be excluded from statistics
         await self.join_game()
+        asyncio.timeout(1)
         await self.lobby_ready()
-        print("test")
+        logger.info("test")
+
+        await self._listening_task
 
     async def join_game(self):
         
         await self.connect()
         self._listening_task = asyncio.create_task(self.listen())
         
-        await asyncio.create_task(self.join_lobby())
+        await self.join_lobby()
 
 
 
@@ -46,17 +54,18 @@ class AIStrategy(ABC, GameClient):
                 # AI does not need this
                 pass
             case "game/start":
-                print("start")
-                self.wish_good_luck()
+                logger.info("start")
+                if self._current_player == self._player:
+                    await self.do_turn()
+                #await self.wish_good_luck()
             
             case "game/end":
-                self.say_good_game()
+                await self.say_good_game()
                 await self.close()
-                await self._listening_task
 
             case "game/turn":
-                if self._current_player.uuid == self._ai_uuid:
-                    self.do_turn()
+                if self._current_player == self._player:
+                    await self.do_turn()
                 
             case "statistics/statistics":
                 # AI does not need this
@@ -70,16 +79,16 @@ class AIStrategy(ABC, GameClient):
         
         return
 
-    def wish_good_luck(self):
-        self.chat_message(self._good_luck_message)
+    async def wish_good_luck(self):
+        await self.chat_message(self._good_luck_message)
 
-    def say_good_game(self):
+    async def say_good_game(self):
         if self._winner.uuid == self._ai_uuid:
-            self.chat_message(self._good_game_message_won)
+            await self.chat_message(self._good_game_message_won)
         elif self._winner.uuid == None:
-            self.chat_message(self._good_game_message_draw)
+            await self.chat_message(self._good_game_message_draw)
         else:
-            self.chat_message(self._good_game_message_lost)
+            await self.chat_message(self._good_game_message_lost)
 
     def get_empty_cells(self, game_status: list):
         """
@@ -101,30 +110,34 @@ class AIStrategy(ABC, GameClient):
 class WeakAIStrategy(AIStrategy):
     
     def __init__(self, second_player: bool = False):
-        super().__init__(second_player)
+        self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
+        self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._strength = "Weak"
         self._good_luck_message = "Good luck! I'm still learning so please have mercy on me."
         self._good_game_message_lost = "Good game! I will try to do better next time."
         self._good_game_message_won = "Good game! I can't believe I won!"
         self._good_game_message_draw = "Good game! I' happy I didn't lose."
         self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
+        super().__init__(second_player)
     
     async def do_turn(self):
 
-        empty_cells = self.get_empty_cells(self._game_status)
+        empty_cells = self.get_empty_cells(self._playfield)
         move = random.randint(0, len(empty_cells) - 1)
         await self.game_make_move(empty_cells[move][0], empty_cells[move][1])
 
 class AdvancedAIStrategy(AIStrategy):
 
     def __init__(self, second_player: bool = False):
-        super().__init__(second_player)
+        self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
+        self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._strength = "Advanced"
         self._good_luck_message = "Good luck! I hope you are ready for a challenge."
         self._good_game_message_lost = "Good game! I admire your skills."
         self._good_game_message_won = "Good game! I hope you learned something from me."
         self._good_game_message_draw = "Good game! I hope you are ready for a rematch."
         self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
+        super().__init__(second_player)
 
     async def do_turn(self):
         """
@@ -134,17 +147,18 @@ class AdvancedAIStrategy(AIStrategy):
         3. Make a random move(or maybe more complex logic)
         """
 
-        empty_cells = self.get_empty_cells(self._game_status)
+        empty_cells = self.get_empty_cells(self._playfield)
 
         # Check for own winning move
         for possible_move in empty_cells:
             temp_gamestate = GameState()
 
             # Make deep copy of the game state
-            temp_gamestate._playfield = [self._game_status[row].copy() for row in self._game_status]
+            temp_gamestate._playfield = copy.deepcopy(self._playfield)
 
             temp_gamestate.set_player_position(self._player_number, possible_move)
-            RuleBase.check_win(temp_gamestate)
+            logger.info(temp_gamestate._playfield)
+            self._rulebase.check_win(temp_gamestate)
             if temp_gamestate.winner == self._player_number:
                 await self.game_make_move(possible_move[0], possible_move[1])
                 return
@@ -154,10 +168,10 @@ class AdvancedAIStrategy(AIStrategy):
             temp_gamestate = GameState()
 
             # Make deep copy of the game state
-            temp_gamestate._playfield = [self._game_status[row].copy() for row in self._game_status]
+            temp_gamestate._playfield = copy.deepcopy(self._playfield)
 
             temp_gamestate.set_player_position(self._opponent_number, possible_move)
-            RuleBase.check_win(temp_gamestate)
+            self._rulebase.check_win(temp_gamestate)
             if temp_gamestate.winner == self._opponent_number:
                 await self.game_make_move(possible_move[0], possible_move[1])
                 return
