@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from Client.client import GameClient
 from Server.player import Player
-from Server.rulebase import RuleBase
+from . import ai_rulebase
 from Server.gamestate import GameState
 import asyncio
 import random
@@ -20,7 +20,7 @@ class AIStrategy(ABC, GameClient):
         self._good_game_message_lost = "Good game! You played well."
         self._good_game_message_won = "Good game! I'll have better luck next time."
         self._good_game_message_draw = "Good game! We are evenly matched."
-        self._rulebase = RuleBase()
+        self._rulebase = ai_rulebase.AIRulebase()
         self._ip = "127.0.0.1"
         self._port = 8765
         super().__init__(self._ip, self._port, self._player)
@@ -139,6 +139,24 @@ class AdvancedAIStrategy(AIStrategy):
         self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
         super().__init__(second_player)
 
+    def check_winning_move(self, empty_cells: list, player: int):
+        """
+        Check if there is a winning move for the given player.
+        """
+        
+        for possible_move in empty_cells:
+            temp_gamestate = GameState()
+
+            # Make deep copy of the game state
+            temp_gamestate._playfield = copy.deepcopy(self._playfield)
+
+            temp_gamestate.set_player_position(self._player_number, possible_move)
+            self._rulebase.check_win(temp_gamestate)
+            if temp_gamestate.winner == player:
+                return possible_move
+        
+        return None
+
     async def do_turn(self):
         """
         Advanced AI Logic:
@@ -150,31 +168,14 @@ class AdvancedAIStrategy(AIStrategy):
         empty_cells = self.get_empty_cells(self._playfield)
 
         # Check for own winning move
-        for possible_move in empty_cells:
-            temp_gamestate = GameState()
-
-            # Make deep copy of the game state
-            temp_gamestate._playfield = copy.deepcopy(self._playfield)
-
-            temp_gamestate.set_player_position(self._player_number, possible_move)
-            logger.info(temp_gamestate._playfield)
-            self._rulebase.check_win(temp_gamestate)
-            if temp_gamestate.winner == self._player_number:
-                await self.game_make_move(possible_move[0], possible_move[1])
-                return
+        if winning_move:= self.check_winning_move(empty_cells, self._player_number) != None:
+            await self.game_make_move(winning_move[0], winning_move[1])
+            return
             
         # Check for opponent winning move
-        for possible_move in empty_cells:
-            temp_gamestate = GameState()
-
-            # Make deep copy of the game state
-            temp_gamestate._playfield = copy.deepcopy(self._playfield)
-
-            temp_gamestate.set_player_position(self._opponent_number, possible_move)
-            self._rulebase.check_win(temp_gamestate)
-            if temp_gamestate.winner == self._opponent_number:
-                await self.game_make_move(possible_move[0], possible_move[1])
-                return
+        if winning_move:= self.check_winning_move(empty_cells, self._opponent_number):
+            await self.game_make_move(winning_move[0], winning_move[1])
+            return
             
         # Make a random move
         move = random.randint(0, len(empty_cells) - 1)
