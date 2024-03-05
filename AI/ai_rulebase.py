@@ -1,4 +1,5 @@
 from Server.rulebase import RuleBase, transpose
+from Server.gamestate import GameState
 
 class AIRulebase(RuleBase):
     # overwrite the check_win method without checking if the playfield
