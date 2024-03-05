@@ -29,9 +29,7 @@ class Lobby:
         while True:
             try:
                 message = await websocket.recv()
-
                 logger.info(f"Received: {message}")
-            
                 message_json = json.loads(message)
                 
                 # Validate JSON
@@ -44,24 +42,22 @@ class Lobby:
                 match message_json["message_type"]:
 
                     case "lobby/join":
-
                         if self._inprogress:
                             await websocket.send("Game in progress, cannot join") # TODO jsonify
                             break
 
                         self._players[message_json["profile"]["uuid"]] = Player(uuid=UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
-                        # await websocket.send( ## STATISTICS ## )
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
                             "players": [player.as_dict() for player in self._players.values()],
                         }))
-                    
+
 
                     case "lobby/kick":
                         pass
-                    
-                    
+
+ 
                     case "lobby/ready":
 
                         self._players[message_json["player_uuid"]].ready = True
@@ -71,31 +67,67 @@ class Lobby:
                             "players":  [player.as_dict() for player in self._players.values()],
                         }))
 
-                        if all([player.ready for player in self._players.values()]) & len(self._players) == 2:
+                        if all([player.ready for player in self._players.values()]) and len(self._players) == 2:
                             # TODO add error messages for why game cant start with not enough or too many ready players
                             # all players are ready, start the game
                             rulebase = RuleBase()
-                            self._game = Game(player1 = self._players.values()[0], player2 = self._players.values()[1], rulebase = rulebase)
+                            self._game = Game(player1 = list(self._players.values())[0], player2 = list(self._players.values())[1], rule_base = rulebase)
+
+                            self._inprogress = True
                             
                             websockets.broadcast(self._connections, json.dumps({
                                 "message_type": "game/start",
                                 "starting_player_uuid": self._game.current_player_uuid,
                             }))
-                    
-                    
-                    case "game/make_move":
-                        pass
-                    
-                    
-                    case "chat/message":
-                        pass
-                    
-                    
-                    case _:
-                        await websocket.send("Invalid Message Type")
 
-            except websockets.ConnectionClosedOK:
+
+                    case "game/make_move":
+                        # check if move can be made
+                        if not self._inprogress:
+                            await websocket.send(json.dumps({"message_type": "game/error", "error": "Game not in progress"}))
+                            break
+                        if message_json["player_uuid"] != self._game.current_player_uuid:
+                            await websocket.send(json.dumps({"message_type": "game/error", "error": "Not your turn"}))
+                            break
+                        
+                        # make move, catch illegal move
+                        try:
+                            self._game.move(self._players(message_json["player_uuid"]), message_json["move"])
+                        except ValueError as e:
+                            await websocket.send(json.dumps({"message_type": "game/error", "error": str(e)}))
+                        
+                        # check for winning state
+                        if self._game.finished:
+                            websockets.broadcast(self._connections, json.dumps({
+                                "message_type": "game/end",
+                                "winner_uuid": self._game.winner.uuid,
+                                "final_playfiled": self._game.playfield,
+                            }))
+                            self._inprogress = False
+                        
+                        # announce new game state
+                        else:
+                            websockets.broadcast(self._connections, json.dumps({
+                                "message_type": "game/turn",
+                                "updated_playfield": self._game.playfield,
+                                "next_player_uuid": self._game.current_player_uuid,
+                            }))
+
+
+                    case "chat/message":
+                        websockets.broadcast(self._connections, json.dumps({
+                            "message_type": "chat/receive",
+                            "sender_uuid": message_json["player_uuid"],
+                            "message": message_json["message"],
+                        }))
+
+
+                    case _:
+                        await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
+
+            except (websockets.ConnectionClosedOK, websockets.ConnectionClosedError, websockets.ConnectionClosed):
                 logger.info("Connection Closed from Client-Side")
+                self._connections.remove(websocket)
                 # TODO: Add handling when game is not over yet
                 break
             # TODO: Catch other errors for disconnects
@@ -109,5 +141,5 @@ class Lobby:
         asyncio.run(self.start_server())
 
 if __name__ == "__main__":
-    lobby = Lobby(port = 8765, admin = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff))
+    lobby = Lobby(port = 8765, admin = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff, ready=True))
     lobby.run()

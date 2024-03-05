@@ -7,6 +7,7 @@ from Server.websocket_server import Lobby
 import logging
 from jsonschema import validate, ValidationError
 from threading import Thread
+from uuid import UUID
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -168,7 +169,7 @@ class GameClient:
                         logger.error("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
                         raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
 
-                    self._opponent = self._lobby_status[0] if self._lobby_status[0]["uuid"] != str(self._player.uuid) else self._lobby_status[1]
+                    self._opponent = self._lobby_status[0] if self._lobby_status[0].uuid is not str(self._player.uuid) else self._lobby_status[1]
 
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
                         self._current_player = self._player  
@@ -250,15 +251,15 @@ class GameClient:
         msg = {
             "message_type": "lobby/ready",
             "player_uuid": str(self._player.uuid),
-            "ready": ready
+            "ready": bool(ready)
         }
         await self._websocket.send(json.dumps(msg))
 
-    async def lobby_kick(self, player_to_kick_index:int):
+    async def lobby_kick(self, player_to_kick:UUID):
         msg = {
             "message_type": "lobby/kick",
             "admin_player_uuid": str(self._player.uuid),
-            "kick_player_uuid": str(self._lobby_status[player_to_kick_index].uuid)
+            "kick_player_uuid": str(player_to_kick)
         }
         await self._websocket.send(json.dumps(msg))
                                    
