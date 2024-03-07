@@ -1,4 +1,5 @@
 import tkinter as tk
+from uuid import UUID
 
 from .base_frame import base_frame
 from .field_frame import Field
@@ -47,16 +48,16 @@ class Join(base_frame):
 
     def _update_lobby(self):
         queue = self.master.in_queue.get()
-        print(queue)
+        #print(queue)
         for player in queue['player']:
             self.playerlist.append([tk.Label(self, text=player.display_name),
                                     tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick_index': uuid}}))])
-            if(player.uuid == self.master.player.uuid):
+            if(str(player.uuid) == str(self.master.player.uuid)):
                 self.ready = player.ready
                 if(player.ready):
-                    self.btnRdy.config("Ready")
+                    self.btnRdy.config(text="Ready")
                 else:
-                    self.btnRdy.config("Start")
+                    self.btnRdy.config(text="Start")
         for i, player in enumerate(self.playerlist):
             player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i, columnspan=2)
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
