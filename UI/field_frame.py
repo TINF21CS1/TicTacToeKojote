@@ -76,9 +76,12 @@ class Field(base_frame):
         self._create_widgets()
         self.controller = field_controller(self, tuple(start_player, opponent))
         self._display_widgets()
-        self.bind("<<game/turn>>", self.controller.sub_controller.turn)
-        self.bind("<<game/end>>", self.controller.end)
-        self.bind("<<game/error>>", self.controller.error)
+        #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
+        #self.bind("<<game/end>>", self.controller.end)
+        #self.bind("<<game/error>>", self.controller.error)
+        self.master.network_events['game/turn'] = self.controller.sub_controller.turn
+        self.master.network_events['game/end'] = self.controller.end
+        self.master.network_events['game/error'] = self.controller.error
 
     def _create_widgets(self):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)
@@ -97,3 +100,8 @@ class Field(base_frame):
         self.player[1].grid(row=1, column=2)
         self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=1)
         self.close.grid(row=3, column=2)
+
+    def on_destroy(self):
+        del self.master.network_events['game/turn']
+        del self.master.network_events['game/end']
+        del self.master.network_events['game/error']
