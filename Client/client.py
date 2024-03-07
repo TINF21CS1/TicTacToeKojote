@@ -64,6 +64,7 @@ class GameClient:
         self._opponent_number: int = None
 
         # Game info
+        self._starting_player: Player = None
         self._current_player: Player = None
         self._lobby_status: list[str] = []
         self._playfield: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
@@ -172,12 +173,14 @@ class GameClient:
                     self._opponent = self._lobby_status[0] if self._lobby_status[0].uuid is not str(self._player.uuid) else self._lobby_status[1]
 
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
-                        self._current_player = self._player  
+                        self._current_player = self._player
+                        self._starting_player = self._player
                         self._symbol = "X"
                         self._player_number = 1
                         self._opponent_number = 2
                     else:
                         self._current_player = self._opponent
+                        self._starting_player = self._opponent
                         self._symbol = "O"
                         self._opponent_number = 1
                         self._player_number = 2
