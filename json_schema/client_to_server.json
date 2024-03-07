@@ -1,0 +1,151 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "client_to_server_TicTacToe",
+    "title": "Clients perform actions in the TicTacToe program",
+    "description": "The schema for the messages sent from the client to the server in the TicTacToe program",
+    "type": "object",
+    "properties": {
+        "message_type": {
+            "description": "The message type",
+            "type": "string",
+            "enum": ["lobby/join", "lobby/kick", "lobby/ready", "game/make_move", "chat/message"]
+        }
+    },
+    "required": [ "message_type"],
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/join" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "profile": {
+                        "description": "The profile object of the player",
+                        "type": "object",
+                        "properties": {
+                            "uuid": {
+                                "description": "The uuid of the player",
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "display_name": {
+                                "description": "The name of the player",
+                                "type": "string"
+                            },
+                            "color": {
+                                "description": "The color of the player",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 16777215
+                            }
+                        },
+                        "required": [ "uuid", "display_name", "color"]
+                    }
+                }, 
+                "required": [ "profile"]
+            }
+        }, 
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/kick" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "admin_player_uuid": {
+                        "description": "The uuid of the player with admin rights",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "kick_player_uuid": {
+                        "description": "The uuid of the player to kick",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [ "admin_player_uuid", "kick_player_uuid"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/ready" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_uuid": {
+                        "description": "The uuid of the player who changed the ready status",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "ready": {
+                        "description": "The ready status of the player",
+                        "type": "boolean"
+                    }
+                },
+                "required": [ "player_uuid", "ready"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "game/make_move" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_uuid": {
+                        "description": "The uuid of the player who made the move",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "move": {
+                        "description": "The move to make",
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "description": "The x coordinate of the move",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 2
+                            },
+                            "y": {
+                                "description": "The y coordinate of the move",
+                                "type": "number", 
+                                "minimum": 0,
+                                "maximum": 2
+                            }
+                        },
+                        "required": [ "x", "y"]
+                    }
+                },
+                "required": [ "player_uuid", "move"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "chat/message" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_uuid": {
+                        "description": "The uuid of the player who sent the message",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "message": {
+                        "description": "The message to send",
+                        "type": "string"
+                    }
+                },
+                "required": [ "player_uuid", "message"]
+            }
+        }
+    ]
+}

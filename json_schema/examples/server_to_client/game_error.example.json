@@ -1,0 +1,4 @@
+{
+    "message_type": "game/error",
+    "error_message": "Invalid move."
+}

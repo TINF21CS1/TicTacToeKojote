@@ -1,0 +1,9 @@
+{
+    "message_type": "game/end",
+    "winner_uuid": "123e4567-e89b-12d3-a456-426614174000",
+    "final_playfield": [
+        [1, 1, 2],
+        [2, 1, 1],
+        [1, 2, 2]
+    ]
+}

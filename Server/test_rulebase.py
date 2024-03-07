@@ -1,5 +1,5 @@
-from gamestate import GameState
-from rulebase import RuleBase
+from Server.gamestate import GameState
+from Server.rulebase import RuleBase
 import unittest
 
 class TestRuleBase(unittest.TestCase):
@@ -50,6 +50,13 @@ class TestRuleBase(unittest.TestCase):
         self.state._playfield = [[1, 2, 1], [1, 2, 2], [2, 1, 1]]
         self.rulebase.check_win(self.state)
         self.assertEqual(self.state.winner, 0)
+        self.assertTrue(self.state.finished)
+
+    def test_check_win_6(self):
+        # Test case 6: Player 2 win
+        self.state._playfield = [[1, 1, 2], [2, 2, 1], [2, 1, 0]]
+        self.rulebase.check_win(self.state)
+        self.assertEqual(self.state.winner, 2)
         self.assertTrue(self.state.finished)
 
     def test_is_game_state_valid(self):

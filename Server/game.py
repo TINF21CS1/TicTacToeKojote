@@ -1,7 +1,8 @@
-from player import Player
-from gamestate import GameState
-from rulebase import RuleBase
+from Server.player import Player
+from Server.gamestate import GameState
+from Server.rulebase import RuleBase
 import uuid
+from random import shuffle
 
 class Game:
     def __init__(self, player1: Player, player2: Player, rule_base: RuleBase = RuleBase()):
@@ -16,7 +17,9 @@ class Game:
         self._uuid: uuid.UUID = uuid.uuid4()
         self._id: int =  self._uuid.int
         self.state = GameState()
-        self.players: list = [None, player1, player2]
+        players = [player1, player2]
+        shuffle(players)
+        self.players: list = [None] +  players
         self.rule_base = rule_base
 
     def move(self, player: int, new_position: tuple[int, int]):
@@ -33,7 +36,17 @@ class Game:
         try:
             self.rule_base.is_move_valid(self.state, new_position)
             self.state.set_player_position(player, new_position)
+            self.rule_base.check_win(self.state)
         except ValueError as e:
             # TODO: Call a function in networking to display the error
             print(e)
         
+    @property
+    def current_player_uuid(self) -> str:
+        """
+        Returns the UUID string of the current player.
+
+        Returns:
+            str: The UUID string of the current player.
+        """
+        return str(self.players[self.state.current_player].uuid)
