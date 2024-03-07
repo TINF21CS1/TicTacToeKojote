@@ -151,8 +151,6 @@ class Statistics:
     ________Get Methods___________
     """
 
-    # TODO : how does draws influence wr?
-    # TODO : for all getters: if profile with given uuid doesn't exist: return None or raise error?
     def get_winrates(self, uuid: str, type: str = "all") -> float:
         """
         Returns the winrate of a profile by its uuid
