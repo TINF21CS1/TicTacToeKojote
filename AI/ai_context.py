@@ -1,5 +1,6 @@
 from . import ai_strategy
 from threading import Thread
+import time
 
 class AIContext():
 
@@ -17,6 +18,20 @@ class AIContext():
 
     # Runs the strategy as a new thread and returns the thread
     def run_strategy(self):
-        thread = Thread(target=self.thread_entry)
+        thread = Thread(target=self._strategy.thread_entry)
         thread.start()
         return thread
+
+if __name__ == "__main__":
+    weak_ai = ai_strategy.WeakAIStrategy()
+    # create ai context
+    ai_context = AIContext(weak_ai)
+    # run the strategy
+    ai_context.run_strategy()
+    time.sleep(3)
+    # create strong ai strategy: set arg to true to indicate that it is the second AI-player in the game(this is needed if AIs play against each other)
+    strong_ai = ai_strategy.AdvancedAIStrategy(True)
+    # set the strategy
+    strong_context = AIContext(strong_ai)
+    # run the strategy
+    strong_context.run_strategy()

@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Lobby:
     def __init__(self, admin:Player, port: int = 8765) -> None:
-        self._players = {admin.uuid : admin}
+        self._players = {}
+        #self._players = {admin.uuid : admin}
         self._game = None
         self._inprogress = False
         self._port = port
@@ -67,7 +68,7 @@ class Lobby:
                             "players":  [player.as_dict() for player in self._players.values()],
                         }))
 
-                        if all([player.ready for player in self._players.values()]) and len(self._players) == 2:
+                        if all([player.ready for player in self._players.values()]) and len(self._connections) == 2:
                             # TODO add error messages for why game cant start with not enough or too many ready players
                             # all players are ready, start the game
                             rulebase = RuleBase()
@@ -84,24 +85,24 @@ class Lobby:
                     case "game/make_move":
                         # check if move can be made
                         if not self._inprogress:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error": "Game not in progress"}))
+                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Game not in progress"}))
                             break
                         if message_json["player_uuid"] != self._game.current_player_uuid:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error": "Not your turn"}))
+                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Not your turn"}))
                             break
                         
                         # make move, catch illegal move
                         try:
-                            self._game.move(self._players(message_json["player_uuid"]), message_json["move"])
+                            self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
                         except ValueError as e:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error": str(e)}))
+                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
                         
                         # check for winning state
-                        if self._game.finished:
+                        if self._game.state.finished:
                             websockets.broadcast(self._connections, json.dumps({
                                 "message_type": "game/end",
-                                "winner_uuid": self._game.winner.uuid,
-                                "final_playfiled": self._game.playfield,
+                                "winner_uuid": self._game.state.winner.uuid,
+                                "final_playfiled": self._game.state.playfield,
                             }))
                             self._inprogress = False
                         
@@ -109,7 +110,7 @@ class Lobby:
                         else:
                             websockets.broadcast(self._connections, json.dumps({
                                 "message_type": "game/turn",
-                                "updated_playfield": self._game.playfield,
+                                "updated_playfield": self._game.state.playfield,
                                 "next_player_uuid": self._game.current_player_uuid,
                             }))
 

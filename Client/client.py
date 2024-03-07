@@ -28,7 +28,7 @@ class GameClient:
         _opponent_number (int): The number of the opponent in the game. 1 for the first player, 2 for the second player.
         _current_player (Player): The player that is currently allowed to make a move.
         _lobby_status (list[str]): The status of the lobby. Contains all players in the lobby.
-        _game_status (list[list[int]]): The status of the game. Contains the current playfield.
+        _playfield (list[list[int]]): The status of the game. Contains the current playfield.
         _statistics: The statistics of the game. TODO
         _chat_history (list[tuple[Player, str]]): The chat history of the game. Contains all messages sent in the game.
         _winner (Player): The winner of the game. None if the game is not finished yet or it is a draw.
