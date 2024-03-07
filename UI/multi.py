@@ -45,7 +45,7 @@ class Join(base_frame):
             self.btnRdy2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
-    def _update_lobby(self, event):
+    def _update_lobby(self):
         queue = self.master.in_queue.get()
         print(queue)
         for player in queue['player']:
