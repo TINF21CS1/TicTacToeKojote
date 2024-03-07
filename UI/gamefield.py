@@ -27,7 +27,7 @@ class gamefield_controller:
     
     def _bind(self):
         for position, button in self.view.fields.items():
-            button.config(command=lambda e=position: self._game_input(self, e))
+            button.config(command=lambda e=position: self._game_input(e))
 
     def draw_field(self, matrix=None, position=None, value=None): #either matrix as a 3x3 list or position and value need to be provided
         if matrix != None:

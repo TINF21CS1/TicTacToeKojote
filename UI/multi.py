@@ -49,7 +49,7 @@ class Join(base_frame):
 
     def _update_lobby(self):
         queue = self.master.in_queue.get()
-        #print(queue)
+        self.playerlist = []
         for player in queue['player']:
             self.playerlist.append([tk.Label(self, text=player.display_name),
                                     tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick_index': uuid}}))])
@@ -64,8 +64,9 @@ class Join(base_frame):
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
         
 
-    def _start_game(self, event):
+    def _start_game(self):
         queue = self.master.in_queue.get()
+        print(queue)
         self.master.show(Field, **queue)
 
     def on_destroy(self):
