@@ -1,10 +1,12 @@
 import tkinter as tk
+from uuid import UUID
 
 from .base_frame import base_frame
 from .field_frame import Field
 from .profile import Profile
 from Client.ui_client import client_thread
 from .field_frame import player_type
+from Server.main import server_thread
 
 class Join(base_frame):
     def __init__(self, master, *args, opponent=player_type.unknown, **kwargs):
@@ -19,7 +21,7 @@ class Join(base_frame):
         self.bind('Destroy', lambda *args: self.on_destroy())
         self.ready = False
         if opponent != player_type.unknown:
-            pass #create server
+            server_thread(self.master.player)
 
     def _create_widgets(self, opponent):
         title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent == player_type.ai else 'Play local game against a friend'
@@ -47,16 +49,16 @@ class Join(base_frame):
 
     def _update_lobby(self):
         queue = self.master.in_queue.get()
-        print(queue)
+        #print(queue)
         for player in queue['player']:
             self.playerlist.append([tk.Label(self, text=player.display_name),
                                     tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick_index': uuid}}))])
-            if(player.uuid == self.master.player.uuid):
+            if(str(player.uuid) == str(self.master.player.uuid)):
                 self.ready = player.ready
                 if(player.ready):
-                    self.btnRdy.config("Ready")
+                    self.btnRdy.config(text="Ready")
                 else:
-                    self.btnRdy.config("Start")
+                    self.btnRdy.config(text="Start")
         for i, player in enumerate(self.playerlist):
             player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i, columnspan=2)
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
