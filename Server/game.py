@@ -36,6 +36,7 @@ class Game:
         try:
             self.rule_base.is_move_valid(self.state, new_position)
             self.state.set_player_position(player, new_position)
+            self.rule_base.check_win(self.state)
         except ValueError as e:
             # TODO: Call a function in networking to display the error
             print(e)
