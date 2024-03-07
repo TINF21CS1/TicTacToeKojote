@@ -113,6 +113,15 @@ class Statistics:
                 DELETE FROM statistics
                 WHERE uuid = '{uuid}'
                 """)
+
+    def delete_all_statistics(self):
+        """
+        Deletes all statistics from the database
+        """
+        with self.conn:
+            self.cursor.execute(f"""
+              DELETE FROM statistics
+              """)
     """
     ________Reset Methods_________
     """
@@ -388,7 +397,12 @@ class Statistics:
             """, {'uuid': uuid, 'wins_first': wins_first, 'wins_second': wins_second,
                   'loses_first': loses_first, 'loses_second': loses_second, 'draws_first': draws_first, 'draws_second': draws_second, 'moves': moves, 'emojis': emojis})
 
-statistics = Statistics()
-statistics.update_statistics("test", "draws_first", 5)
-statistics.count_emojis("test", "🤔 🙈 me así, se 😌 ds 💕👭👙 hello 👩🏾‍🎓 emoji hello 👨‍👩‍👦‍👦 how are 😊 you today🙅🏽🙅🏽")
-print(statistics.get_statistics("test"))
+# statistics = Statistics()
+# statistics.update_statistics("test", "draws_first", 5)
+# statistics.count_emojis("test", "🤔 🙈 me así, se 😌 ds 💕👭👙 hello 👩🏾‍🎓 emoji hello 👨‍👩‍👦‍👦 how are 😊 you today🙅🏽🙅🏽")
+# print(statistics.get_statistics("test"))
+# print(statistics.update_statistics("lol", "draws_first", 5))
+# print(statistics.get_all_statistics())
+# statistics.delete_all_statistics()
+# print(statistics.get_all_statistics())
+# print(statistics.get_statistics("test"))
