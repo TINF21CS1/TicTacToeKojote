@@ -6,6 +6,7 @@ from .field_frame import Field
 from .profile import Profile
 from Client.ui_client import client_thread
 from .field_frame import player_type
+from Server.main import server_thread
 
 class Join(base_frame):
     def __init__(self, master, *args, opponent=player_type.unknown, **kwargs):
@@ -20,7 +21,7 @@ class Join(base_frame):
         self.bind('Destroy', lambda *args: self.on_destroy())
         self.ready = False
         if opponent != player_type.unknown:
-            pass #create server
+            server_thread(self.master.player)
 
     def _create_widgets(self, opponent):
         title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent == player_type.ai else 'Play local game against a friend'

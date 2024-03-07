@@ -52,6 +52,13 @@ class TestRuleBase(unittest.TestCase):
         self.assertEqual(self.state.winner, 0)
         self.assertTrue(self.state.finished)
 
+    def test_check_win_6(self):
+        # Test case 6: Player 2 win
+        self.state._playfield = [[1, 1, 2], [2, 2, 1], [2, 1, 0]]
+        self.rulebase.check_win(self.state)
+        self.assertEqual(self.state.winner, 2)
+        self.assertTrue(self.state.finished)
+
     def test_is_game_state_valid(self):
         # Test case 1: Valid game state
         self.assertTrue(self.rulebase.is_game_state_valid(self.state))
