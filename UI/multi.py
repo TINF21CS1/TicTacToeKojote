@@ -12,8 +12,11 @@ class Join(base_frame):
         self._create_widgets(opponent)
         self._display_widgets()
         self.playerlist = []
-        self.bind('<<lobby/status>>', self._update_lobby)
-        self.bind('<<game/start>>', self._start_game)
+        #self.bind('<<lobby/status>>', self._update_lobby)
+        #self.bind('<<game/start>>', self._start_game)
+        self.master.network_events['lobby/status'] = self._update_lobby
+        self.master.network_events['game/start'] = self._start_game
+        self.bind('Destroy', lambda *args: self.on_destroy())
         self.ready = False
         if opponent != player_type.unknown:
             pass #create server
@@ -42,7 +45,7 @@ class Join(base_frame):
             self.btnRdy2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
-    def _update_lobby(self, event):
+    def _update_lobby(self):
         queue = self.master.in_queue.get()
         print(queue)
         for player in queue['player']:
@@ -62,6 +65,10 @@ class Join(base_frame):
     def _start_game(self, event):
         queue = self.master.in_queue.get()
         self.master.show(Field, **queue)
+
+    def on_destroy(self):
+        del self.master.network_events['lobby/status']
+        del self.master.network_events['game/start']
 
 class Lobby_Overview(tk.Frame):
     def __init__(self, master):
