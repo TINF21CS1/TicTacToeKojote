@@ -113,6 +113,8 @@ class Statistics:
                 DELETE FROM statistics
                 WHERE uuid = '{uuid}'
                 """)
+        else:
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     def delete_all_statistics(self):
         """
@@ -127,7 +129,7 @@ class Statistics:
     """
     def reset_statistics(self, uuid: str, arg: str):
         """
-        Resets the statistics of a profile by its uuid
+        Resets an argument value of a profile by its uuid to 0
         :param uuid: uuid of the profile that is reset
         :param arg: statistics that is get reseted, hast to be one of those:
         'wins_first', 'wins_second', 'loses_first', 'loses_second', 'draws_first', 'draws_second', 'emojis', 'moves'
@@ -136,13 +138,15 @@ class Statistics:
         if arg not in ['wins_first', 'wins_second' 'loses_first', 'loses_second',
                        'draws_first', 'draws_secons', 'emojis', 'moves']:
             raise ValueError('Invalid type')
-        with self.conn:
-            self.cursor.execute(f"""
-            UPDATE statistics
-            SET {arg} = 0
-            WHERE uuid = '{uuid}'
-            """)
-
+        if self._check_profile(uuid):
+            with self.conn:
+                self.cursor.execute(f"""
+                UPDATE statistics
+                SET {arg} = 0
+                WHERE uuid = '{uuid}'
+                """)
+        else:
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
     """
     ________Get Methods___________
     """
@@ -169,7 +173,7 @@ class Statistics:
             elif type == 'second':
                 return profile[2] / (profile[2] + profile[4])
         else:
-            return None
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     def get_emojis(self, uuid: str) -> int:
         """
@@ -181,7 +185,7 @@ class Statistics:
             profile = self._get_profile(uuid)
             return profile[8]
         else:
-            return None
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     def get_moves(self, uuid: str) -> int:
         """
@@ -215,7 +219,7 @@ class Statistics:
             elif type == 'second':
                 return profile[2]
         else:
-            return None
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     def get_loses(self, uuid: str, type='all') -> int:
         """
@@ -237,7 +241,7 @@ class Statistics:
             elif type == 'second':
                 return profile[4]
         else:
-            return None
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     def get_draws(self, uuid: str, type: str = 'all') -> int:
         """
@@ -259,7 +263,7 @@ class Statistics:
             elif type == 'second':
                 return profile[6]
         else:
-            return None
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     """
     ________Private Methods_________
@@ -353,6 +357,8 @@ class Statistics:
         :param uuid: uuid of the profile that is searched
         :return: profile statistics as a tuple
         """
+        if not self._check_profile(uuid):
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
         with self.conn:
             self.cursor.execute(f"""
             SELECT * FROM statistics
@@ -397,7 +403,7 @@ class Statistics:
             """, {'uuid': uuid, 'wins_first': wins_first, 'wins_second': wins_second,
                   'loses_first': loses_first, 'loses_second': loses_second, 'draws_first': draws_first, 'draws_second': draws_second, 'moves': moves, 'emojis': emojis})
 
-# statistics = Statistics()
+statistics = Statistics()
 # statistics.update_statistics("test", "draws_first", 5)
 # statistics.count_emojis("test", "🤔 🙈 me así, se 😌 ds 💕👭👙 hello 👩🏾‍🎓 emoji hello 👨‍👩‍👦‍👦 how are 😊 you today🙅🏽🙅🏽")
 # print(statistics.get_statistics("test"))
