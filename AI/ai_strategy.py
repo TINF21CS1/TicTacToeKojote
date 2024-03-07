@@ -113,12 +113,14 @@ class WeakAIStrategy(AIStrategy):
         self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
         self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._strength = "Weak"
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
+        super().__init__(second_player)
+        # set it again because the parent's init overwrites it
+        self._strength = "Weak"
         self._good_luck_message = "Good luck! I'm still learning so please have mercy on me."
         self._good_game_message_lost = "Good game! I will try to do better next time."
         self._good_game_message_won = "Good game! I can't believe I won!"
         self._good_game_message_draw = "Good game! I' happy I didn't lose."
-        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
-        super().__init__(second_player)
     
     async def do_turn(self):
 
@@ -132,12 +134,14 @@ class AdvancedAIStrategy(AIStrategy):
         self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
         self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._strength = "Advanced"
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
+        super().__init__(second_player)
+        # set it again because the parent's init overwrites it
+        self._strength = "Advanced"
         self._good_luck_message = "Good luck! I hope you are ready for a challenge."
         self._good_game_message_lost = "Good game! I admire your skills."
         self._good_game_message_won = "Good game! I hope you learned something from me."
         self._good_game_message_draw = "Good game! I hope you are ready for a rematch."
-        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
-        super().__init__(second_player)
 
     def check_winning_move(self, empty_cells: list, player: int):
         """
