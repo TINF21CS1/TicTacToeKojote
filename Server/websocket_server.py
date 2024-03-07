@@ -99,11 +99,14 @@ class Lobby:
                         
                         # check for winning state
                         if self._game.state.finished:
-                            websockets.broadcast(self._connections, json.dumps({
+                            finished_dict = {
                                 "message_type": "game/end",
-                                "winner_uuid": self._game.players[self._game.state.winner].uuid,
-                                "final_playfiled": self._game.state.playfield,
-                            }))
+                                "final_playfield": self._game.state.playfield,
+                            }
+                            if self._game.state.winner != 0:
+                                finished_dict["winner_uuid"] = str(self._game.players[self._game.state.winner].uuid)
+                            
+                            websockets.broadcast(self._connections, json.dumps(finished_dict))
                             self._inprogress = False
                         
                         # announce new game state

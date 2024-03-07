@@ -54,7 +54,7 @@ class AIStrategy(ABC, GameClient):
                 # AI does not need this
                 pass
             case "game/start":
-                logger.info("start")
+                logger.info(f"start {self._starting_player.uuid}")
                 if self._starting_player == self._player:
                     await self.do_turn()
                 #await self.wish_good_luck()
