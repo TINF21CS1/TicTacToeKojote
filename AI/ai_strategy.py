@@ -55,7 +55,7 @@ class AIStrategy(ABC, GameClient):
                 pass
             case "game/start":
                 logger.info("start")
-                if self._current_player == self._player:
+                if self._starting_player == self._player:
                     await self.do_turn()
                 #await self.wish_good_luck()
             
@@ -168,12 +168,12 @@ class AdvancedAIStrategy(AIStrategy):
         empty_cells = self.get_empty_cells(self._playfield)
 
         # Check for own winning move
-        if winning_move:= self.check_winning_move(empty_cells, self._player_number) != None:
+        if (winning_move:= self.check_winning_move(empty_cells, self._player_number)) != None:
             await self.game_make_move(winning_move[0], winning_move[1])
             return
             
         # Check for opponent winning move
-        if winning_move:= self.check_winning_move(empty_cells, self._opponent_number):
+        if (winning_move:= self.check_winning_move(empty_cells, self._opponent_number)) != None:
             await self.game_make_move(winning_move[0], winning_move[1])
             return
             
