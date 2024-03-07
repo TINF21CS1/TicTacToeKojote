@@ -118,7 +118,7 @@ class Multiplayer(base_frame):
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Multiplayer', font=self.master.title_font)
-        self.btnNew = tk.Button(self, text='Create a new online game', command=lambda *args: self.master.show(Join, opponent=player_type.network))
+        self.btnNew = tk.Button(self, text='Create a new online game', command=lambda *args: self._create_online_game())
         self.btnLocal = tk.Button(self, text='Create local Game', command=lambda*args : self.master.show(Join, opponent=player_type.local))
         self.lobbyOverview = Lobby_Overview(self)
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
@@ -138,3 +138,7 @@ class Multiplayer(base_frame):
         self.btnLocal.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, rowspan=3)
         self.lobbyOverview.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, rowspan=7)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+
+    def _create_online_game(self):
+        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.player, ip='localhost')
+        self.master.show(Join, opponent=player_type.network)
