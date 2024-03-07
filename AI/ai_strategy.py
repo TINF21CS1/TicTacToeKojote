@@ -20,6 +20,7 @@ class AIStrategy(ABC, GameClient):
         self._good_game_message_lost = "Good game! You played well."
         self._good_game_message_won = "Good game! I'll have better luck next time."
         self._good_game_message_draw = "Good game! We are evenly matched."
+        self._current_uuid = None
         self._rulebase = ai_rulebase.AIRulebase()
         self._ip = "127.0.0.1"
         self._port = 8765
@@ -57,7 +58,7 @@ class AIStrategy(ABC, GameClient):
                 logger.info(f"start {self._starting_player.uuid}")
                 if self._starting_player == self._player:
                     await self.do_turn()
-                #await self.wish_good_luck()
+                await self.wish_good_luck()
             
             case "game/end":
                 await self.say_good_game()
@@ -83,7 +84,7 @@ class AIStrategy(ABC, GameClient):
         await self.chat_message(self._good_luck_message)
 
     async def say_good_game(self):
-        if self._winner.uuid == self._ai_uuid:
+        if self._winner.uuid == self._current_uuid:
             await self.chat_message(self._good_game_message_won)
         elif self._winner.uuid == None:
             await self.chat_message(self._good_game_message_draw)
@@ -113,9 +114,11 @@ class WeakAIStrategy(AIStrategy):
         self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
         self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._strength = "Weak"
-        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
+        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._current_uuid)
         super().__init__(second_player)
         # set it again because the parent's init overwrites it
+        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
         self._strength = "Weak"
         self._good_luck_message = "Good luck! I'm still learning so please have mercy on me."
         self._good_game_message_lost = "Good game! I will try to do better next time."
@@ -134,10 +137,12 @@ class AdvancedAIStrategy(AIStrategy):
         self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
         self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
         self._strength = "Advanced"
-        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=(self._ai_uuid if not second_player else self._ai_uuid2))
+        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._current_uuid)
         super().__init__(second_player)
         # set it again because the parent's init overwrites it
         self._strength = "Advanced"
+        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
         self._good_luck_message = "Good luck! I hope you are ready for a challenge."
         self._good_game_message_lost = "Good game! I admire your skills."
         self._good_game_message_won = "Good game! I hope you learned something from me."
