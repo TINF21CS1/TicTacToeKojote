@@ -10,6 +10,6 @@ def server_start(admin:Player, port:int = 8765):
     lobby.run()
 
 def server_thread(admin:Player, port:int = 8765) -> Thread:
-    t = Thread(target=server_start, args=(admin, port))
+    t = Thread(target=server_start, args=(admin, port), daemon=True)
     t.start()
     return t
