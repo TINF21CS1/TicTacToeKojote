@@ -16,10 +16,8 @@ class Profile:
         :return: True if the file exists, False if it does not
         """
         if exists(self.path):
-            print("found")
             return True
         else:
-            print("not found")
             return False
 
     def get_profiles(self):
