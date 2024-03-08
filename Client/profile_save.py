@@ -47,23 +47,24 @@ class Profile:
             except:
                 print("json error: Make sure profiles.json is formatted correctly")
         return None
-    def set_profile(self, profile_uuid , profile_name = None, profile_color = None):
+    def set_profile(self, profile_uuid , profile_name, profile_color):
         """
         This method sets the profile name and/or color by the uuid
         :param profile_uuid:
         :param profile_name: *optional*
         :param profile_color: *optional*
         """
+        if profile_name == None || profile_color == None:
+            raise ValueError("name or color cannot be none")
+        
         if self.check_file():
             try:
                 with open(path, 'r+') as file:
                     data = json.load(file)
                     for profile in data:
                         if profile["profile_uuid"] == profile_uuid:
-                            if profile_name != None:
-                                profile["profile_name"] = profile_name
-                            if profile_color != None:
-                                profile["profile_color"] = profile_color
+                            profile["profile_name"] = profile_name
+                            profile["profile_color"] = profile_color
                             break
                     with open(path, 'w') as file:
                         json.dump(data, file)
