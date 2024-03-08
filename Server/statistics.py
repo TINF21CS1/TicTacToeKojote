@@ -38,7 +38,7 @@ class Statistics:
         :param uuid: uuid of the profile that is searched
         :return: tuple containing:
         (uuid : str, wins_first : int, wins_second : int, loses_first : int,
-        loses_second : int, draws : int, moves : int, emojis : int)
+        loses_second : int, draws_first : int, draws_second, moves : int, emojis : int)
         """
         return self._get_profile(uuid)
 
@@ -195,7 +195,7 @@ class Statistics:
             profile = self._get_profile(uuid)
             return profile[7]
         else:
-            return None
+            raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
     def get_wins(self, uuid: str, type='all') -> int:
         """
