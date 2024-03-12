@@ -261,7 +261,6 @@ class GameClient:
     async def lobby_kick(self, player_to_kick:UUID):
         msg = {
             "message_type": "lobby/kick",
-            "admin_player_uuid": str(self._player.uuid),
             "kick_player_uuid": str(player_to_kick)
         }
         await self._websocket.send(json.dumps(msg))

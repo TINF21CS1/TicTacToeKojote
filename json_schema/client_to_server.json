@@ -55,18 +55,13 @@
             },
             "then": {
                 "properties": {
-                    "admin_player_uuid": {
-                        "description": "The uuid of the player with admin rights",
-                        "type": "string",
-                        "format": "uuid"
-                    },
                     "kick_player_uuid": {
                         "description": "The uuid of the player to kick",
                         "type": "string",
                         "format": "uuid"
                     }
                 },
-                "required": [ "admin_player_uuid", "kick_player_uuid"]
+                "required": [ "kick_player_uuid" ]
             }
         },
         {
