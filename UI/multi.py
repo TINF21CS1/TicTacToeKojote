@@ -1,4 +1,5 @@
-import tkinter as tk
+#import tkinter as tk
+from .lib import tttk_tk as tk
 from uuid import UUID
 
 from .base_frame import base_frame
@@ -49,10 +50,10 @@ class Join(base_frame):
 
     def _update_lobby(self):
         queue = self.master.in_queue.get()
-        #print(queue)
+        self.playerlist = []
         for player in queue['player']:
             self.playerlist.append([tk.Label(self, text=player.display_name),
-                                    tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick_index': uuid}}))])
+                                    tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick': uuid}}))])
             if(str(player.uuid) == str(self.master.player.uuid)):
                 self.ready = player.ready
                 if(player.ready):
@@ -64,33 +65,37 @@ class Join(base_frame):
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
         
 
-    def _start_game(self, event):
+    def _start_game(self):
         queue = self.master.in_queue.get()
+        print(queue)
         self.master.show(Field, **queue)
 
     def on_destroy(self):
         del self.master.network_events['lobby/status']
         del self.master.network_events['game/start']
 
-class Lobby_Overview(tk.Frame):
+class Lobby_Overview(tk.Container):
     def __init__(self, master):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
 
     def _create_widgets(self):
-        self.lblHeading = tk.Label(self, text="Join public lobbies", font=self.master.master.title_font)
+        self.frame = tk.Frame(self)
+        self.innerframe = self.frame.widget
+        self.lblHeading = tk.Label(self.innerframe, text="Join public lobbies", font=self.master.master.title_font)
 
-        self.btnManual = tk.Button(self, text="Join by address", command=lambda *args: self.manually())
-        self.etrAddress = tk.Entry(self)
-        self.btnConnect = tk.Button(self, text="Connect", command=lambda *args: self._connect())
+        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self.manually())
+        self.etrAddress = tk.Entry(self.innerframe)
+        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda *args: self._connect())
 
     def _display_widgets(self):
-        self.columnconfigure([0, 2, 4], weight=1)
-        self.columnconfigure([1, 3], weight=5)
-        self.rowconfigure([0, 4], weight=2)
-        self.rowconfigure([1, 3], weight=1)
-        self.rowconfigure([2], weight=40)
+        self.frame.pack(expand=True, fill=tk.BOTH)
+        self.innerframe.columnconfigure([0, 2, 4], weight=1)
+        self.innerframe.columnconfigure([1, 3], weight=5)
+        self.innerframe.rowconfigure([0, 4], weight=2)
+        self.innerframe.rowconfigure([1, 3], weight=1)
+        self.innerframe.rowconfigure([2], weight=40)
         self.lblHeading.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=0, columnspan=3)
         self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=3)
 

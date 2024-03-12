@@ -1,4 +1,5 @@
-import tkinter as tk
+#import tkinter as tk
+from .lib import tttk_tk as tk
 from enum import Enum, auto
 
 from .base_frame import base_frame
@@ -12,7 +13,7 @@ class player_type(Enum):
     network = auto()
     unknown = auto()
 
-class player(tk.Frame):
+class player(tk.Container):
     def __init__(self, master, number):
         super().__init__(master)
         self._create_widgets(number)
@@ -51,7 +52,7 @@ class player(tk.Frame):
 class field_controller():
     def __init__(self, view, players):
         self.view = view
-        sub_controller = gamefield_controller(self.view.gamefield)
+        self.sub_controller = gamefield_controller(self.view.gamefield)
         for player_lbl, player in zip(self.view.player, players):
             player_lbl.set(player.display_name, player_type.unknown)
         self._bind()
@@ -71,10 +72,10 @@ class field_controller():
         msg.display()
 
 class Field(base_frame):
-    def __init__(self, master, *args, start_player, start_symbol, opponent, opponent_symbol, **kwargs):
+    def __init__(self, master, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
         super().__init__(master)
         self._create_widgets()
-        self.controller = field_controller(self, tuple(start_player, opponent))
+        self.controller = field_controller(self, [starting_player, opponent])
         self._display_widgets()
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
         #self.bind("<<game/end>>", self.controller.end)
