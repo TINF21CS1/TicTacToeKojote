@@ -10,7 +10,10 @@ from threading import Thread
 from uuid import UUID
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 class GameClient:
@@ -170,7 +173,12 @@ class GameClient:
                         logger.error("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
                         raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
 
-                    self._opponent = self._lobby_status[0] if self._lobby_status[0].uuid is not str(self._player.uuid) else self._lobby_status[1]
+
+                    self._opponent = self._lobby_status[0] if self._lobby_status[0] != self._player else self._lobby_status[1]
+
+                    if self._opponent == self._player:
+                        logger.error("player and opponent are equal")
+
 
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
                         self._current_player = self._player

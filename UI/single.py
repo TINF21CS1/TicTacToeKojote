@@ -4,8 +4,15 @@ from .lib import tttk_tk as tk
 from .base_frame import base_frame
 from .multi import Join
 from .field_frame import player_type
+from Client.ui_client import client_thread
+from .profile import Profile
 
 class Singleplayer(base_frame):
+    def __new__(cls, master, *args, **kwargs):
+        if(master.player == None):
+            return Profile(master, *args, return_to=Singleplayer, **kwargs)
+        return super().__new__(cls, *args, **kwargs)
+    
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
@@ -14,8 +21,8 @@ class Singleplayer(base_frame):
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Choose your opponent', font=self.master.title_font)
-        self.btnStrong = tk.Button(self, text='Strong AI', command=lambda *args: self.master.show(Join, opponent=player_type.ai))
-        self.btnWeak = tk.Button(self, text='Weak AI', command=lambda *args: self.master.show(Join, opponent=player_type.ai))
+        self.btnStrong = tk.Button(self, text='Strong AI', command=lambda *args: self.join_ai(True))
+        self.btnWeak = tk.Button(self, text='Weak AI', command=lambda *args: self.join_ai(False))
         self.btnExit = tk.Button(self, text='Menu', command=lambda *args: self.master.show_menu())
 
     def _display_widgets(self):
@@ -32,3 +39,10 @@ class Singleplayer(base_frame):
         self.btnStrong.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4, rowspan=7)
         self.btnWeak.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, rowspan=7)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+
+    def join_ai(self, strong: bool):
+        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.player, ip='localhost')
+        if strong:
+            self.master.show(Join, opponent=player_type.ai_strong)
+        else:
+            self.master.show(Join, opponent=player_type.ai_weak)

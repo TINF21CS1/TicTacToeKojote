@@ -41,9 +41,8 @@ class gamefield_controller:
         for i, player in enumerate(self.view.master.player):
             player.highlight(i == player_id)
 
-    def turn(self, *args):
+    def turn(self, queue, *args):
         root = self.view.master.master
-        queue = root.in_queue.get()
         self.draw_field(matrix=queue['playfield'])
         self.change_active_player(queue['next_player'])
 

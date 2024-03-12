@@ -18,7 +18,7 @@ class AIContext():
 
     # Runs the strategy as a new thread and returns the thread
     def run_strategy(self):
-        thread = Thread(target=self._strategy.thread_entry)
+        thread = Thread(target=self._strategy.thread_entry, daemon=True)
         thread.start()
         return thread
 

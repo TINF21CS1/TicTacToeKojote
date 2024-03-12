@@ -8,6 +8,8 @@ from .profile import Profile
 from Client.ui_client import client_thread
 from .field_frame import player_type
 from Server.main import server_thread
+from AI.ai_context import AIContext
+from AI.ai_strategy import AIStrategy, WeakAIStrategy, AdvancedAIStrategy
 
 class Join(base_frame):
     def __init__(self, master, *args, opponent=player_type.unknown, **kwargs):
@@ -23,9 +25,12 @@ class Join(base_frame):
         self.ready = False
         if opponent != player_type.unknown:
             server_thread(self.master.player)
+        if opponent in [player_type.ai_strong, player_type.ai_weak]:
+            ai_context = AIContext(AdvancedAIStrategy() if opponent == player_type.ai_strong else WeakAIStrategy())
+            self.master.ai = ai_context.run_strategy()
 
     def _create_widgets(self, opponent):
-        title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent == player_type.ai else 'Play local game against a friend'
+        title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent in [player_type.ai_weak, player_type.ai_strong] else 'Play local game against a friend'
         self.lblTitle = tk.Label(self, text=title, font=self.master.title_font)
         self.btnRdy = tk.Button(self, text='Start', command=lambda *args: self.master.out_queue.put({'message_type': 'lobby/ready', 'args' : {'ready': not self.ready}}))
         if opponent == player_type.local:
@@ -48,8 +53,7 @@ class Join(base_frame):
             self.btnRdy2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
-    def _update_lobby(self):
-        queue = self.master.in_queue.get()
+    def _update_lobby(self, queue):
         self.playerlist = []
         for player in queue['player']:
             self.playerlist.append([tk.Label(self, text=player.display_name),
@@ -65,8 +69,7 @@ class Join(base_frame):
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
         
 
-    def _start_game(self):
-        queue = self.master.in_queue.get()
+    def _start_game(self, queue):
         print(queue)
         self.master.show(Field, **queue)
 
