@@ -38,8 +38,7 @@ class Game:
             self.state.set_player_position(player, new_position)
             self.rule_base.check_win(self.state)
         except ValueError as e:
-            # TODO: Call a function in networking to display the error
-            print(e)
+            raise ValueError(e)
         
     @property
     def current_player_uuid(self) -> str:

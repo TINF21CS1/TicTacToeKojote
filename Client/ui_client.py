@@ -123,11 +123,11 @@ class GameClientUI(GameClient):
                 case "lobby/join":
                     pass
                 case "lobby/ready":
-                    await self.lobby_ready(message["args"])
+                    await self.lobby_ready(**message["args"])
                 case "lobby/kick":
-                    await self.lobby_kick(message["args"])
+                    await self.lobby_kick(**message["args"])
                 case "game/make_move":
-                    await self.game_make_move(message["args"])
+                    await self.game_make_move(**message["args"])
                 case "chat/message":
                     pass
                 case _:

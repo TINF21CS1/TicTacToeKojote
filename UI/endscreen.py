@@ -1,4 +1,5 @@
-import tkinter as tk
+#import tkinter as tk
+from .lib import tttk_tk as tk
 from .base_frame import base_frame
 #from .field_frame import Field
 
