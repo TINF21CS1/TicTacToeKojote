@@ -165,13 +165,16 @@ class Statistics:
         if type not in ['first', 'second', 'all']:
             raise ValueError('Invalid type')
         if self._check_profile(uuid):
-            profile = self._get_profile(uuid)
-            if type == 'all':
-                return (profile[1] + profile[2]) / (profile[1] + profile[2] + profile[3] + profile[4])
-            elif type == 'first':
-                return profile[1] / (profile[1] + profile[3])
-            elif type == 'second':
-                return profile[2] / (profile[2] + profile[4])
+            try:
+                profile = self._get_profile(uuid)
+                if type == 'all':
+                    return (profile[1] + profile[2]) / (profile[1] + profile[2] + profile[3] + profile[4])
+                elif type == 'first':
+                    return profile[1] / (profile[1] + profile[3])
+                elif type == 'second':
+                    return profile[2] / (profile[2] + profile[4])
+            except:
+                return 0
         else:
             raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
