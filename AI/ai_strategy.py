@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class AIStrategy(ABC, GameClient):
 
-    def __init__(self, second_player: bool):
+    def __init__(self):
         
         self._strength = "Placeholder"
         self._good_luck_message = "Good luck!"
@@ -24,6 +24,9 @@ class AIStrategy(ABC, GameClient):
         self._rulebase = ai_rulebase.AIRulebase()
         self._ip = "127.0.0.1"
         self._port = 8765
+
+    def post_init(self):
+        #needs to be called by inheriting classes at the end of their __init__ function
         super().__init__(self._ip, self._port, self._player)
 
     def thread_entry(self):
@@ -106,47 +109,36 @@ class AIStrategy(ABC, GameClient):
     async def do_turn(self):
         pass
 
-        
-
 class WeakAIStrategy(AIStrategy):
     
-    def __init__(self, second_player: bool = False):
-        self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
-        self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
-        self._strength = "Weak"
-        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
-        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._current_uuid)
-        super().__init__(second_player)
-        # set it again because the parent's init overwrites it
-        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
+    def __init__(self, uuid: str = '108eaa05-2b0e-4e00-a190-8856edcd56a5'):
+        super().__init__()
+        self._current_uuid = uuid
         self._strength = "Weak"
         self._good_luck_message = "Good luck! I'm still learning so please have mercy on me."
         self._good_game_message_lost = "Good game! I will try to do better next time."
         self._good_game_message_won = "Good game! I can't believe I won!"
         self._good_game_message_draw = "Good game! I' happy I didn't lose."
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._current_uuid)
+        self.post_init()
     
     async def do_turn(self):
-
         empty_cells = self.get_empty_cells(self._playfield)
         move = random.randint(0, len(empty_cells) - 1)
         await self.game_make_move(empty_cells[move][0], empty_cells[move][1])
 
 class AdvancedAIStrategy(AIStrategy):
 
-    def __init__(self, second_player: bool = False):
-        self._ai_uuid = "108eaa05-2b0e-4e00-a190-8856edcd56a5"
-        self._ai_uuid2 = "108eaa05-2b0e-4e00-a190-8856edcd56a6"
+    def __init__(self, uuid: str = 'd90397a5-a255-4101-9864-694b43ce8a6c'):
+        super().__init__()
+        self._current_uuid = uuid
         self._strength = "Advanced"
-        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
-        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._current_uuid)
-        super().__init__(second_player)
-        # set it again because the parent's init overwrites it
-        self._strength = "Advanced"
-        self._current_uuid = self._ai_uuid if not second_player else self._ai_uuid2
         self._good_luck_message = "Good luck! I hope you are ready for a challenge."
         self._good_game_message_lost = "Good game! I admire your skills."
         self._good_game_message_won = "Good game! I hope you learned something from me."
         self._good_game_message_draw = "Good game! I hope you are ready for a rematch."
+        self._player = Player(f"{self._strength} AI", random.randint(0, 0xFFFFFF), uuid=self._current_uuid)
+        self.post_init()
 
     def check_winning_move(self, empty_cells: list, player: int):
         """
