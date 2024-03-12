@@ -1,15 +1,17 @@
 import emoji
 import sqlite3
+import os
 
 
 class Statistics:
-    def __init__(self, path: str = './Data/statistics.db') -> None:
+    def __init__(self, path: str = os.path.abspath('Server/Data/statistics.db')) -> None:
         """
         Initializes the statistics object by creating a connection to the database
         and creating the table if it doesn't exist
         :param path: path to db file, default is './Data/statistics.db'
         """
         self.path = path
+        print(path)
         self.conn = sqlite3.connect(self.path)
         self.cursor = self.conn.cursor()
         with self.conn:
