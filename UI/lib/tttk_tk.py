@@ -1,18 +1,19 @@
 import tkinter as tk
+from tkinter import *
 
 from . import custom_tk as ctk
 from .framed_tk import wrapper as ftk_wrapper
 #from .framed_tk import Entry as ftk_Entry
 from .colors import COLOR, color
 
-N = tk.N
-E = tk.E
-S = tk.S
-W = tk.W
-NE = tk.NE
-SE = tk.SE
-SW = tk.SW
-NW = tk.NW
+#N = tk.N
+#E = tk.E
+#S = tk.S
+#W = tk.W
+#NE = tk.NE
+#SE = tk.SE
+#SW = tk.SW
+#NW = tk.NW
 
 class wrapper(ftk_wrapper):
     def __init__(self, Widget: tk.Widget, master: tk.Misc, *args, **kwargs):
@@ -21,6 +22,8 @@ class wrapper(ftk_wrapper):
                 'font': ("Arial bold", 12),
                 'margin': 5,
                 'bg': '#FFFFFF',} | defaultValues
+        if(Widget == tk.Frame):
+            del kwargs['defaultValues']['font']
         super().__init__(Widget, master, *args, **kwargs)
 
 class Entry(wrapper):                   
@@ -203,7 +206,28 @@ class Checkbutton(wrapper):
             **kwargs
         )
 
-class Frame(tk.Frame):
+class Frame(wrapper):
+    def __init__(self, master: tk.Misc | None, *args, **kwargs) -> None:
+        color = kwargs.pop('color', COLOR.anthracite)
+        inverted = kwargs.pop('inverted',False)
+
+        self._bg = color.complement if not inverted else color
+        self._bd = color if (not inverted) else color.complement
+
+        super().__init__(
+            tk.Frame, 
+            master, 
+            defaultValues={
+                'bg': self._bg,
+                'border_color': self._bd,
+                'border': 2,
+                'padding': 5,
+            },
+            *args, 
+            **kwargs
+        )
+
+class Container(tk.Frame):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(
             *args, 
