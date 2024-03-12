@@ -9,7 +9,8 @@ from .messages import messages
 
 class player_type(Enum):
     local = auto()
-    ai = auto()
+    ai_weak = auto()
+    ai_strong = auto()
     network = auto()
     unknown = auto()
 
@@ -36,7 +37,7 @@ class player(tk.Container):
         match type:
             case player_type.local:
                 self.symbol.config(text="Lokal")
-            case player_type.ai:
+            case player_type.ai_strong, player_type.ai_weak:
                 self.symbol.config( text="Computer")
             case player_type.network:
                 self.symbol.config(text="Online")
@@ -60,14 +61,12 @@ class field_controller():
     def _bind(self):
         self.view.close.config(command=self.view.master.show_menu)
 
-    def end(self, *args):
+    def end(self, queue, *args):
         root = self.view.master
-        queue = root.in_queue.get()
         root.show(EndScreen, queue['win'])
 
-    def error(self, *args):
+    def error(self, queue, *args):
         root = self.view.master
-        queue = root.in_queue.get()
         msg = messages(type='move', message=queue['error_message'])
         msg.display()
 
