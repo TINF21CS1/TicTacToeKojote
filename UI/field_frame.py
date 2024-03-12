@@ -13,7 +13,7 @@ class player_type(Enum):
     network = auto()
     unknown = auto()
 
-class player(tk.Frame):
+class player(tk.Container):
     def __init__(self, master, number):
         super().__init__(master)
         self._create_widgets(number)

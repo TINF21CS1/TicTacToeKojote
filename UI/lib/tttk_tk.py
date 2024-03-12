@@ -210,6 +210,7 @@ class Frame(wrapper):
     def __init__(self, master: tk.Misc | None, *args, **kwargs) -> None:
         color = kwargs.pop('color', COLOR.anthracite)
         inverted = kwargs.pop('inverted',False)
+        kwargs.pop('fg', None)
 
         self._bg = color.complement if not inverted else color
         self._bd = color if (not inverted) else color.complement
