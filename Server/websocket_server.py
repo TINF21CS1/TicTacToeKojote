@@ -123,6 +123,10 @@ class Lobby:
                         }))
 
 
+                    case "server/terminate":
+                        logger.info("Server Termination Requested")
+                        exit()
+
                     case _:
                         await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
 

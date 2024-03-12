@@ -8,7 +8,7 @@
         "message_type": {
             "description": "The message type",
             "type": "string",
-            "enum": ["lobby/join", "lobby/kick", "lobby/ready", "game/make_move", "chat/message"]
+            "enum": ["lobby/join", "lobby/kick", "lobby/ready", "game/make_move", "chat/message", "server/terminate"]
         }
     },
     "required": [ "message_type"],
