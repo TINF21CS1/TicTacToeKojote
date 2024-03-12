@@ -44,7 +44,7 @@ class GameClient:
         get_player_by_uuid: Get a player by its UUID. 
         join_lobby: Join the lobby of the server.
         lobby_ready: Set the player ready in the lobby.
-        lobby_kick: Kick a player from the lobby. (Only the admin can do this.)
+        lobby_kick: Kick a player from the lobby.
         game_make_move: Make a move in the game.
         chat_message: Send a chat message.
         close: Close the connection to the server.
