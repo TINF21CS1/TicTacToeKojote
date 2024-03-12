@@ -177,7 +177,8 @@ class GameClient:
                     self._opponent = self._lobby_status[0] if self._lobby_status[0] != self._player else self._lobby_status[1]
 
                     if self._opponent == self._player:
-                        logger.info("ERROR WTF ALTER")
+                        logger.error("player and opponent are equal")
+
 
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
                         self._current_player = self._player
