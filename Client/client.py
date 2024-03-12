@@ -47,7 +47,7 @@ class GameClient:
         get_player_by_uuid: Get a player by its UUID. 
         join_lobby: Join the lobby of the server.
         lobby_ready: Set the player ready in the lobby.
-        lobby_kick: Kick a player from the lobby. (Only the admin can do this.)
+        lobby_kick: Kick a player from the lobby.
         game_make_move: Make a move in the game.
         chat_message: Send a chat message.
         close: Close the connection to the server.
@@ -269,7 +269,6 @@ class GameClient:
     async def lobby_kick(self, player_to_kick:UUID):
         msg = {
             "message_type": "lobby/kick",
-            "admin_player_uuid": str(self._player.uuid),
             "kick_player_uuid": str(player_to_kick)
         }
         await self._websocket.send(json.dumps(msg))

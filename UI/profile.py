@@ -17,8 +17,6 @@ class NewProfile(base_frame):
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Create profile', font=self.master.title_font)
         self.lblName = tk.Label(self, text='Name')
-        #self.varName = tk.StringVar(self, value=self.master.player.display_name if self.master.player != None else '')
-        #self.etrName = tk.Entry(self, textvariable=self.varName)
         self.etrName = tk.Entry(self)
         self.varName = self.etrName.var
         self.btnCreate = tk.Button(self, text='Create profile', command=lambda *args: self._create())

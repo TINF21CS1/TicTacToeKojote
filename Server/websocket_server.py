@@ -56,7 +56,10 @@ class Lobby:
 
 
                     case "lobby/kick":
-                        pass
+                        websockets.broadcast(self._connections, json.dumps({
+                            "message_type": "lobby/kick",
+                            "player_uuid": message_json["player_uuid"],
+                        }))
 
  
                     case "lobby/ready":
@@ -86,36 +89,33 @@ class Lobby:
                         # check if move can be made
                         if not self._inprogress:
                             await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Game not in progress"}))
-                            break
-                        if message_json["player_uuid"] != self._game.current_player_uuid:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Not your turn"}))
-                            break
-                        
-                        # make move, catch illegal move
-                        try:
-                            self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
-                        except ValueError as e:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
-                        
-                        # check for winning state
-                        if self._game.state.finished:
-                            finished_dict = {
-                                "message_type": "game/end",
-                                "final_playfield": self._game.state.playfield,
-                            }
-                            if self._game.state.winner != 0:
-                                finished_dict["winner_uuid"] = str(self._game.players[self._game.state.winner].uuid)
-                            
-                            websockets.broadcast(self._connections, json.dumps(finished_dict))
-                            self._inprogress = False
-                        
-                        # announce new game state
                         else:
-                            websockets.broadcast(self._connections, json.dumps({
-                                "message_type": "game/turn",
-                                "updated_playfield": self._game.state.playfield,
-                                "next_player_uuid": self._game.current_player_uuid,
-                            }))
+                            if message_json["player_uuid"] != self._game.current_player_uuid:
+                                await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Not your turn"}))
+                            else:
+
+                                # make move, catch illegal move
+                                try:
+                                    self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
+                                except ValueError as e:
+                                    await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
+                                
+                                # check for winning state
+                                if self._game.state.finished:
+                                    websockets.broadcast(self._connections, json.dumps({
+                                        "message_type": "game/end",
+                                        "winner_uuid": self._game.state.winner.uuid,
+                                        "final_playfiled": self._game.state.playfield,
+                                    }))
+                                    self._inprogress = False
+                                
+                                # announce new game state
+                                else:
+                                    websockets.broadcast(self._connections, json.dumps({
+                                        "message_type": "game/turn",
+                                        "updated_playfield": self._game.state.playfield,
+                                        "next_player_uuid": self._game.current_player_uuid,
+                                    }))
 
 
                     case "chat/message":
@@ -126,14 +126,29 @@ class Lobby:
                         }))
 
 
+                    case "server/terminate":
+                        logger.info("Server Termination Requested")
+                        exit()
+
                     case _:
                         await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
 
             except (websockets.ConnectionClosedOK, websockets.ConnectionClosedError, websockets.ConnectionClosed):
                 logger.info("Connection Closed from Client-Side")
                 self._connections.remove(websocket)
-                # TODO: Add handling when game is not over yet
+                if self._inprogress:
+                    # TODO: Add handling (for reconnect) when game is not over yet
+                    pass
+                else:
+                    # request a ping from everyone and delete player list to wait for join messages.
+                    websockets.broadcast(self._connections, json.dumps({
+                            "message_type": "lobby/ping",
+                        }))
+                    self._players = {}
+
+                # End this connection loop
                 break
+
             # TODO: Catch other errors for disconnects
         
 
