@@ -1,5 +1,5 @@
 import json
-from os.path import exists
+from os.path import exists, abspath
 
 
 class Profile:
@@ -7,7 +7,7 @@ class Profile:
     This class is used to handle the profiles.json file. It is used to get, set, and add profiles to the file.
     """
 
-    def __init__(self, path='../json_schema/profiles.json'):
+    def __init__(self, path=abspath('../json_schema/profiles.json')):
         self.path = path
 
     def check_file(self):
@@ -165,10 +165,3 @@ class Profile:
             with open(self.path, 'w') as file:
                 file.write("[]")
 
-# Testing
-# profile = Profile()
-# profile.add_new_profile("test", "test", "test")
-# print(profile.get_profiles())
-# print(profile.get_profile("test"))
-# profile.set_profile("test", "test2", "test3")
-# print(profile.get_profiles())
