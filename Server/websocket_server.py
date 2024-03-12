@@ -86,33 +86,33 @@ class Lobby:
                         # check if move can be made
                         if not self._inprogress:
                             await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Game not in progress"}))
-                            break
-                        if message_json["player_uuid"] != self._game.current_player_uuid:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Not your turn"}))
-                            break
-                        
-                        # make move, catch illegal move
-                        try:
-                            self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
-                        except ValueError as e:
-                            await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
-                        
-                        # check for winning state
-                        if self._game.state.finished:
-                            websockets.broadcast(self._connections, json.dumps({
-                                "message_type": "game/end",
-                                "winner_uuid": self._game.state.winner.uuid,
-                                "final_playfiled": self._game.state.playfield,
-                            }))
-                            self._inprogress = False
-                        
-                        # announce new game state
                         else:
-                            websockets.broadcast(self._connections, json.dumps({
-                                "message_type": "game/turn",
-                                "updated_playfield": self._game.state.playfield,
-                                "next_player_uuid": self._game.current_player_uuid,
-                            }))
+                            if message_json["player_uuid"] != self._game.current_player_uuid:
+                                await websocket.send(json.dumps({"message_type": "game/error", "error_message": "Not your turn"}))
+                            else:
+
+                                # make move, catch illegal move
+                                try:
+                                    self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
+                                except ValueError as e:
+                                    await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
+                                
+                                # check for winning state
+                                if self._game.state.finished:
+                                    websockets.broadcast(self._connections, json.dumps({
+                                        "message_type": "game/end",
+                                        "winner_uuid": self._game.state.winner.uuid,
+                                        "final_playfiled": self._game.state.playfield,
+                                    }))
+                                    self._inprogress = False
+                                
+                                # announce new game state
+                                else:
+                                    websockets.broadcast(self._connections, json.dumps({
+                                        "message_type": "game/turn",
+                                        "updated_playfield": self._game.state.playfield,
+                                        "next_player_uuid": self._game.current_player_uuid,
+                                    }))
 
 
                     case "chat/message":
