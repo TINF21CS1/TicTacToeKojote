@@ -136,8 +136,19 @@ class Lobby:
             except (websockets.ConnectionClosedOK, websockets.ConnectionClosedError, websockets.ConnectionClosed):
                 logger.info("Connection Closed from Client-Side")
                 self._connections.remove(websocket)
-                # TODO: Add handling when game is not over yet
+                if self._inprogress:
+                    # TODO: Add handling (for reconnect) when game is not over yet
+                    pass
+                else:
+                    # request a ping from everyone and delete player list to wait for join messages.
+                    websockets.broadcast(self._connections, json.dumps({
+                            "message_type": "lobby/ping",
+                        }))
+                    self._players = {}
+
+                # End this connection loop
                 break
+
             # TODO: Catch other errors for disconnects
         
 
