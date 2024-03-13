@@ -209,6 +209,10 @@ class GameClient:
                     self._chat_history.append((sender, message_json["message"]))
                 case "lobby/ping":
                     await self.join_lobby()
+                case "lobby/kick":
+                    if str(self._player.uuid) == message_json["kick_player_uuid"]:
+                        logger.info("You have been kicked from the lobby.")
+                        await self.close()
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
                     raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
