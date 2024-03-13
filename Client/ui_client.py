@@ -130,6 +130,8 @@ class GameClientUI(GameClient):
                     await self.game_make_move(**message["args"])
                 case "chat/message":
                     pass
+                case "server/terminate":
+                    await self.terminate()
                 case _:
                     logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
                     return
