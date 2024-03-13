@@ -58,7 +58,7 @@ class Lobby:
                     case "lobby/kick":
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/kick",
-                            "player_uuid": message_json["player_uuid"],
+                            "kick_player_uuid": message_json["kick_player_uuid"],
                         }))
 
  
