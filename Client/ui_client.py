@@ -81,7 +81,7 @@ class GameClientUI(GameClient):
                     "final_playfield": self._playfield
                 })
                 self._tk_root.event_generate("<<game/end>>", when="tail")
-                self.client.close()
+                self.close()
             case "game/turn":
                 self._out_queue.put({
                     "message_type": "game/turn",
