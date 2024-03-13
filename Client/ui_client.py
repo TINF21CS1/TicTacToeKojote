@@ -81,7 +81,7 @@ class GameClientUI(GameClient):
                     "final_playfield": self._playfield
                 })
                 self._tk_root.event_generate("<<game/end>>", when="tail")
-                self.close()
+                await self.close()
             case "game/turn":
                 self.send_gamestate_to_ui()
             case "statistics/statistics":

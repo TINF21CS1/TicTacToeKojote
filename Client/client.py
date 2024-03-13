@@ -194,6 +194,7 @@ class GameClient:
                         self._player_number = 2
                 case "game/end":
                     self._winner = self.get_player_by_uuid(message_json["winner_uuid"])
+                    logger.info(f"Game ended. Winner: {self._winner.display_name if self._winner else 'Draw'}")
                     self._playfield = message_json["final_playfield"]
                 case "game/turn":
                     self._playfield = message_json["updated_playfield"]

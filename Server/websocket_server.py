@@ -104,8 +104,8 @@ class Lobby:
                                 if self._game.state.finished:
                                     websockets.broadcast(self._connections, json.dumps({
                                         "message_type": "game/end",
-                                        "winner_uuid": self._game.state.winner.uuid,
-                                        "final_playfiled": self._game.state.playfield,
+                                        "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
+                                        "final_playfield": self._game.state.playfield,
                                     }))
                                     self._inprogress = False
                                 
