@@ -9,17 +9,19 @@ from Server.player import Player
 class NewProfile(base_frame):
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
-        self._create_widgets()
-        self._display_widgets()
         self.address_toogle = False
         self.next = kwargs.pop('return_to', Profile)
+        self.edit = kwargs.pop('edit', False)
+        self._create_widgets()
+        self._display_widgets()
 
     def _create_widgets(self):
-        self.lblTitle = tk.Label(self, text='Create profile', font=self.master.title_font)
+        task = 'Edit' if self.edit else 'Create'
+        self.lblTitle = tk.Label(self, text=f'{task} profile', font=self.master.title_font)
         self.lblName = tk.Label(self, text='Name')
         self.etrName = tk.Entry(self)
-        self.varName = self.etrName.var
-        self.btnCreate = tk.Button(self, text='Create profile', command=lambda *args: self._create())
+        self.etrName.val = self.master.player.display_name if self.edit else ''
+        self.btnCreate = tk.Button(self, text=f'{task} profile', command=lambda *args: self._create())
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
     def _display_widgets(self):
@@ -42,7 +44,7 @@ class NewProfile(base_frame):
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=9, row=1)
 
     def _create(self):
-        self.master.player = Player(self.varName.get(), 0)
+        self.master.player = Player(self.etrName.val, 0)
         self.master.show(self.next)
 
 class Profile(base_frame):
@@ -63,7 +65,7 @@ class Profile(base_frame):
         self.lblNameValue = tk.Label(self, text=self.master.player.display_name)
         self.lblUUDI = tk.Label(self, text='User ID')
         self.lblUUIDValue = tk.Label(self, text=self.master.player.uuid)
-        self.btnEdit = tk.Button(self, text='Edit Profile', command=lambda *args: self.master.show(NewProfile, 'edit'))
+        self.btnEdit = tk.Button(self, text='Edit Profile', command=lambda *args: self.master.show(NewProfile, edit=True))
         self.btnDelete = tk.Button(self, text='Delete profile', command=lambda *args: self._delete())
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
@@ -91,4 +93,4 @@ class Profile(base_frame):
     
     def _delete(self):
         self.master.player = None
-        self.master.show(NewProfile, 'delete')
+        self.master.show(NewProfile)
