@@ -26,7 +26,7 @@ class Profile:
         This method returns all the profiles from the file
         :return: An array of all profiles
         """
-        if self.check_file():
+        if exists(self.path):
             with open(self.path, 'r') as file:
                 data = json.load(file)
                 output = []
