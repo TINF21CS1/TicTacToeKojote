@@ -46,7 +46,7 @@ class Profile:
                         if profile["profile_uuid"] == profile_uuid:
                             return profile
             except:
-                print("json error: Make sure profiles.json is formatted correctly")
+                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
         return None
 
     def set_profile(self, profile_uuid, profile_name, profile_color):
@@ -73,7 +73,7 @@ class Profile:
                     with open(self.path, 'w') as file:
                         json.dump(data, file)
             except:
-                print("json error: Make sure profiles.json is formatted correctly")
+                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
         return None
 
     def get_profile_by_name(self, profile_name):
@@ -110,7 +110,7 @@ class Profile:
                     json.dump(data, file)
                     file.truncate()
             except:
-                print("json error: Make sure profiles.json is formatted correctly")
+                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
 
         else:
             with open(self.path, 'w') as file:
@@ -135,7 +135,7 @@ class Profile:
                     with open(self.path, 'w') as file:
                         json.dump(data, file)
             except:
-                print("json error: Make sure profiles.json is formatted correctly")
+                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
 
     def delete_profile_by_name(self, profile_name):
         """
@@ -155,7 +155,7 @@ class Profile:
                     with open(self.path, 'w') as file:
                         json.dump(data, file)
             except:
-                print("json error: Make sure profiles.json is formatted correctly")
+                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
 
     def delete_all_profiles(self):
         """
