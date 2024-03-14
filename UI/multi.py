@@ -35,7 +35,7 @@ class Join(base_frame):
         self.btnRdy = tk.Button(self, text='Start', command=lambda *args: self.master.out_queue.put({'message_type': 'lobby/ready', 'args' : {'ready': not self.ready}}))
         if opponent == player_type.local:
             self.btnRdy2 = tk.Button(self, text='Start', command=lambda *args: self.master.out_queue.put({'message_type': 'lobby/ready', 'args' : {'ready': True}}))
-        self.btnExit = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
+        self.btnExit = tk.Button(self, text='Menu', command=lambda: self._menu())
 
     def _display_widgets(self,):
         self.columnconfigure([0, 6], weight=1)
@@ -76,6 +76,10 @@ class Join(base_frame):
     def on_destroy(self):
         del self.master.network_events['lobby/status']
         del self.master.network_events['game/start']
+
+    def _menu(self):
+        self.master.out_queue.put({'message_type': 'server/terminate', 'args': {}})
+        self.master.show_menu()
 
 class Lobby_Overview(tk.Container):
     def __init__(self, master):
