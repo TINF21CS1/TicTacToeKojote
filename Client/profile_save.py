@@ -11,16 +11,6 @@ class Profile:
     def __init__(self, path=os.path.abspath('Client/Data/profiles.json')):
         self.path = path
 
-    def check_file(self):
-        """
-        This method checks if the file exists
-        :return: True if the file exists, False if it does not
-        """
-        if exists(self.path):
-            return True
-        else:
-            return False
-
     def get_profiles(self):
         """
         This method returns all the profiles from the file
