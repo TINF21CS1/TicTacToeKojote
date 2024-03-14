@@ -101,8 +101,8 @@ class Statistics:
         :param winner: 0 if draw, 1 if player1 wins, 2 if player2 wins
         """
 
-        self._check_add_profile(player_list[1].uuid)
-        self._check_add_profile(player_list[2].uuid)
+        self._check_add_profile(player_list[1])
+        self._check_add_profile(player_list[2])
 
         if winner == 0:
             self._increment_draws(player_list[1])
@@ -174,10 +174,10 @@ class Statistics:
         :param uuid: uuid of the profile that is checked
         :return: True if the profile exists, False if it doesn't
         """
-        if not self._check_profile(player.uuid):
+        if not self._check_profile(str(player.uuid)):
             self._add_profile(player)
 
-    def _check_profile(self, uuid: str) -> bool:
+    def _check_profile(self, uuid_str: str) -> bool:
         """
         Checks if a profile with the given uuid exists
         :param uuid: uuid of the profile that is checked
@@ -187,7 +187,7 @@ class Statistics:
             self.cursor.execute(f"""
                 SELECT * FROM statistics
                 WHERE uuid = ?
-                """, (uuid,))
+                """, (uuid_str,))
             return True if self.cursor.fetchone() is not None else False
 
     def _add_profile(self, player: Player) -> None:
@@ -197,19 +197,8 @@ class Statistics:
         """
         with self.conn:
             self.cursor.execute(f"""
-                INSERT INTO statistics
-                VALUES (
-                :uuid,
-                :display_name,
-                :color,
-                :wins,
-                :losses,
-                :draws,
-                :moves,
-                :emojis
-                )
+                INSERT INTO statistics ('uuid', 'display_name', 'color', 'wins', 'losses', 'draws', 'moves', 'emojis')
+                VALUES (?, ?, ?, 0, 0, 0, 0, 0)
                 """,
-                {'uuid': str(player.uuid), 'display_name': player.display_name, 'color': player.color,
-                    'wins': 0, 'losses': 0, 'draws': 0,
-                    'moves': 0, 'emojis': 0}
+                (str(player.uuid), player.display_name, player.color,)
             )
