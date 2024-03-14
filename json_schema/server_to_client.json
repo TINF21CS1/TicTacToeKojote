@@ -117,23 +117,13 @@
                                     "description": "The statistics of a player",
                                     "type": "object",
                                     "properties": {
-                                        "wins_first": {
-                                            "description": "The number of wins as first player",
+                                        "wins": {
+                                            "description": "The number of wins",
                                             "type": "integer",
                                             "minimum": 0
                                         },
-                                        "wins_second": {
-                                            "description": "The number of wins as second player",
-                                            "type": "integer",
-                                            "minimum": 0
-                                        },
-                                        "loses_first": {
-                                            "description": "The number of loses as first player",
-                                            "type": "integer",
-                                            "minimum": 0
-                                        },
-                                        "loses_second": {
-                                            "description": "The number of loses as second player",
+                                        "losses": {
+                                            "description": "The number of loses",
                                             "type": "integer",
                                             "minimum": 0
                                         },
@@ -153,7 +143,7 @@
                                             "minimum": 0
                                         }
                                     },
-                                    "required": ["wins_first", "wins_second", "loses_first", "loses_second", "draws", "moves", "emojis"]
+                                    "required": ["wins", "losses", "draws", "moves", "emojis"]
                                 }
                             },
                             "required": ["player", "statistics"]
