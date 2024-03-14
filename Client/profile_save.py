@@ -1,6 +1,7 @@
 import json
 from os.path import exists
 import os
+from Server.player import Player
 
 class Profile:
     """
@@ -28,35 +29,40 @@ class Profile:
         if self.check_file():
             with open(self.path, 'r') as file:
                 data = json.load(file)
-                return data
+                output = []
+                for profile in data:
+                    output.append(Player.from_dict(profile))
+                return output
         else:
             return None
 
-    def get_profile(self, profile_uuid):
+    def get_profile(self, player : Player):
         """
         This method returns a profile by its uuid
         :param profile_uuid:
         :return: profile matching given uuid
         """
+        player_dict = player.as_dict()
         if self.check_file():
             try:
                 with open(self.path, 'r') as file:
                     data = json.load(file)
                     for profile in data:
-                        if profile["profile_uuid"] == profile_uuid:
-                            return profile
+                        if profile["uuid"] == player_dict["uuid"]:
+                            return Player.from_dict(profile)
             except:
                 raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
         return None
 
-    def set_profile(self, profile_uuid, profile_name, profile_color):
+    def set_profile(self, player : Player):
         """
         This method sets the profile name and/or color by the uuid
         :param profile_uuid:
         :param profile_name:
         :param profile_color:
         """
-        if (profile_name or profile_color) == None:
+        player_dict = player.as_dict()
+        if (player_dict['display_name'] or player_dict['color']) == None:
             raise ValueError("name or color cannot be none")
 
         if self.check_file():
@@ -64,11 +70,11 @@ class Profile:
                 with open(self.path, 'r+') as file:
                     data = json.load(file)
                     for profile in data:
-                        if profile["profile_uuid"] == profile_uuid:
-                            if profile_name != None:
-                                profile["profile_name"] = profile_name
-                            if profile_color != None:
-                                profile["profile_color"] = profile_color
+                        if profile["uuid"] == player_dict["uuid"]:
+                            if player_dict['display_name'] != None:
+                                profile["display_name"] = player_dict['display_name']
+                            if player_dict['color'] != None:
+                                profile["color"] = player_dict['color']
                             break
                     with open(self.path, 'w') as file:
                         json.dump(data, file)
@@ -76,24 +82,25 @@ class Profile:
                 raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
         return None
 
-    def get_profile_by_name(self, profile_name):
+    def get_profile_by_name(self, player : Player):
         if self.check_file():
             """
             This method returns a profile by its name
             :param profile_name:
             :return: profile matching given name
             """
+            player_dict = player.as_dict()
             try:
                 with open(self.path, 'r') as file:
                     data = json.load(file)
                     for profile in data:
-                        if profile["profile_name"] == profile_name:
-                            return profile
+                        if profile["display_name"] == player_dict["display_name"]:
+                            return Player.from_dict(profile)
             except:
                 print("json error: Make sure profiles.json is formatted correctly")
         return None
 
-    def add_new_profile(self, profile_name, profile_uuid, profile_color):
+    def add_new_profile(self, player : Player):
         """
         This method adds a new profile to the file
         :param profile_name:
@@ -101,7 +108,7 @@ class Profile:
         :param profile_color:
         """
         if self.check_file():
-            entry = {"profile_name": profile_name, "profile_uuid": profile_uuid, "profile_color": profile_color}
+            entry = player.as_dict()
             try:
                 with open(self.path, 'r+') as file:
                     data = json.load(file)
@@ -114,44 +121,46 @@ class Profile:
 
         else:
             with open(self.path, 'w') as file:
-                entry = [{"profile_name": profile_name, "profile_uuid": profile_uuid, "profile_color": profile_color}]
+                entry = [player.as_dict()]
                 json.dump(entry, file)
 
-    def delete_profile(self, profile_uuid):
+    def delete_profile(self, player : Player):
         """
         This method deletes a profile by its uuid
         :param profile_uuid:
         """
+        player_dict = player.as_dict()
         if self.check_file():
             try:
                 with open(self.path, 'r+') as file:
                     data = json.load(file)
                     for profile in data:
-                        if profile["profile_uuid"] == profile_uuid:
+                        if profile["uuid"] == player_dict["uuid"]:
                             data.remove(profile)
                             break
                     else:
-                        raise ValueError(f"Profile with given uuid: {profile_uuid} not found")
+                        raise ValueError(f"Profile with given uuid: {player_dict['uuid']} not found")
                     with open(self.path, 'w') as file:
                         json.dump(data, file)
             except:
                 raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
 
-    def delete_profile_by_name(self, profile_name):
+    def delete_profile_by_name(self, player : Player):
         """
         This method deletes a profile by its name
         :param profile_name:
         """
+        player_dict = player.as_dict()
         if self.check_file():
             try:
                 with open(self.path, 'r+') as file:
                     data = json.load(file)
                     for profile in data:
-                        if profile["profile_name"] == profile_name:
+                        if profile["display_name"] == player_dict["display_name"]:
                             data.remove(profile)
                             break
                     else:
-                        raise ValueError(f"Profile with given name: {profile_name} not found")
+                        raise ValueError(f"Profile with given name: {player_dict['display_name']} not found")
                     with open(self.path, 'w') as file:
                         json.dump(data, file)
             except:
