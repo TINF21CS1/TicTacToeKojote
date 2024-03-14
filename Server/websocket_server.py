@@ -64,7 +64,7 @@ class Lobby:
  
                     case "lobby/ready":
 
-                        self._players[message_json["player_uuid"]].ready = True
+                        self._players[message_json["player_uuid"]].ready = message_json["ready"]
 
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
