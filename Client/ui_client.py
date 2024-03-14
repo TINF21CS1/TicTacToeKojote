@@ -63,7 +63,7 @@ class GameClientUI(GameClient):
                     "message_type": "lobby/status", 
                     "player": self._lobby_status
                 })
-                self._tk_root.event_generate("<<lobby/status>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "game/start":
                 self._out_queue.put({
                     "message_type": "game/start",
@@ -72,7 +72,7 @@ class GameClientUI(GameClient):
                     "opponent": self._opponent,
                     "opponent_symbol": self._symbol != "X"
                 })
-                self._tk_root.event_generate("<<game/start>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "game/end":
                 self._out_queue.put({
                     "message_type": "game/end",
@@ -80,25 +80,23 @@ class GameClientUI(GameClient):
                     "win": self._winner == self._player,
                     "final_playfield": self._playfield
                 })
-                self._tk_root.event_generate("<<game/end>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
                 await self.close()
             case "game/turn":
                 self.send_gamestate_to_ui()
-            case "statistics/statistics":
-                pass
             case "game/error":
                 self._out_queue.put({
                     "message_type": "game/error",
                     "error_message": self._error_history[-1]
                 })
-                self._tk_root.event_generate("<<game/error>>", when="tail")  
+                self._tk_root.event_generate("<<queue_input>>", when="tail")  
             case "chat/receive":
                 self._out_queue.put({
                     "message_type": "chat/receive",
                     "sender": self._chat_history[-1][0],
                     "message": self._chat_history[-1][1]
                 })
-                self._tk_root.event_generate("<<chat/receive>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
 
         return
     
@@ -108,7 +106,7 @@ class GameClientUI(GameClient):
             "next_player": int(self._current_player == self._opponent),
             "playfield": self._playfield
         })
-        self._tk_root.event_generate("<<game/turn>>", when="tail")
+        self._tk_root.event_generate("<<queue_input>>", when="tail")
     
     async def await_commands(self):
         # Send messages to the server
@@ -142,7 +140,7 @@ class GameClientUI(GameClient):
                         "message_type": "statistics/statistics",
                         "statistics": self._statistics
                     })
-                    self._tk_root.event_generate("<<statistics/statistics>>", when="tail")
+                    self._tk_root.event_generate("<<queue_input>>", when="tail")
                 case _:
                     logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
                     return
