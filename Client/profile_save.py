@@ -70,7 +70,6 @@ class Profile:
                     json.dump(entry, file)
             except:
                 raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
-        return None
 
     def get_profile_by_name(self, player : Player):
         if self.check_file():
