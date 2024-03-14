@@ -300,9 +300,6 @@ class GameClient:
         await self._websocket.send(json.dumps(msg))
 
     async def close(self):
-        await self._websocket.close()
-
-    async def terminate(self):
         msg = {
             "message_type": "server/terminate",
             "player_uuid": str(self._player.uuid)
@@ -310,5 +307,4 @@ class GameClient:
         await self._websocket.send(json.dumps(msg))
         await asyncio.sleep(0.1)
         if self._websocket.open:
-            await self.close()
-        return
+            await self._websocket.close()

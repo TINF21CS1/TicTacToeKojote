@@ -134,7 +134,7 @@ class GameClientUI(GameClient):
                 case "chat/message":
                     pass
                 case "server/terminate":
-                    await self.terminate()
+                    await self.close()
                 case "game/gamestate":
                     self.send_gamestate_to_ui()
                 case _:
