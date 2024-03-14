@@ -62,7 +62,6 @@ class Profile:
         :param profile_color:
         """
 
-        if self.check_file():
             try:
                 with open(self.path, 'w') as file:
                     entry = []
