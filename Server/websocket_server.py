@@ -52,9 +52,19 @@ class Lobby:
 
                         self._players[message_json["profile"]["uuid"]] = Player(uuid=UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
+                        # send new lobby status
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
                             "players": [player.as_dict() for player in self._players.values()],
+                        }))
+
+                        # send lobby statistics
+                        stats = self._stats.get_statistics()
+                        await websocket.send(json.dumps({
+                            "message_type": "statistics/statistics",
+                            "server_statistics": [
+                                {"player": {"uuid": u, "display_name": d, "color": c},"statistics":{"wins": w, "losses": l, "draws": r, "moves": m, "emojis": e}} for (u, d, c, w, l, r, m, e) in stats
+                            ],
                         }))
 
 
