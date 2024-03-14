@@ -65,9 +65,9 @@ class Join(base_frame):
             if(str(player.uuid) == str(self.master.player.uuid)):
                 self.ready = player.ready
                 if(player.ready):
-                    self.btnRdy.config(text="Ready")
+                    self.btnRdy.config(text="not Ready")
                 else:
-                    self.btnRdy.config(text="Start")
+                    self.btnRdy.config(text="Ready")
         for i, player in enumerate(self.playerlist):
             player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i)
             player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=4+i)
