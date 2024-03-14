@@ -86,14 +86,13 @@
             "then": {
                 "properties": {
                     "server_statistics": {
-                        "$comment": "TODO: Implement the statistics schema",
                         "description": "The statistics of the players on the server",
                         "type": "array",
                         "items": {
                             "type": "object",
                             "properties": {
-                                "profile": {
-                                    "description": "The profile object of the player",
+                                "player": {
+                                    "description": "The player object for the statistics",
                                     "type": "object",
                                     "properties": {
                                         "uuid": {
@@ -118,13 +117,23 @@
                                     "description": "The statistics of a player",
                                     "type": "object",
                                     "properties": {
-                                        "wins": {
-                                            "description": "The number of wins",
+                                        "wins_first": {
+                                            "description": "The number of wins as first player",
                                             "type": "integer",
                                             "minimum": 0
                                         },
-                                        "losses": {
-                                            "description": "The number of losses",
+                                        "wins_second": {
+                                            "description": "The number of wins as second player",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "loses_first": {
+                                            "description": "The number of loses as first player",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "loses_second": {
+                                            "description": "The number of loses as second player",
                                             "type": "integer",
                                             "minimum": 0
                                         },
@@ -132,12 +141,22 @@
                                             "description": "The number of draws",
                                             "type": "integer",
                                             "minimum": 0
+                                        },
+                                        "moves": {
+                                            "description": "The number of moves",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "emojis": {
+                                            "description": "The number of emojis",
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
-                                    "required": ["wins", "losses", "draws"]
+                                    "required": ["wins_first", "wins_second", "loses_first", "loses_second", "draws", "moves", "emojis"]
                                 }
                             },
-                            "required": ["profile", "statistics"]
+                            "required": ["player", "statistics"]
                         }
                     }
                 },
