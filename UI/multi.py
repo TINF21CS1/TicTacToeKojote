@@ -60,7 +60,8 @@ class Join(base_frame):
     def _update_lobby(self, queue):
         self.playerlist = []
         for player in queue['player']:
-            self.playerlist.append([tk.Label(self, text=player.display_name),
+            rdy = '\u2611' if player.ready else ''
+            self.playerlist.append([tk.Label(self, text=rdy + ' ' + player.display_name),
                                     tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick': uuid}}))])
             if(str(player.uuid) == str(self.master.player.uuid)):
                 self.ready = player.ready
