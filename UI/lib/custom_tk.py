@@ -445,14 +445,14 @@ class Label(tk.Label):
     __getitem__ = cget
 
 class OptionMenu(tk.OptionMenu):
-    def __init__(self, master, variable, value, *values, **kwargs) -> None:
+    def __init__(self, master, variable, *values, **kwargs) -> None:
         filter = ('font', 'bg')
         attributes = dict()
         kwargs_copy = dict(kwargs)
         for key, value in kwargs_copy.items():
             if key in filter:
                 attributes[key] = kwargs.pop(key, None)
-        super().__init__(master, variable, value, *values, **kwargs)
+        super().__init__(master, variable, *values, **kwargs)
         for key, value in attributes.items():
             self.config(**{key: value})
 

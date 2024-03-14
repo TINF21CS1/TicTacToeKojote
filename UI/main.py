@@ -4,6 +4,7 @@ from tkinter import font as tkfont
 from queue import Queue
 
 from .menu import Menu
+from Client.profile_save import Profile as ProfileIO
 
 class Root(tk.Tk):
     def __init__(self):
@@ -14,11 +15,13 @@ class Root(tk.Tk):
         min_height = 250
 
         self.devOptions = False
-        self.player = None
+        self.players, self.player = ProfileIO.get_profiles()
         self.ai_thread = None
         self.network_events = {}
         self.out_queue = Queue()
         self.in_queue = Queue()
+
+
 
         self.geometry(f"{start_width}x{start_height}")
         self.minsize(width=min_width, height=min_height)

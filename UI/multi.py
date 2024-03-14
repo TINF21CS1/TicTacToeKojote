@@ -25,7 +25,7 @@ class Join(base_frame):
         self.bind('Destroy', lambda *args: self.on_destroy())
         self.ready = False
         if opponent != player_type.unknown:
-            server_thread(self.master.player)
+            server_thread(self.master.players[self.master.player])
         if opponent in [player_type.ai_strong, player_type.ai_weak]:
             ai_context = AIContext(AdvancedAIStrategy() if opponent == player_type.ai_strong else WeakAIStrategy())
             self.master.ai = ai_context.run_strategy()
@@ -63,7 +63,7 @@ class Join(base_frame):
             rdy = '\u2611' if player.ready else ''
             self.playerlist.append([tk.Label(self, text=rdy + ' ' + player.display_name),
                                     tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: self.master.out_queue.put({'message_type': 'lobby/kick', 'args' : {'player_to_kick': uuid}}))])
-            if(str(player.uuid) == str(self.master.player.uuid)):
+            if(str(player.uuid) == str(self.master.players[self.master.player].uuid)):
                 self.ready = player.ready
                 if(player.ready):
                     self.btnRdy.config(text="not Ready")
@@ -114,7 +114,7 @@ class Lobby_Overview(tk.Container):
 
     def _connect(self):
         root = self.master.master
-        root.network_client = client_thread(root, in_queue=root.out_queue, out_queue=root.in_queue, player=root.player, ip=self.etrAddress.get())
+        root.network_client = client_thread(root, in_queue=root.out_queue, out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
         root.show(Join)
 
 class Multiplayer(base_frame):
@@ -153,5 +153,5 @@ class Multiplayer(base_frame):
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
     def _create_online_game(self):
-        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.player, ip='localhost')
+        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.players[self.master.player], ip='localhost')
         self.master.show(Join, opponent=player_type.network)

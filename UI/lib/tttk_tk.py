@@ -22,7 +22,8 @@ class wrapper(ftk_wrapper):
                 'font': ("Arial bold", 12),
                 'margin': 5,
                 'bg': '#FFFFFF',
-                'width': 0,} | defaultValues
+                #'width': 0,
+                } | defaultValues
         if(Widget == tk.Frame):
             del kwargs['defaultValues']['font']
         super().__init__(Widget, master, *args, **kwargs)

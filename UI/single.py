@@ -41,7 +41,7 @@ class Singleplayer(base_frame):
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
     def join_ai(self, strong: bool):
-        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.player, ip='localhost')
+        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.players[self.master.player], ip='localhost')
         if strong:
             self.master.show(Join, opponent=player_type.ai_strong)
         else:
