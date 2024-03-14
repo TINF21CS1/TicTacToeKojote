@@ -1,6 +1,8 @@
 from Server.game import Game
 from Server.player import Player
 from Server.rulebase import RuleBase
+from Server.statistics import Statistics
+
 import asyncio
 import websockets
 import logging
@@ -19,6 +21,7 @@ class Lobby:
         self._inprogress = False
         self._port = port
         self._connections = set()
+        self._stats = Statistics()
 
         with open("./json_schema/client_to_server.json", "r") as f:
             self._json_schema = json.load(f)
@@ -97,6 +100,7 @@ class Lobby:
                                 # make move, catch illegal move
                                 try:
                                     self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
+                                    self._stats.increment_moves(self._players[message_json["player_uuid"]])
                                 except ValueError as e:
                                     await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
                                 
@@ -119,6 +123,7 @@ class Lobby:
                             "sender_uuid": message_json["player_uuid"],
                             "message": message_json["message"],
                         }))
+                        self._stats.increment_emojis(self._players[message_json["player_uuid"]], message_json["message"])
 
 
                     case "server/terminate":
@@ -169,6 +174,8 @@ class Lobby:
         
     async def _end_game(self):
         self._inprogress = False
+
+        self._stats.increment_games(self._players, self._game.state.winner)
 
         await websockets.broadcast(self._connections, json.dumps({
                 "message_type": "game/end",
