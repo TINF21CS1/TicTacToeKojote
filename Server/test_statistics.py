@@ -7,7 +7,6 @@ class TestStatistics(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         path = os.path.abspath("Server/Data/test_statistics.db")
-        print(f"lol {path}")
         cls.statistics = Statistics(path=path)
     def setUp(self):
         statistics = Statistics(path = "./data/test_statistics.json")
@@ -150,10 +149,6 @@ class TestStatistics(unittest.TestCase):
             statistics.get_loses("test")
         with self.assertRaises(ValueError):
             statistics.get_wins("test")
-
-
-test = TestStatistics()
-
 
 
 

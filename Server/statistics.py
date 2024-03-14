@@ -11,7 +11,6 @@ class Statistics:
         :param path: path to db file, default is './Data/statistics.db'
         """
         self.path = path
-        print(path)
         self.conn = sqlite3.connect(self.path)
         self.cursor = self.conn.cursor()
         with self.conn:
@@ -113,8 +112,8 @@ class Statistics:
             with self.conn:
                 self.cursor.execute(f"""
                 DELETE FROM statistics
-                WHERE uuid = '{uuid}'
-                """)
+                WHERE uuid = ?
+                """, (uuid,))
         else:
             raise ValueError(f'Statistics for uuid: {uuid} does not exist')
 
@@ -145,8 +144,9 @@ class Statistics:
                 self.cursor.execute(f"""
                 UPDATE statistics
                 SET {arg} = 0
-                WHERE uuid = '{uuid}'
-                """)
+                WHERE uuid = %(uuid)s
+                """,
+                                    {'uuid': uuid})
         else:
             raise ValueError(f'Statistics for uuid: {uuid} does not exist')
     """
@@ -291,8 +291,9 @@ class Statistics:
                 self.cursor.execute(f"""
                 UPDATE statistics
                 SET {type} = {type} + 1
-                WHERE uuid = '{uuid}'
-                """)
+                WHERE uuid = ?
+                """,
+                                    (uuid,))
         else:
             self._add_profile(uuid, wins_first=1 if type == 'wins_first' else 0,
                               wins_second=1 if type == 'wins_second' else 0,
@@ -311,9 +312,9 @@ class Statistics:
             with self.conn:
                 self.cursor.execute(f"""
                 UPDATE statistics
-                SET moves = moves + {moves}
-                WHERE uuid = '{uuid}'
-                """)
+                SET moves = moves + ?
+                WHERE uuid = ?
+                """, (moves, uuid,))
         else:
             self._add_profile(uuid, moves=moves)
 
@@ -327,9 +328,9 @@ class Statistics:
             with self.conn:
                 self.cursor.execute(f"""
                 UPDATE statistics
-                SET emojis = emojis + :emoji
-                WHERE uuid = '{uuid}'
-                """, {'emoji': count})
+                SET emojis = emojis + ?
+                WHERE uuid = ?
+                """, (count, uuid,))
         else:
             self._add_profile(uuid, emojis=count)
 
@@ -346,8 +347,8 @@ class Statistics:
         with self.conn:
             self.cursor.execute(f"""
             SELECT * FROM statistics
-            WHERE uuid = '{uuid}'
-            """)
+            WHERE uuid = ?
+            """, (uuid,))
             return True if self.cursor.fetchone() is not None else False
 
     """
@@ -365,8 +366,8 @@ class Statistics:
         with self.conn:
             self.cursor.execute(f"""
             SELECT * FROM statistics
-            WHERE uuid = '{uuid}'
-            """)
+            WHERE uuid = ?
+            """, (uuid,))
             return self.cursor.fetchone()
 
     """
