@@ -101,7 +101,7 @@ class GameClient:
         """
         
         lobby = Lobby(port = port, admin = player)
-        server_thread = Thread(target=lobby.run, daemon=True) # TODO: Maybe remove daemon=True and add a proper shutdown function for database etc.
+        server_thread = Thread(target=lobby.run, daemon=True)
         server_thread.start()
 
         client = cls("localhost", port, player)
@@ -149,6 +149,9 @@ class GameClient:
                 continue
             
             await self._message_handler(message_type)
+
+            if message_type == "game/end":
+                await self.terminate()
 
     def get_player_by_uuid(self, uuid:str) -> Player:
         for player in self._lobby_status:
@@ -300,6 +303,9 @@ class GameClient:
         await self._websocket.send(json.dumps(msg))
 
     async def close(self):
+        await self._websocket.close()
+
+    async def terminate(self):
         msg = {
             "message_type": "server/terminate",
             "player_uuid": str(self._player.uuid)
@@ -307,4 +313,4 @@ class GameClient:
         await self._websocket.send(json.dumps(msg))
         await asyncio.sleep(0.1)
         if self._websocket.open:
-            await self._websocket.close()
+            await self.close()
