@@ -108,6 +108,9 @@ class Lobby:
                                         "final_playfield": self._game.state.playfield,
                                     }))
                                     self._inprogress = False
+
+                                    asyncio.sleep(1)
+                                    exit()
                                 
                                 # announce new game state
                                 else:
@@ -128,6 +131,19 @@ class Lobby:
 
                     case "server/terminate":
                         logger.info("Server Termination Requested")
+
+                        for player, i in self._game.players:
+                            if player.uuid == message_json["player_uuid"]:
+                                self._game.state.set_winner(i+1)
+                                break
+
+                        await websocket.broadcast(self._connections, json.dumps({
+                            "message_type": "game/end",
+                            "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
+                            "final_playfield": self._game.state.playfield,
+                        }))
+
+                        asyncio.sleep(1)
                         exit()
 
                     case _:
