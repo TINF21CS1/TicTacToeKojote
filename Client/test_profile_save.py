@@ -48,3 +48,9 @@ class TestProfileSave(unittest.TestCase):
         self.profile.delete_profile_by_name(self.player1)
         self.assertEqual(self.profile.get_profiles(), [self.player2])
         self.profile.delete_all_profiles()
+
+    def test_set_profiles(self):
+        data = [self.player1, self.player2]
+        self.profile.set_profiles(data)
+        self.assertEqual(self.profile.get_profiles(), data)
+        self.profile.delete_all_profiles()

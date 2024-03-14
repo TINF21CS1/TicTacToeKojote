@@ -82,6 +82,25 @@ class Profile:
                 raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
         return None
 
+    def set_profiles(self, players: list):
+        """
+        This method sets the profile name and/or color by the uuid
+        :param profile_uuid:
+        :param profile_name:
+        :param profile_color:
+        """
+
+        if self.check_file():
+            try:
+                with open(self.path, 'w') as file:
+                    entry = []
+                    for player in players:
+                        entry.append(player.as_dict())
+                    json.dump(entry, file)
+            except:
+                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
+        return None
+
     def get_profile_by_name(self, player : Player):
         if self.check_file():
             """
