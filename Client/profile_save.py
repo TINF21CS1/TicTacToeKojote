@@ -91,30 +91,6 @@ class Profile:
                 print("json error: Make sure profiles.json is formatted correctly")
         return None
 
-    def add_new_profile(self, player : Player):
-        """
-        This method adds a new profile to the file
-        :param profile_name:
-        :param profile_uuid:
-        :param profile_color:
-        """
-        if self.check_file():
-            entry = player.as_dict()
-            try:
-                with open(self.path, 'r+') as file:
-                    data = json.load(file)
-                    file.seek(0)
-                    data.append(entry)
-                    json.dump(data, file)
-                    file.truncate()
-            except:
-                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
-
-        else:
-            with open(self.path, 'w') as file:
-                entry = [player.as_dict()]
-                json.dump(entry, file)
-
     def delete_profile(self, player : Player):
         """
         This method deletes a profile by its uuid
