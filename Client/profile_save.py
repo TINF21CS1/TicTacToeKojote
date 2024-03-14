@@ -24,7 +24,7 @@ class Profile:
                     output.append(Player.from_dict(profile))
                 return output
         else:
-            return None
+            return []
 
     def set_profile(self, player : Player):
         """
