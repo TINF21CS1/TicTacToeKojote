@@ -194,6 +194,7 @@ class GameClient:
                         self._player_number = 2
                 case "game/end":
                     self._winner = self.get_player_by_uuid(message_json["winner_uuid"])
+                    logger.info(f"Game ended. Winner: {self._winner.display_name if self._winner else 'Draw'}")
                     self._playfield = message_json["final_playfield"]
                 case "game/turn":
                     self._playfield = message_json["updated_playfield"]
@@ -207,6 +208,12 @@ class GameClient:
                 case "chat/receive":
                     sender = self.get_player_by_uuid(message_json["sender_uuid"])
                     self._chat_history.append((sender, message_json["message"]))
+                case "lobby/ping":
+                    await self.join_lobby()
+                case "lobby/kick":
+                    if str(self._player.uuid) == message_json["kick_player_uuid"]:
+                        logger.info("You have been kicked from the lobby.")
+                        await self.close()
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
                     raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
@@ -294,3 +301,13 @@ class GameClient:
 
     async def close(self):
         await self._websocket.close()
+
+    async def terminate(self):
+        msg = {
+            "message_type": "server/terminate"
+        }
+        await self._websocket.send(json.dumps(msg))
+        await asyncio.sleep(0.1)
+        if self._websocket.open:
+            await self.close()
+        return

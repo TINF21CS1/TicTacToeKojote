@@ -1,4 +1,7 @@
 from uuid import UUID, uuid4
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Player:
     """
@@ -27,7 +30,7 @@ class Player:
     def __eq__(self, other) -> bool:
         if not isinstance(other, Player):
             return False
-        return self.uuid == other.uuid
+        return str(self.uuid) == str(other.uuid)
     
     @classmethod
     def from_dict(cls, player_dict: dict):
