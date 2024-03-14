@@ -102,7 +102,7 @@ class Lobby:
                                 
                                 # check for winning state
                                 if self._game.state.finished:
-                                    self._end_game()
+                                    await self._end_game()
                                 
                                 # announce new game state
                                 else:
@@ -132,7 +132,7 @@ class Lobby:
                             else:
                                 self._game.state.set_winner(0)
                             
-                            self._end_game()
+                            await self._end_game()
                         
                         else:
                             # still in lobby, can terminate without game end.
@@ -153,7 +153,7 @@ class Lobby:
                 if self._inprogress:
                     # connection closed, but not nice. we cannot determine winner, so fuck off
                     self._game.state.set_winner(0)
-                    self._end_game()
+                    await self._end_game()
 
                 else:
                     # request a ping from everyone and delete player list to wait for join messages.
@@ -176,7 +176,7 @@ class Lobby:
                 "final_playfield": self._game.state.playfield,
             }))
 
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
         exit()
 
     async def start_server(self):
