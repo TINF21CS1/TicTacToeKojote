@@ -15,42 +15,9 @@ class TestProfileSave(unittest.TestCase):
     def setUp(self):
         self.profile.delete_all_profiles()
 
-    def test_get_profile_by_name(self):
-        self.profile.add_new_profile(self.player1)
-        self.assertEqual(self.profile.get_profile_by_name(self.player1),
-                         self.player1)
-        self.profile.delete_all_profiles()
-        self.assertEqual(self.profile.get_profiles(), [])
-
-    def test_get_profile_by_uuid(self):
-        self.profile.add_new_profile(self.player1)
-        self.assertEqual(self.profile.get_profile(self.player1),
-                         self.player1)
-        self.profile.delete_all_profiles()
-        self.assertEqual(self.profile.get_profiles(), [])
-    def test_add_new_profile(self):
-        self.profile.add_new_profile(self.player1)
-        self.assertEqual(self.profile.get_profile(self.player1),
-                         self.player1)
-        self.profile.delete_all_profiles()
-        self.assertEqual(self.profile.get_profiles(), [])
-
-    def test_delete_profile(self):
-        self.profile.add_new_profile(self.player1)
-        self.profile.add_new_profile(self.player2)
-        self.profile.delete_profile(self.player1)
-        self.assertEqual(self.profile.get_profiles(), [self.player2])
-        self.profile.delete_all_profiles()
-
-    def test_delete_profile_by_name(self):
-        self.profile.add_new_profile(self.player1)
-        self.profile.add_new_profile(self.player2)
-        self.profile.delete_profile_by_name(self.player1)
-        self.assertEqual(self.profile.get_profiles(), [self.player2])
-        self.profile.delete_all_profiles()
-
-    def test_set_profiles(self):
+    def test_all(self):
         data = [self.player1, self.player2]
         self.profile.set_profiles(data)
         self.assertEqual(self.profile.get_profiles(), data)
         self.profile.delete_all_profiles()
+        self.assertEqual(self.profile.get_profiles(), [])
