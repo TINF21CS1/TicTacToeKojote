@@ -64,7 +64,7 @@ class Profile(base_frame):
         self.lblUUDI = tk.Label(self, text='User ID')
         self.lblUUIDValue = tk.Label(self, text=self.master.player.uuid)
         self.btnEdit = tk.Button(self, text='Edit Profile', command=lambda *args: self.master.show(NewProfile, 'edit'))
-        self.btnDelete = tk.Button(self, text='Delete profile', command=lambda*args : self.master.show(NewProfile, 'delete'))
+        self.btnDelete = tk.Button(self, text='Delete profile', command=lambda *args: self._delete())
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
     def _display_widgets(self):
@@ -88,3 +88,7 @@ class Profile(base_frame):
         self.btnDelete.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, columnspan=3)
         self.btnEdit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=6, row=8, columnspan=3)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=9, row=1)
+    
+    def _delete(self):
+        self.master.player = None
+        self.master.show(NewProfile, 'delete')
