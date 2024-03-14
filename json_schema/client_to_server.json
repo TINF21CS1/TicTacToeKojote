@@ -141,6 +141,23 @@
                 },
                 "required": [ "player_uuid", "message"]
             }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "server/terminate" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_uuid": {
+                        "description": "The uuid of the player who sent the message",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [ "player_uuid" ]
+            }
         }
     ]
 }

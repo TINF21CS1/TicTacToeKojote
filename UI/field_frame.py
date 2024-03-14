@@ -59,7 +59,7 @@ class field_controller():
         self._bind()
 
     def _bind(self):
-        self.view.close.config(command=self.view.master.show_menu)
+        self.view.close.config(command=lambda *args: self._close())
 
     def end(self, queue, *args):
         root = self.view.master
@@ -69,6 +69,11 @@ class field_controller():
         root = self.view.master
         msg = messages(type='move', message=queue['error_message'])
         msg.display()
+
+    def _close(self):
+        root = self.view.master
+        root.out_queue.put({'message_type': 'server/terminate', 'args': {}})
+        self.view.master.show_menu()
 
 class Field(base_frame):
     def __init__(self, master, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):

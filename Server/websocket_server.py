@@ -58,7 +58,7 @@ class Lobby:
                     case "lobby/kick":
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/kick",
-                            "player_uuid": message_json["player_uuid"],
+                            "kick_player_uuid": message_json["kick_player_uuid"],
                         }))
 
  
@@ -102,12 +102,7 @@ class Lobby:
                                 
                                 # check for winning state
                                 if self._game.state.finished:
-                                    websockets.broadcast(self._connections, json.dumps({
-                                        "message_type": "game/end",
-                                        "winner_uuid": self._game.state.winner.uuid,
-                                        "final_playfiled": self._game.state.playfield,
-                                    }))
-                                    self._inprogress = False
+                                    self._end_game()
                                 
                                 # announce new game state
                                 else:
@@ -128,7 +123,26 @@ class Lobby:
 
                     case "server/terminate":
                         logger.info("Server Termination Requested")
-                        exit()
+
+                        if self._inprogress:
+                            if self._game.players.index(self._players[message_json["player_uuid"]]) == 1:
+                                self._game.state.set_winner(2)
+                            elif self._game.players.index(self._players[message_json["player_uuid"]]) == 2:
+                                self._game.state.set_winner(1)
+                            else:
+                                self._game.state.set_winner(0)
+                            
+                            self._end_game()
+                        
+                        else:
+                            # still in lobby, can terminate without game end.
+                            websockets.broadcast(self._connections, json.dumps({
+                                "message_type": "game/error",
+                                "error_message": "Server terminated.",
+                            }))
+                            exit()
+
+                        
 
                     case _:
                         await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
@@ -137,8 +151,10 @@ class Lobby:
                 logger.info("Connection Closed from Client-Side")
                 self._connections.remove(websocket)
                 if self._inprogress:
-                    # TODO: Add handling (for reconnect) when game is not over yet
-                    pass
+                    # connection closed, but not nice. we cannot determine winner, so fuck off
+                    self._game.state.set_winner(0)
+                    self._end_game()
+
                 else:
                     # request a ping from everyone and delete player list to wait for join messages.
                     websockets.broadcast(self._connections, json.dumps({
@@ -151,6 +167,17 @@ class Lobby:
 
             # TODO: Catch other errors for disconnects
         
+    async def _end_game(self):
+        self._inprogress = False
+
+        await websockets.broadcast(self._connections, json.dumps({
+                "message_type": "game/end",
+                "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
+                "final_playfield": self._game.state.playfield,
+            }))
+
+        asyncio.sleep(1)
+        exit()
 
     async def start_server(self):
         async with websockets.serve(self.handler, host = "", port = self._port):

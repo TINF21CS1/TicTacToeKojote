@@ -49,3 +49,13 @@ class Game:
             str: The UUID string of the current player.
         """
         return str(self.players[self.state.current_player].uuid)
+    
+    @property
+    def winner(self) -> Player:
+        """
+        Returns the winner of the game.
+
+        Returns:
+            Player: The winner of the game.
+        """
+        return self.players[self.state.winner]

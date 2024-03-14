@@ -225,7 +225,7 @@
                 "properties": {
                     "winner_uuid": {
                         "description": "Shows whether the receiving player is the winner. If null, the game ended in a draw",
-                        "type": "string",
+                        "type": ["string", "null"],
                         "format": "uuid"
                     },
                     "final_playfield": {

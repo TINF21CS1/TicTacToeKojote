@@ -81,14 +81,9 @@ class GameClientUI(GameClient):
                     "final_playfield": self._playfield
                 })
                 self._tk_root.event_generate("<<game/end>>", when="tail")
-                self.client.close()
+                await self.close()
             case "game/turn":
-                self._out_queue.put({
-                    "message_type": "game/turn",
-                    "next_player": int(self._current_player == self._opponent),
-                    "playfield": self._playfield
-                })
-                self._tk_root.event_generate("<<game/turn>>", when="tail")
+                self.send_gamestate_to_ui()
             case "statistics/statistics":
                 pass
             case "game/error":
@@ -104,8 +99,20 @@ class GameClientUI(GameClient):
                     "message": self._chat_history[-1][1]
                 })
                 self._tk_root.event_generate("<<chat/receive>>", when="tail")
-
+            case "lobby/kick":
+                self._out_queue.put({
+                    "message_type": "lobby/kick",
+                })
+                self._tk_root.event_generate("<<lobby/kick>>", when="tail")
         return
+    
+    def send_gamestate_to_ui(self):
+        self._out_queue.put({
+            "message_type": "game/turn",
+            "next_player": int(self._current_player == self._opponent),
+            "playfield": self._playfield
+        })
+        self._tk_root.event_generate("<<game/turn>>", when="tail")
     
     async def await_commands(self):
         # Send messages to the server
@@ -130,6 +137,10 @@ class GameClientUI(GameClient):
                     await self.game_make_move(**message["args"])
                 case "chat/message":
                     pass
+                case "server/terminate":
+                    await self.terminate()
+                case "game/gamestate":
+                    self.send_gamestate_to_ui()
                 case _:
                     logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
                     return
