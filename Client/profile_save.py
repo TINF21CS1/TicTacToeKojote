@@ -189,7 +189,7 @@ class Profile:
         """
         This method deletes all profiles
         """
-        if self.check_file():
+        if exists(self.path):
             with open(self.path, 'w') as file:
                 file.write("[]")
 
