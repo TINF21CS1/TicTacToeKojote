@@ -26,24 +26,6 @@ class Profile:
         else:
             return None
 
-    def get_profile(self, player : Player):
-        """
-        This method returns a profile by its uuid
-        :param profile_uuid:
-        :return: profile matching given uuid
-        """
-        player_dict = player.as_dict()
-        if self.check_file():
-            try:
-                with open(self.path, 'r') as file:
-                    data = json.load(file)
-                    for profile in data:
-                        if profile["uuid"] == player_dict["uuid"]:
-                            return Player.from_dict(profile)
-            except:
-                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
-        return None
-
     def set_profile(self, player : Player):
         """
         This method sets the profile name and/or color by the uuid
