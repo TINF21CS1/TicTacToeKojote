@@ -132,12 +132,14 @@ class Lobby:
                     case "server/terminate":
                         logger.info("Server Termination Requested")
 
-                        for player, i in self._game.players:
-                            if player.uuid == message_json["player_uuid"]:
-                                self._game.state.set_winner(i+1)
-                                break
+                        if self._game.players.index(self._players[message_json["player_uuid"]]) == 1:
+                            self._game.state.set_winner(2)
+                        elif self._game.players.index(self._players[message_json["player_uuid"]]) == 2:
+                            self._game.state.set_winner(1)
+                        else:
+                            self._game.state.set_winner(0)
 
-                        await websocket.broadcast(self._connections, json.dumps({
+                        await websockets.broadcast(self._connections, json.dumps({
                             "message_type": "game/end",
                             "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
                             "final_playfield": self._game.state.playfield,
