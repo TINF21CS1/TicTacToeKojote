@@ -27,7 +27,7 @@ class gamefield_controller:
     
     def _bind(self):
         for position, button in self.view.fields.items():
-            button.config(command=lambda e=position: self._game_input(self, e))
+            button.config(command=lambda e=position: self._game_input(e))
 
     def draw_field(self, matrix=None, position=None, value=None): #either matrix as a 3x3 list or position and value need to be provided
         if matrix != None:
@@ -41,9 +41,8 @@ class gamefield_controller:
         for i, player in enumerate(self.view.master.player):
             player.highlight(i == player_id)
 
-    def turn(self, *args):
+    def turn(self, queue, *args):
         root = self.view.master.master
-        queue = root.in_queue.get()
         self.draw_field(matrix=queue['playfield'])
         self.change_active_player(queue['next_player'])
 

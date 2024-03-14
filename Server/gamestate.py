@@ -45,6 +45,7 @@ class GameState:
             new_position (tuple[int, int]): The new position set by the player on the playfield.
         """
         self._playfield[new_position[0]][new_position[1]] = player
+        self._current_player = 1 if player == 2 else 2
 
     def set_winner(self, winner: int):
         """

@@ -1,0 +1,48 @@
+@startuml Client
+!pragma useIntermediatePackages false
+
+class Client.client.GameClient {
+  - _ip: str
+  - _port: int
+  - _player: Player
+  - _player_number: int
+  - _symbol: str
+  - _opponent: Player
+  - _opponent_number: int
+  - _current_player: Player
+  - _lobby_status: list[str]
+  - _playfield: list[list[int]]
+  - _statistics: Statistics
+  - _chat_history: list[tuple[Player, str]]
+  - _winner: Player
+  - _error_history: list[str]
+  - _json_schema: Any
+  + __init__(ip:str, port:int, player:Player): None
+  - connect(): None
+  + create_game(player: Player, port:int = 8765): tuple[GameClient, asyncio.Task, Thread]
+  + join_game(player: Player, ip:str, port:int = 8765): tuple[GameClient, asyncio.Task]
+  + listen(): None
+  + get_player_by_uuid(uuid:str): Player
+  - _preprocess_message(message:str): str
+  - _message_handler(message_type: str): None
+  + join_lobby(): None
+  + lobby_ready(ready:bool = True): None
+  + lobby_kick(player_to_kick_index:int): None
+  + game_make_move(x:int, y:int): None
+  + chat_message(message:str): None
+  + close(): None
+}
+
+class Client.ui_client.GameClientUI {
+  - _tk_root: tk.Tk
+  - _in_queue: queue.Queue
+  - _out_queue: queue.Queue
+  + join_game(player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765): tuple[GameClientUI, asyncio.Task, asyncio.Task]
+  - listen(): None
+  - _message_handler(message_type: str): None
+  - await_commands(): None
+}
+
+Client.client.GameClient <|-- Client.ui_client.GameClientUI
+@enduml
+

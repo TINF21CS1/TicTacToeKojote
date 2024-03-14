@@ -8,7 +8,7 @@
         "message_type": {
             "description": "The message type",
             "type": "string",
-            "enum": ["lobby/join", "lobby/kick", "lobby/ready", "game/make_move", "chat/message"]
+            "enum": ["lobby/join", "lobby/kick", "lobby/ready", "game/make_move", "chat/message", "server/terminate"]
         }
     },
     "required": [ "message_type"],
@@ -55,18 +55,13 @@
             },
             "then": {
                 "properties": {
-                    "admin_player_uuid": {
-                        "description": "The uuid of the player with admin rights",
-                        "type": "string",
-                        "format": "uuid"
-                    },
                     "kick_player_uuid": {
                         "description": "The uuid of the player to kick",
                         "type": "string",
                         "format": "uuid"
                     }
                 },
-                "required": [ "admin_player_uuid", "kick_player_uuid"]
+                "required": [ "kick_player_uuid" ]
             }
         },
         {
@@ -145,6 +140,23 @@
                     }
                 },
                 "required": [ "player_uuid", "message"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "server/terminate" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "player_uuid": {
+                        "description": "The uuid of the player who sent the message",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [ "player_uuid" ]
             }
         }
     ]

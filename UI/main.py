@@ -15,6 +15,7 @@ class Root(tk.Tk):
 
         self.devOptions = False
         self.player = None
+        self.ai_thread = None
         self.network_events = {}
         self.out_queue = Queue()
         self.in_queue = Queue()
@@ -29,7 +30,12 @@ class Root(tk.Tk):
         self.geometry("700x500")
         self.frames = {}
         self.current_frame = None
-
+        self.bind("<<lobby/status>>", lambda *args: self.network_event_handler('lobby/status'))
+        self.bind("<<game/start>>", lambda *args: self.network_event_handler('game/start'))
+        self.bind("<<game/end>>", lambda *args: self.network_event_handler('game/end'))
+        self.bind("<<game/error>>", lambda *args: self.network_event_handler('game/error'))
+        self.bind("<<game/turn>>", lambda *args: self.network_event_handler('game/turn'))
+        self.bind("<<chat/receive>>", lambda *args: self.network_event_handler('chat/receive'))
         self.show(Menu, True)
 
     def show(self, Frame, *args, cache=False, **kwargs):
@@ -64,8 +70,11 @@ class Root(tk.Tk):
         pass
 
     def network_event_handler(self, event):
-        args = self.in_queue.get()
-        self.network_events.get(event, lambda *args: None)(*args)
+        try:
+            queue = self.in_queue.get()
+            self.network_events[event](queue)
+        except KeyError:
+            pass
 
 def main():
     app = Root()

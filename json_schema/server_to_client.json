@@ -8,7 +8,7 @@
         "message_type": {
             "description": "The message type",
             "type": "string",
-            "enum": ["game/start", "lobby/status", "statistics/statistics", "game/turn", "game/error", "game/end", "chat/receive"]
+            "enum": ["game/start", "lobby/status", "lobby/kick", "lobby/ping", "statistics/statistics", "game/turn", "game/error", "game/end", "chat/receive"]
         }
     },
     "required": ["message_type"], 
@@ -73,6 +73,23 @@
                     }
                 },
                 "required": ["players"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "message_type": { "const": "lobby/kick" }
+                }
+            },
+            "then": {
+                "properties": {
+                    "kick_player_uuid": {
+                        "description": "The uuid of the player to kick",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [ "kick_player_uuid" ]
             }
         },
         {
@@ -217,7 +234,7 @@
                 "properties": {
                     "winner_uuid": {
                         "description": "Shows whether the receiving player is the winner. If null, the game ended in a draw",
-                        "type": "string",
+                        "type": ["string", "null"],
                         "format": "uuid"
                     },
                     "final_playfield": {

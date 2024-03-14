@@ -10,7 +10,10 @@ from threading import Thread
 from uuid import UUID
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 class GameClient:
@@ -28,7 +31,7 @@ class GameClient:
         _opponent_number (int): The number of the opponent in the game. 1 for the first player, 2 for the second player.
         _current_player (Player): The player that is currently allowed to make a move.
         _lobby_status (list[str]): The status of the lobby. Contains all players in the lobby.
-        _game_status (list[list[int]]): The status of the game. Contains the current playfield.
+        _playfield (list[list[int]]): The status of the game. Contains the current playfield.
         _statistics (dict[Player:dict[str:int]] ): The statistics of the game. 
         _chat_history (list[tuple[Player, str]]): The chat history of the game. Contains all messages sent in the game.
         _winner (Player): The winner of the game. None if the game is not finished yet or it is a draw.
@@ -44,7 +47,7 @@ class GameClient:
         get_player_by_uuid: Get a player by its UUID. 
         join_lobby: Join the lobby of the server.
         lobby_ready: Set the player ready in the lobby.
-        lobby_kick: Kick a player from the lobby. (Only the admin can do this.)
+        lobby_kick: Kick a player from the lobby.
         game_make_move: Make a move in the game.
         chat_message: Send a chat message.
         close: Close the connection to the server.
@@ -64,6 +67,7 @@ class GameClient:
         self._opponent_number: int = None
 
         # Game info
+        self._starting_player: Player = None
         self._current_player: Player = None
         self._lobby_status: list[str] = []
         self._playfield: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
@@ -97,7 +101,7 @@ class GameClient:
         """
         
         lobby = Lobby(port = port, admin = player)
-        server_thread = Thread(target=lobby.run, daemon=True) # TODO: Maybe remove daemon=True and add a proper shutdown function for database etc.
+        server_thread = Thread(target=lobby.run, daemon=True)
         server_thread.start()
 
         client = cls("localhost", port, player)
@@ -146,6 +150,9 @@ class GameClient:
             
             await self._message_handler(message_type)
 
+            if message_type == "game/end":
+                await self.terminate()
+
     def get_player_by_uuid(self, uuid:str) -> Player:
         for player in self._lobby_status:
             if str(player.uuid) == uuid:
@@ -169,20 +176,28 @@ class GameClient:
                         logger.error("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
                         raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
 
-                    self._opponent = self._lobby_status[0] if self._lobby_status[0].uuid is not str(self._player.uuid) else self._lobby_status[1]
+
+                    self._opponent = self._lobby_status[0] if self._lobby_status[0] != self._player else self._lobby_status[1]
+
+                    if self._opponent == self._player:
+                        logger.error("player and opponent are equal")
+
 
                     if str(self._player.uuid) == message_json["starting_player_uuid"]:
-                        self._current_player = self._player  
+                        self._current_player = self._player
+                        self._starting_player = self._player
                         self._symbol = "X"
                         self._player_number = 1
                         self._opponent_number = 2
                     else:
                         self._current_player = self._opponent
+                        self._starting_player = self._opponent
                         self._symbol = "O"
                         self._opponent_number = 1
                         self._player_number = 2
                 case "game/end":
                     self._winner = self.get_player_by_uuid(message_json["winner_uuid"])
+                    logger.info(f"Game ended. Winner: {self._winner.display_name if self._winner else 'Draw'}")
                     self._playfield = message_json["final_playfield"]
                 case "game/turn":
                     self._playfield = message_json["updated_playfield"]
@@ -196,6 +211,12 @@ class GameClient:
                 case "chat/receive":
                     sender = self.get_player_by_uuid(message_json["sender_uuid"])
                     self._chat_history.append((sender, message_json["message"]))
+                case "lobby/ping":
+                    await self.join_lobby()
+                case "lobby/kick":
+                    if str(self._player.uuid) == message_json["kick_player_uuid"]:
+                        logger.info("You have been kicked from the lobby.")
+                        await self.close()
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
                     raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
@@ -258,7 +279,6 @@ class GameClient:
     async def lobby_kick(self, player_to_kick:UUID):
         msg = {
             "message_type": "lobby/kick",
-            "admin_player_uuid": str(self._player.uuid),
             "kick_player_uuid": str(player_to_kick)
         }
         await self._websocket.send(json.dumps(msg))
@@ -284,3 +304,13 @@ class GameClient:
 
     async def close(self):
         await self._websocket.close()
+
+    async def terminate(self):
+        msg = {
+            "message_type": "server/terminate",
+            "player_uuid": str(self._player.uuid)
+        }
+        await self._websocket.send(json.dumps(msg))
+        await asyncio.sleep(0.1)
+        if self._websocket.open:
+            await self.close()

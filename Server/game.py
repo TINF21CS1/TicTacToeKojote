@@ -36,9 +36,9 @@ class Game:
         try:
             self.rule_base.is_move_valid(self.state, new_position)
             self.state.set_player_position(player, new_position)
+            self.rule_base.check_win(self.state)
         except ValueError as e:
-            # TODO: Call a function in networking to display the error
-            print(e)
+            raise ValueError(e)
         
     @property
     def current_player_uuid(self) -> str:
@@ -49,3 +49,13 @@ class Game:
             str: The UUID string of the current player.
         """
         return str(self.players[self.state.current_player].uuid)
+    
+    @property
+    def winner(self) -> Player:
+        """
+        Returns the winner of the game.
+
+        Returns:
+            Player: The winner of the game.
+        """
+        return self.players[self.state.winner]

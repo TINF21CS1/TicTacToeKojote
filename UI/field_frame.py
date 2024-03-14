@@ -1,4 +1,5 @@
-import tkinter as tk
+#import tkinter as tk
+from .lib import tttk_tk as tk
 from enum import Enum, auto
 
 from .base_frame import base_frame
@@ -8,11 +9,12 @@ from .messages import messages
 
 class player_type(Enum):
     local = auto()
-    ai = auto()
+    ai_weak = auto()
+    ai_strong = auto()
     network = auto()
     unknown = auto()
 
-class player(tk.Frame):
+class player(tk.Container):
     def __init__(self, master, number):
         super().__init__(master)
         self._create_widgets(number)
@@ -35,7 +37,7 @@ class player(tk.Frame):
         match type:
             case player_type.local:
                 self.symbol.config(text="Lokal")
-            case player_type.ai:
+            case player_type.ai_strong, player_type.ai_weak:
                 self.symbol.config( text="Computer")
             case player_type.network:
                 self.symbol.config(text="Online")
@@ -51,34 +53,40 @@ class player(tk.Frame):
 class field_controller():
     def __init__(self, view, players):
         self.view = view
-        sub_controller = gamefield_controller(self.view.gamefield)
+        self.sub_controller = gamefield_controller(self.view.gamefield)
         for player_lbl, player in zip(self.view.player, players):
             player_lbl.set(player.display_name, player_type.unknown)
         self._bind()
 
     def _bind(self):
-        self.view.close.config(command=self.view.master.show_menu)
+        self.view.close.config(command=lambda *args: self._close())
 
-    def end(self, *args):
+    def end(self, queue, *args):
         root = self.view.master
-        queue = root.in_queue.get()
         root.show(EndScreen, queue['win'])
 
-    def error(self, *args):
+    def error(self, queue, *args):
         root = self.view.master
-        queue = root.in_queue.get()
         msg = messages(type='move', message=queue['error_message'])
         msg.display()
 
+    def _close(self):
+        root = self.view.master
+        root.out_queue.put({'message_type': 'server/terminate', 'args': {}})
+        self.view.master.show_menu()
+
 class Field(base_frame):
-    def __init__(self, master, *args, start_player, start_symbol, opponent, opponent_symbol, **kwargs):
+    def __init__(self, master, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
         super().__init__(master)
         self._create_widgets()
-        self.controller = field_controller(self, tuple(start_player, opponent))
+        self.controller = field_controller(self, [starting_player, opponent])
         self._display_widgets()
-        self.bind("<<game/turn>>", self.controller.sub_controller.turn)
-        self.bind("<<game/end>>", self.controller.end)
-        self.bind("<<game/error>>", self.controller.error)
+        #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
+        #self.bind("<<game/end>>", self.controller.end)
+        #self.bind("<<game/error>>", self.controller.error)
+        self.master.network_events['game/turn'] = self.controller.sub_controller.turn
+        self.master.network_events['game/end'] = self.controller.end
+        self.master.network_events['game/error'] = self.controller.error
 
     def _create_widgets(self):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)
@@ -97,3 +105,8 @@ class Field(base_frame):
         self.player[1].grid(row=1, column=2)
         self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=1)
         self.close.grid(row=3, column=2)
+
+    def on_destroy(self):
+        del self.master.network_events['game/turn']
+        del self.master.network_events['game/end']
+        del self.master.network_events['game/error']

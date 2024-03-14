@@ -83,12 +83,13 @@ class RuleBase:
             return
 
         diagonal1 = [state.playfield[i][i] for i in range(state.playfield_dimensions[0])]
-        diagonal2 = [state.playfield[i][j] for i in range(state.playfield_dimensions[0]) for j in range(state.playfield_dimensions[0], -1)]
+        diagonal2 = [state.playfield[i][j] for i,j in zip(range(state.playfield_dimensions[0]), range(state.playfield_dimensions[0]-1, -1, -1))]
         if len(set(diagonal1)) == 1 and diagonal1[0] != 0:
             state.set_winner(diagonal1[0])
             return
         elif len(set(diagonal2)) == 1 and diagonal2[0] != 0:
             state.set_winner(diagonal2[0])
+            return
         
         # Check draw
         if 0 not in [item for row in state.playfield for item in row]:
