@@ -90,7 +90,11 @@ class GameClientUI(GameClient):
                 })
                 self._tk_root.event_generate("<<game/turn>>", when="tail")
             case "statistics/statistics":
-                pass
+                self._out_queue.put({
+                    "message_type": "statistics/statistics",
+                    "statistics": self._statistics
+                })
+                self._tk_root.event_generate("<<statistics/statistics>>", when="tail")
             case "game/error":
                 self._out_queue.put({
                     "message_type": "game/error",

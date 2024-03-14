@@ -29,6 +29,9 @@ class Player:
             return False
         return self.uuid == other.uuid
     
+    def __hash__(self) -> int:
+        return hash(self.uuid)
+    
     @classmethod
     def from_dict(cls, player_dict: dict):
         return cls(player_dict["display_name"], player_dict["color"], player_dict["uuid"], player_dict["ready"])
