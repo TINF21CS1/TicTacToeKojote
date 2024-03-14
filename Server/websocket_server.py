@@ -102,15 +102,7 @@ class Lobby:
                                 
                                 # check for winning state
                                 if self._game.state.finished:
-                                    websockets.broadcast(self._connections, json.dumps({
-                                        "message_type": "game/end",
-                                        "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
-                                        "final_playfield": self._game.state.playfield,
-                                    }))
-                                    self._inprogress = False
-
-                                    asyncio.sleep(1)
-                                    exit()
+                                    self._end_game()
                                 
                                 # announce new game state
                                 else:
@@ -139,14 +131,7 @@ class Lobby:
                         else:
                             self._game.state.set_winner(0)
 
-                        await websockets.broadcast(self._connections, json.dumps({
-                            "message_type": "game/end",
-                            "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
-                            "final_playfield": self._game.state.playfield,
-                        }))
-
-                        asyncio.sleep(1)
-                        exit()
+                        self._end_game()
 
                     case _:
                         await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
@@ -155,8 +140,10 @@ class Lobby:
                 logger.info("Connection Closed from Client-Side")
                 self._connections.remove(websocket)
                 if self._inprogress:
-                    # TODO: Add handling (for reconnect) when game is not over yet
-                    pass
+                    # connection closed, but not nice. we cannot determine winner, so fuck off
+                    self._game.state.set_winner(0)
+                    self._end_game()
+
                 else:
                     # request a ping from everyone and delete player list to wait for join messages.
                     websockets.broadcast(self._connections, json.dumps({
@@ -169,6 +156,17 @@ class Lobby:
 
             # TODO: Catch other errors for disconnects
         
+    async def _end_game(self):
+        self._inprogress = False
+
+        await websockets.broadcast(self._connections, json.dumps({
+                "message_type": "game/end",
+                "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
+                "final_playfield": self._game.state.playfield,
+            }))
+
+        asyncio.sleep(1)
+        exit()
 
     async def start_server(self):
         async with websockets.serve(self.handler, host = "", port = self._port):
