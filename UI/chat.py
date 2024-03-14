@@ -31,9 +31,6 @@ class Chat(tk.Frame):
     def _send(self):
         self.root.out_queue.put({'message_type': 'chat/message', 'args' : {'message': self.etrMessage.val}})
         self.etrMessage.val = ""
-        self.txtChat.config(state=tk.NORMAL)
-        self.txtChat.insert(tk.END, "hallo\n")
-        self.txtChat.config(state=tk.DISABLED)
 
     def _chat_receive(self, queue):
         self.txtChat.config(state=tk.NORMAL)

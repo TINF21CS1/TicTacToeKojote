@@ -132,7 +132,7 @@ class GameClientUI(GameClient):
                 case "game/make_move":
                     await self.game_make_move(**message["args"])
                 case "chat/message":
-                    pass
+                    await self.chat_message(**message["args"])
                 case "server/terminate":
                     await self.terminate()
                 case "game/gamestate":
