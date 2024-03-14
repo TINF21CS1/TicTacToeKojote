@@ -2,6 +2,7 @@ import unittest
 from Client.profile_save import Profile
 import os
 from Server.player import Player
+from os.path import exists
 
 
 class TestProfileSave(unittest.TestCase):
@@ -16,6 +17,8 @@ class TestProfileSave(unittest.TestCase):
         self.profile.delete_all_profiles()
 
     def test_all(self):
+        if exists(self.profile.path):
+            os.remove(self.profile.path)
         data = [self.player1, self.player2]
         self.profile.set_profiles(data)
         self.assertEqual(self.profile.get_profiles(), data)
