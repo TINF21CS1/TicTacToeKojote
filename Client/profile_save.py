@@ -91,27 +91,6 @@ class Profile:
                 print("json error: Make sure profiles.json is formatted correctly")
         return None
 
-    def delete_profile(self, player : Player):
-        """
-        This method deletes a profile by its uuid
-        :param profile_uuid:
-        """
-        player_dict = player.as_dict()
-        if self.check_file():
-            try:
-                with open(self.path, 'r+') as file:
-                    data = json.load(file)
-                    for profile in data:
-                        if profile["uuid"] == player_dict["uuid"]:
-                            data.remove(profile)
-                            break
-                    else:
-                        raise ValueError(f"Profile with given uuid: {player_dict['uuid']} not found")
-                    with open(self.path, 'w') as file:
-                        json.dump(data, file)
-            except:
-                raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
-
     def delete_profile_by_name(self, player : Player):
         """
         This method deletes a profile by its name
