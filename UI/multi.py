@@ -10,6 +10,7 @@ from .field_frame import player_type
 from Server.main import server_thread
 from AI.ai_context import AIContext
 from AI.ai_strategy import AIStrategy, WeakAIStrategy, AdvancedAIStrategy
+from .chat import Chat
 
 class Join(base_frame):
     def __init__(self, master, *args, opponent=player_type.unknown, **kwargs):
@@ -36,8 +37,9 @@ class Join(base_frame):
         if opponent == player_type.local:
             self.btnRdy2 = tk.Button(self, text='Start', command=lambda *args: self.master.out_queue.put({'message_type': 'lobby/ready', 'args' : {'ready': True}}))
         self.btnExit = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
+        self.chat = Chat(self, self.master)
 
-    def _display_widgets(self,):
+    def _display_widgets(self):
         self.columnconfigure([0, 6], weight=1)
         self.columnconfigure([1, 5], weight=2)
         self.columnconfigure([2, 4], weight=4)
@@ -46,11 +48,13 @@ class Join(base_frame):
         self.rowconfigure([2], weight=2)
         self.rowconfigure([4, 6, 8, 10], weight=4)
         self.rowconfigure([3, 5, 7, 9, 11], weight=2)
+        self.grid_configure()
         # display the buttons created in the _create_widgets method
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
-        self.btnRdy.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=10)
+        self.btnRdy.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         if hasattr(self, 'btnRdy2'):
             self.btnRdy2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
+        self.chat.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=2, rowspan=7)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
     def _update_lobby(self, queue):
@@ -65,13 +69,13 @@ class Join(base_frame):
                 else:
                     self.btnRdy.config(text="Start")
         for i, player in enumerate(self.playerlist):
-            player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i, columnspan=2)
-            player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4+i)
+            player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i)
+            player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=4+i)
         
 
     def _start_game(self, queue):
         print(queue)
-        self.master.show(Field, **queue)
+        self.master.show(Field, self.chat.txtChat.get("1.0", tk.END+"-1c")+"Game starting\n", **queue)
 
     def on_destroy(self):
         del self.master.network_events['lobby/status']

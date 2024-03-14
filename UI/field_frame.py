@@ -6,6 +6,7 @@ from .base_frame import base_frame
 from .gamefield import gamefield, gamefield_controller
 from .endscreen import EndScreen
 from .messages import messages
+from .chat import Chat
 
 class player_type(Enum):
     local = auto()
@@ -71,9 +72,9 @@ class field_controller():
         msg.display()
 
 class Field(base_frame):
-    def __init__(self, master, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
+    def __init__(self, master, chat, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
         super().__init__(master)
-        self._create_widgets()
+        self._create_widgets(chat)
         self.controller = field_controller(self, [starting_player, opponent])
         self._display_widgets()
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
@@ -83,22 +84,24 @@ class Field(base_frame):
         self.master.network_events['game/end'] = self.controller.end
         self.master.network_events['game/error'] = self.controller.error
 
-    def _create_widgets(self):
+    def _create_widgets(self, chat):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)
         self.player = []
         self.player.append(player(self, 1))
         self.player.append(player(self, 2))
         self.gamefield = gamefield(self)
+        self.chat = Chat(self, self.master, chat)
         self.close = tk.Button(self, text="close")
 
     def _display_widgets(self):
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure([1,3], weight=1)
         self.rowconfigure(2, weight=1)
 
         self.heading.grid(row=0, column=0, columnspan=3)
         self.player[0].grid(row=1, column=0)
         self.player[1].grid(row=1, column=2)
         self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=1)
+        self.chat.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=3, rowspan=3)
         self.close.grid(row=3, column=2)
 
     def on_destroy(self):
