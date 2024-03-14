@@ -2,13 +2,12 @@ import unittest
 from Client.profile_save import Profile
 import os
 
-#todo kda durch 0 teilen fixen
 
 class TestProfileSave(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.profile = Profile(os.path.abspath("json_schema/test/test_profiles.json"))
+        cls.profile = Profile(os.path.abspath("Client/Data/test/test_profiles.json"))
 
     def setUp(self):
         self.profile.delete_all_profiles()
