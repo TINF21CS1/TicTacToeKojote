@@ -1,0 +1,24 @@
+@startuml
+title Play versus AI
+
+actor Player as p
+database System
+actor AI as a
+
+p->System: Click Singleplayer Button
+System->p: Display AI Difficulty Selection
+p->System: Select AI Difficulty by clicking Strong or Weak AI Button
+System->System: Host Server locally
+System->p: Display Game Lobby
+System->a: Create AI
+a->System: Connect to Server
+a->System: Get Ready
+System->p: Show AI is ready
+p->System: Click Ready Button
+p->System: Click Start Game Button
+System->p: Show Playfield
+p->p: Play Game
+System->System: Process Game
+a->a: Play Game
+
+@enduml

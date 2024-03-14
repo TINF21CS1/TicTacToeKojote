@@ -1,0 +1,15 @@
+@startuml
+title Create Player Profile
+
+actor Player
+database System
+
+Player->System: Click Profile Button
+System->Player: Show Profile Creation Prompt
+Player->System: Set Name
+Player->System: Set Color
+Player->System: Click Create Profile Button
+System->System: Save Profile on Disk
+System->Player: Show Profile
+
+@enduml
