@@ -119,7 +119,7 @@ class Lobby_Overview(tk.Container):
 
 class Multiplayer(base_frame):
     def __new__(cls, master, *args, **kwargs):
-        if(master.player == None):
+        if(len(master.players) == 0 or master.player == None):
             return Profile(master, *args, return_to=Multiplayer, **kwargs)
         return super().__new__(cls, *args, **kwargs)
 
