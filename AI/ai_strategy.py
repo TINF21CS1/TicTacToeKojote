@@ -8,6 +8,9 @@ import random
 import logging
 import copy
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 class AIStrategy(ABC, GameClient):
 
     """
