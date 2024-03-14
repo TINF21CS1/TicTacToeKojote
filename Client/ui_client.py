@@ -99,7 +99,11 @@ class GameClientUI(GameClient):
                     "message": self._chat_history[-1][1]
                 })
                 self._tk_root.event_generate("<<chat/receive>>", when="tail")
-
+            case "lobby/kick":
+                self._out_queue.put({
+                    "message_type": "lobby/kick",
+                })
+                self._tk_root.event_generate("<<lobby/kick>>", when="tail")
         return
     
     def send_gamestate_to_ui(self):
