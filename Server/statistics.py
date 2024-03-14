@@ -1,11 +1,30 @@
 import emoji
 import sqlite3
 import os
+
 from Server.player import Player
-from Server.gamestate import GameState
 
 
 class Statistics:
+    """
+    Handle Statistics and Writing to permanent storage.
+
+    Methods:
+    get_statistics() -> list: returns all statistics
+    increment_emojis(player: Player, message: str) -> None: counts the emojis in the given message and updates the emoji statistics of a profile by its player object
+    increment_moves(player: Player) -> None: increments the moves of a profile by its player object
+    increment_games(player_list: list[Player], winner: int) -> None: increments the wins and losses of both players by their player objects
+
+    Private Methods:
+    _increment_win(player: Player) -> None: increments the wins of a profile by its player object
+    _increment_loss(player: Player) -> None: increments the losses of a profile by its player object
+    _increment_draws(player: Player) -> None: increments the draws of a profile by its player object
+    _check_add_profile(player: Player) -> None: checks if a profile with the given uuid exists and adds it if it doesn't
+    _check_profile(uuid: str) -> bool: checks if a profile with the given uuid exists
+    _add_profile(player: Player) -> None: adds a new profile to the database
+    """
+
+
     def __init__(self, path: str = os.path.abspath('Server/Data/statistics.db')) -> None:
         """
         Initializes the statistics object by creating a connection to the database
@@ -17,22 +36,20 @@ class Statistics:
         self.cursor = self.conn.cursor()
         with self.conn:
             self.cursor.execute(f"""
-                    CREATE TABLE IF NOT EXISTS statistics(
-                    uuid TEXT,
-                    display_name TEXT,
-                    color INT,
-                    wins_first INT,
-                    wins_second INT,
-                    losses_first INT,
-                    losses_second INT,
-                    draws_first INT,
-                    draws_second INT,
-                    moves INT, 
-                    emojis INT
-                    )
-                    """)
+                CREATE TABLE IF NOT EXISTS statistics(
+                uuid TEXT,
+                display_name TEXT,
+                color INT,
+                wins INT,
+                losses INT,
+                draws INT,
+                moves INT, 
+                emojis INT
+                )
+                """)
 
-    def get_statistics(self):
+
+    def get_statistics(self) -> list:
         """
         Returns the statistics of all players
         :return: all statistics
@@ -43,6 +60,7 @@ class Statistics:
             """)
             return self.cursor.fetchall()
 
+
     def increment_emojis(self, player: Player, message: str) -> None:
         """
         Counts the emojis in the given message and updates the emoji
@@ -50,102 +68,116 @@ class Statistics:
         :param player:
         :param message: message that is checked for emojis
         """
-        uuid = str(player.uuid)
-        self.__update_emojis(uuid, emoji.emoji_count(message))
+
+        self._check_add_profile(player)
+
+        with self.conn:
+            self.cursor.execute(f"""
+            UPDATE statistics
+            SET emojis = emojis + ?
+            WHERE uuid = ?
+            """,
+            (emoji.emoji_count(message), str(player.uuid)))
 
     def increment_moves(self, player: Player) -> None:
         """
         Increments the moves of a profile by its uuid
         :param player:
         """
-        uuid = str(player.uuid)
-        if self.__check_profile(uuid):
-            with self.conn:
-                self.cursor.execute(f"""
-                UPDATE statistics
-                SET moves = moves + 1
-                WHERE uuid = ?
-                """, (uuid,))
-        else:
-            self.__add_profile(player, moves=1)
 
-    def increment_wins_fromstate(self, player_list: list[Player], winner: int, starting_player: int) -> None:
-        """
-        Increments the wins of a both players by their player objects
-        :param gamestate:
-        :param player_list:
-        """
-        if not self.__check_profile(str(player_list[1].uuid)):
-            self.__add_profile(player_list[1])
-        if not self.__check_profile(str(player_list[2].uuid)):
-            self.__add_profile(player_list[2])
+        self._check_add_profile(player)
 
-        player1 = ""
-        player2 = ""
-        if starting_player == 1:
-            player1 = "first"
-            player2 = "second"
-        elif starting_player == 2:
-            player1 = "second"
-            player2 = "first"
-        else:
-            raise ValueError('Invalid starting player')
-        if winner == 1:
-            self.__increment_games(player_list[1], "wins_" + player1)
-            self.__increment_games(player_list[2], "losses_" + player2)
+        with self.conn:
+            self.cursor.execute(f"""
+            UPDATE statistics
+            SET moves = moves + 1
+            WHERE uuid = ?
+            """, (str(player.uuid),))
+
+    def increment_games(self, player_list: list[Player], winner: int) -> None:
+        """
+        Increments the wins and losses of both players by their player objects
+        :param player_list: list of None, player1, player2
+        :param winner: 0 if draw, 1 if player1 wins, 2 if player2 wins
+        """
+
+        self._check_add_profile(player_list[1].uuid)
+        self._check_add_profile(player_list[2].uuid)
+
+        if winner == 0:
+            self._increment_draws(player_list[1])
+            self._increment_draws(player_list[2])
+        elif winner == 1:
+            self._increment_win(player_list[1])
+            self._increment_loss(player_list[2])
         elif winner == 2:
-            self.__increment_games(player_list[2], "wins_" + player2)
-            self.__increment_games(player_list[1], "losses_" + player1)
-        elif winner == 0:
-            self.__increment_games(player_list[1], "draws_" + player1)
-            self.__increment_games(player_list[2], "draws_" + player2)
+            self._increment_win(player_list[2])
+            self._increment_loss(player_list[1])
         else:
-            raise ValueError('Invalid winner')
+            raise ValueError("Winner must be 0, 1 or 2")
 
-    def __increment_games(self, player: Player, type: str) -> None:
+    def _increment_win(self, player: Player) -> None:
         """
-        Updates the wins of a profile by its uuid
-        :param uuid: uuid of the profile that is updated
-        :param type: type of the win, can be:
-        'wins_first' (if player started the round), 'wins_second' (if other player started the round),
-        'draws_first', 'draws_second', 'losses_first', 'losses_second'
+        Increments the wins of a profile by its uuid
+        :param player: player object of the profile that is updated
         """
-        uuid = str(player.uuid)
-        if type not in ['wins_first', 'wins_second', 'draws_first', 'draws_second', 'losses_first', 'losses_second']:
-            raise ValueError('Invalid type')
-        if self._check_profile(uuid):
-            with self.conn:
-                self.cursor.execute(f"""
-                   UPDATE statistics
-                   SET {type} = {type} + 1
-                   WHERE uuid = ?
-                   """,
-                                    (uuid,))
-        else:
-            self.__add_profile(player, wins_first=1 if type == 'wins_first' else 0,
-                               wins_second=1 if type == 'wins_second' else 0,
-                               draws_first=1 if type == 'draws_first' else 0,
-                               draws_second=1 if type == 'draws_second' else 0,
-                               losses_first=1 if type == 'losses_first' else 0,
-                               losses_second=1 if type == 'losses_second' else 0)
 
-    def __update_emojis(self, uuid: str, count: int) -> None:
-        """
-        Updates the emojis of a profile by its uuid
-        :param uuid: uuid of the profile that is updated
-        :param count: count of emojis that are added to the statistics
-        """
-        if self.__check_profile(uuid):
-            with self.conn:
-                self.cursor.execute(f"""
+        self._check_add_profile(player)
+
+        with self.conn:
+            self.cursor.execute(f"""
                 UPDATE statistics
-                SET emojis = emojis + ?
+                SET wins = wins + 1
                 WHERE uuid = ?
-                """, (count, uuid,))
-        else:
-            self.__add_profile(uuid, emojis=count)
+                """,
+                (str(player.uuid),)
+            )
+    
+    def _increment_loss(self, player: Player) -> None:
+        """
+        Increments the losses of a profile by its uuid
+        :param player: player object of the profile that is updated
+        """
 
-    def __check_profile(self, uuid: str) -> bool:
+        self._check_add_profile(player)
+
+        with self.conn:
+            self.cursor.execute(f"""
+                UPDATE statistics
+                SET losses = losses + 1
+                WHERE uuid = ?
+                """,
+                (str(player.uuid),)
+            )
+    
+    def _increment_draws(self, player: Player) -> None:
+        """
+        Increments the draws of a profile by its uuid
+        :param player: player object of the profile that is updated
+        """
+
+        self._check_add_profile(player)
+
+        with self.conn:
+            self.cursor.execute(f"""
+                UPDATE statistics
+                SET draws = draws + 1
+                WHERE uuid = ?
+                """,
+                (str(player.uuid),)
+            )
+
+
+    def _check_add_profile(self, player: Player) -> None:
+        """
+        Checks if a profile with the given uuid exists and adds it if it doesn't
+        :param uuid: uuid of the profile that is checked
+        :return: True if the profile exists, False if it doesn't
+        """
+        if not self._check_profile(player.uuid):
+            self._add_profile(player)
+
+    def _check_profile(self, uuid: str) -> bool:
         """
         Checks if a profile with the given uuid exists
         :param uuid: uuid of the profile that is checked
@@ -153,49 +185,31 @@ class Statistics:
         """
         with self.conn:
             self.cursor.execute(f"""
-            SELECT * FROM statistics
-            WHERE uuid = ?
-            """, (uuid,))
+                SELECT * FROM statistics
+                WHERE uuid = ?
+                """, (uuid,))
             return True if self.cursor.fetchone() is not None else False
 
-    def __add_profile(self, player: Player, wins_first: int = 0, wins_second: int = 0,
-                      draws_first: int = 0, draws_second=0, losses_first: int = 0,
-                      losses_second: int = 0, moves: int = 0,
-                      emojis: int = 0) -> None:
+    def _add_profile(self, player: Player) -> None:
         """
         Adds a new profile to the database
-        :param uuid: uuid of the profile that is added
-        :param wins_first: wins if player started the round
-        :param wins_second: wins if other player started the round
-        :param draws_first: draws if player started the round
-        :param draws_second: draws if other player started the round
-        :param losses_first: losses if player started the round
-        :param losses_second: losses if other player started the round
-        :param moves: moves made by the profile
-        :param emojis: emojis used by the profile
+        :param player: player object of the profile that is added
         """
-
-        uuid = str(player.uuid)
-        display_name = player.display_name
-        color = player.color
-        ready = player.ready
         with self.conn:
             self.cursor.execute(f"""
-            INSERT INTO statistics
-            VALUES (
-            :uuid,
-            :display_name,
-            :color,
-            :wins_first, 
-            :wins_second, 
-            :losses_first,
-            :losses_second,
-            :draws_first,
-            :draws_second,
-            :moves, 
-            :emojis
+                INSERT INTO statistics
+                VALUES (
+                :uuid,
+                :display_name,
+                :color,
+                :wins,
+                :losses,
+                :draws,
+                :moves,
+                :emojis
+                )
+                """,
+                {'uuid': str(player.uuid), 'display_name': player.display_name, 'color': player.color,
+                    'wins': 0, 'losses': 0, 'draws': 0,
+                    'moves': 0, 'emojis': 0}
             )
-            """, {'uuid': uuid, 'display_name': display_name, 'color': color, 'wins_first': wins_first,
-                  'wins_second': wins_second,
-                  'losses_first': losses_first, 'losses_second': losses_second, 'draws_first': draws_first,
-                  'draws_second': draws_second, 'moves': moves, 'emojis': emojis})
