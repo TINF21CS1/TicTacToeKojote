@@ -203,8 +203,8 @@ class GameClient:
                     self._playfield = message_json["updated_playfield"]
                     self._current_player = self.get_player_by_uuid(message_json["next_player_uuid"])
                 case "statistics/statistics":
-                    for player, statistic in message_json["server_statistics"]:
-                        self._statistics[Player(**player)] = statistic
+                    for entry in message_json["server_statistics"]:
+                        self._statistics[Player(**entry["player"])] = entry["statistics"]
                 case "game/error":
                     self._error_history.append(message_json["error_message"])
                     logger.error(f"Game error: {message_json['error_message']}") 
