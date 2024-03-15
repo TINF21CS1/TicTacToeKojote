@@ -32,7 +32,7 @@ class GameClient:
         _current_player (Player): The player that is currently allowed to make a move.
         _lobby_status (list[str]): The status of the lobby. Contains all players in the lobby.
         _playfield (list[list[int]]): The status of the game. Contains the current playfield.
-        _statistics: The statistics of the game. TODO
+        _statistics (dict[Player:dict[str:int]] ): The statistics of the game. 
         _chat_history (list[tuple[Player, str]]): The chat history of the game. Contains all messages sent in the game.
         _winner (Player): The winner of the game. None if the game is not finished yet or it is a draw.
         _error_history (list[str]): The error history of the game. Contains all errors that occurred for this client.
@@ -71,7 +71,7 @@ class GameClient:
         self._current_player: Player = None
         self._lobby_status: list[str] = []
         self._playfield: list[list[int]] = [[0,0,0],[0,0,0],[0,0,0]]
-        self._statistics = None # TODO
+        self._statistics = {}
         self._chat_history: list[tuple[Player, str]] = []
         self._winner: Player = None
         self._error_history: list[str] = []
@@ -203,8 +203,8 @@ class GameClient:
                     self._playfield = message_json["updated_playfield"]
                     self._current_player = self.get_player_by_uuid(message_json["next_player_uuid"])
                 case "statistics/statistics":
-                    # TODO: Add statistics handling
-                    pass
+                    for entry in message_json["server_statistics"]:
+                        self._statistics[Player(**entry["player"])] = entry["statistics"]
                 case "game/error":
                     self._error_history.append(message_json["error_message"])
                     logger.error(f"Game error: {message_json['error_message']}") 

@@ -84,8 +84,6 @@ class GameClientUI(GameClient):
                 await self.close()
             case "game/turn":
                 self.send_gamestate_to_ui()
-            case "statistics/statistics":
-                pass
             case "game/error":
                 self._out_queue.put({
                     "message_type": "game/error",
@@ -141,6 +139,12 @@ class GameClientUI(GameClient):
                     await self.terminate()
                 case "game/gamestate":
                     self.send_gamestate_to_ui()
+                case "statistics/statistics":
+                    self._out_queue.put({
+                        "message_type": "statistics/statistics",
+                        "statistics": self._statistics
+                    })
+                    self._tk_root.event_generate("<<statistics/statistics>>", when="tail")
                 case _:
                     logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
                     return

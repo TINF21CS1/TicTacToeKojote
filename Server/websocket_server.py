@@ -1,6 +1,8 @@
 from Server.game import Game
 from Server.player import Player
 from Server.rulebase import RuleBase
+from Server.statistics import Statistics
+
 import asyncio
 import websockets
 import logging
@@ -19,6 +21,7 @@ class Lobby:
         self._inprogress = False
         self._port = port
         self._connections = set()
+        self._stats = Statistics()
 
         with open("./json_schema/client_to_server.json", "r") as f:
             self._json_schema = json.load(f)
@@ -49,9 +52,19 @@ class Lobby:
 
                         self._players[message_json["profile"]["uuid"]] = Player(uuid=UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
+                        # send new lobby status
                         websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/status",
                             "players": [player.as_dict() for player in self._players.values()],
+                        }))
+
+                        # send lobby statistics
+                        stats = self._stats.get_statistics()
+                        await websocket.send(json.dumps({
+                            "message_type": "statistics/statistics",
+                            "server_statistics": [
+                                {"player": {"uuid": u, "display_name": d, "color": c},"statistics":{"wins": w, "losses": l, "draws": r, "moves": m, "emojis": e}} for (u, d, c, w, l, r, m, e) in stats
+                            ],
                         }))
 
 
@@ -97,6 +110,7 @@ class Lobby:
                                 # make move, catch illegal move
                                 try:
                                     self._game.move(self._game.players.index(self._players[message_json["player_uuid"]]), (message_json["move"]["x"], message_json["move"]["y"]))
+                                    self._stats.increment_moves(self._players[message_json["player_uuid"]])
                                 except ValueError as e:
                                     await websocket.send(json.dumps({"message_type": "game/error", "error_message": str(e)}))
                                 
@@ -119,6 +133,7 @@ class Lobby:
                             "sender_uuid": message_json["player_uuid"],
                             "message": message_json["message"],
                         }))
+                        self._stats.increment_emojis(self._players[message_json["player_uuid"]], message_json["message"])
 
 
                     case "server/terminate":
@@ -170,7 +185,9 @@ class Lobby:
     async def _end_game(self):
         self._inprogress = False
 
-        await websockets.broadcast(self._connections, json.dumps({
+        self._stats.increment_games(self._game.players, self._game.state.winner)
+
+        websockets.broadcast(self._connections, json.dumps({
                 "message_type": "game/end",
                 "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
                 "final_playfield": self._game.state.playfield,
