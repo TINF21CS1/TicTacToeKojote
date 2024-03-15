@@ -185,9 +185,9 @@ class Lobby:
     async def _end_game(self):
         self._inprogress = False
 
-        self._stats.increment_games(self._players, self._game.state.winner)
+        self._stats.increment_games(self._game.players, self._game.state.winner)
 
-        await websockets.broadcast(self._connections, json.dumps({
+        websockets.broadcast(self._connections, json.dumps({
                 "message_type": "game/end",
                 "winner_uuid": str(self._game.winner.uuid) if self._game.winner else None,
                 "final_playfield": self._game.state.playfield,
