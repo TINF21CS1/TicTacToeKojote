@@ -1,0 +1,90 @@
+@startuml Server
+!pragma useIntermediatePackages false
+
+class Server.game.Game {
+    - _uuid: UUID
+    - _id: int
+    + state: Server.gamestate.GameState
+    + players: list[Server.player.Player]
+    + rule_base: RuleBase
+
+    + Game(player1: Player, player2: Player, rule_base: RuleBase = RuleBase())
+    + None move(player: int, new_position: tuple[int, int])
+    + str current_player_uuid()
+    + Server.player.Player winner()
+}
+class Server.gamestate.GameState {
+    - _playfield: list[list[int]]
+    - _finished: bool 
+    - _winner: int 
+    - _current_player: int 
+
+    + GameState(playfield_dimensions: tuple[int, int] = (3,3))
+    + None set_player_position(player: int, new_position: tuple[int, int])
+    + None set_winner(winner: int)
+    + int winner()
+    + bool finished()
+    + list[list[int]] playfield()
+    + int playfield_value(position: tuple[int, int])
+    + tuple[int, int] playfield_dimensions()
+    + int current_player()
+}
+class Server.player.Player {
+  + uuid: UUID
+  + display_name: str
+  + color: int
+  + ready: bool
+
+  + Player(display_name: str, color: int, uuid: UUID = uuid4(), ready:bool = False)
+  + dict[str, Any] as_dict()
+  + Player from_dict(data: dict[str, Any])
+}
+class Server.rulebase.RuleBase {
+  - _playfield_dimensions: tuple[int, int]
+
+    + RuleBase(playfield_dimensions: tuple[int, int] = (3,3))
+    + bool is_move_valid(state: GameState, new_position: tuple[int, int])
+    + None check_win(state: GameState)
+    + bool is_game_state_valid(state: GameState)
+    + list[list[int]] transpose(matrix: list[list[int]])
+}
+class Server.websocket_server.Lobby {
+  - _players: dict[str, Server.player.Player]
+  - _game: Server.game.Game
+  - _inprogress: bool
+  - _port: int
+  - _connections: list[websockets.server.WebSocketServerProtocol]
+  - _stats: Server.statistics.Statistics
+  - _json_schema: dict[str, Any]
+
+  + Lobby(admin:Player, port: int = 8765)
+  + None handler(websocket: websockets.server.WebSocketServerProtocol)
+  - None _end_game()
+  + None start_server()
+  + None run()
+}
+class Server.statistics.Statistics {
+  - path: str
+  - conn: sqlite3.Connection
+  - cursor: sqlite3.Cursor
+
+    + Statistics(path: str = os.path.abspath('Server/Data/statistics.db'))
+    + list[tuple[str, int]] get_statistics()
+    + None increment_emojis(player: Player, message: str)
+    + None increment_moves(player: Player)
+    + None increment_games(player_list: list[Player], winner: int)
+    - None _increment_win(player: Player)
+    - None _increment_loss(player: Player)
+    - None _increment_draws(player: Player)
+    - None _check_add_profile(player: Player)
+    - bool _check_profile(uuid_str: str)
+    - None _add_profile(player: Player)
+}
+Server.game.Game *-- Server.rulebase.RuleBase
+Server.game.Game *-- Server.gamestate.GameState
+Server.game.Game *-- Server.player.Player
+Server.websocket_server.Lobby *-- Server.game.Game
+Server.websocket_server.Lobby *-- Server.statistics.Statistics
+Server.websocket_server.Lobby *-- Server.player.Player
+@enduml
+
