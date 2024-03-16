@@ -1,0 +1,31 @@
+@startuml Server
+!pragma useIntermediatePackages false
+
+class Server.websocket_server.Lobby {
+  - _connections: set[WebSocketServerProtocol]
+  + handler(websocket: WebSocketServerProtocol)
+}
+
+class websockets.WebSocketServerProtocol {
+    + send(message: str)
+    + str recv()
+}
+
+note left of Server.websocket_server.Lobby::handler
+    Whenever a new connection is made, the handler is called. 
+    The handler adds the connection to the set of connections 
+    (_connections) and removes it when the connection is closed.
+    Whenever a message is received, the handler uses 
+    websockets.broadcast() to send the updated game state to all 
+    connections in _connections.
+end note
+
+note bottom of websockets.WebSocketServerProtocol
+    The WebSocketServerProtocol is a protocol that is used to 
+    handle the WebSocket connection. It has methods to send and 
+    receive messages, and it also has methods to handle the 
+    opening and closing of the connection.
+end note
+
+Server.websocket_server.Lobby o-- websockets.WebSocketServerProtocol
+@enduml
