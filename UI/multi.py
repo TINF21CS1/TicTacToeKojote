@@ -27,6 +27,7 @@ class Join(base_frame):
         #self.bind('<<game/start>>', self._start_game)
         self.master.network_events['lobby/status'] = self._update_lobby
         self.master.network_events['game/start'] = self._start_game
+        self.master.network_events['lobby/kick'] = self._lobby_kick
         self.bind('<Destroy>', lambda *args: self.on_destroy())
         self.ready = False
         if opponent not in [player_type.unknown, player_type.local]:
@@ -90,6 +91,11 @@ class Join(base_frame):
     def on_destroy(self):
         del self.master.network_events['lobby/status']
         del self.master.network_events['game/start']
+
+    def _lobby_kick(self, queue):
+        msg = messages(type='info', message=f'You have been kicked from the lobby by the host')
+        msg.display()
+        self._menu()
 
 class LocalProfileSelection(base_frame):
     def __init__(self, master, *args, **kwargs):
