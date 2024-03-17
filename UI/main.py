@@ -86,7 +86,8 @@ class Root(tk.Tk):
             function = self.network_events[message_type]
         except KeyError:
             print(f"message type not found {message_type}")
-        function(queue)
+        else:
+            function(queue)
 
 def main():
     app = Root()
