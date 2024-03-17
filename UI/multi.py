@@ -22,6 +22,7 @@ class Join(base_frame):
         self._display_widgets()
         self.playerlist = []
         self.local_players = local_players
+        self.ai_players = []
         #self.bind('<<lobby/status>>', self._update_lobby)
         #self.bind('<<game/start>>', self._start_game)
         self.master.network_events['lobby/status'] = self._update_lobby
@@ -32,6 +33,7 @@ class Join(base_frame):
             server_thread(self.master.players[self.master.player])
         if opponent in [player_type.ai_strong, player_type.ai_weak]:
             ai_context = AIContext(AdvancedAIStrategy() if opponent == player_type.ai_strong else WeakAIStrategy())
+            self.ai_players.append(ai_context.get_uuid())
             self.master.ai = ai_context.run_strategy()
 
     def _create_widgets(self, opponent):
@@ -65,8 +67,12 @@ class Join(base_frame):
         self.playerlist = []
         for player in queue['player']:
             rdy = '\u2611' if player.ready else ''
-            self.playerlist.append([tk.Label(self, text=rdy + ' ' + player.display_name),
-                                    tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: list(self.master.out_queue.values())[0].put({'message_type': 'lobby/kick', 'args' : {'player_to_kick': uuid}}))])
+            buffer = []
+            buffer.append(tk.Label(self, text=rdy + ' ' + player.display_name))
+            print(player.uuid, self.local_players + self.ai_players)
+            if(player.uuid not in (self.local_players + self.ai_players)):
+                buffer.append(tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: list(self.master.out_queue.values())[0].put({'message_type': 'lobby/kick', 'args' : {'player_to_kick': uuid}})))
+            self.playerlist.append(buffer)
             if(str(player.uuid) == str(self.master.players[self.master.player].uuid)):
                 self.ready = player.ready
                 if(player.ready):
@@ -74,8 +80,8 @@ class Join(base_frame):
                 else:
                     self.btnRdy.config(text="Ready")
         for i, player in enumerate(self.playerlist):
-            player[0].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4+i)
-            player[1].grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=4+i)
+            for j, object in enumerate(player):
+                object.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2+j, row=4+i)
         
 
     def _start_game(self, queue):

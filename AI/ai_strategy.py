@@ -7,6 +7,7 @@ import asyncio
 import random
 import logging
 import copy
+from uuid import UUID
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -28,6 +29,9 @@ class AIStrategy(ABC, GameClient):
     def post_init(self):
         #needs to be called by inheriting classes at the end of their __init__ function
         super().__init__(self._ip, self._port, self._player)
+
+    def get_uuid(self):
+        return UUID(self._current_uuid)
 
     def thread_entry(self):
         asyncio.run(self.run())
