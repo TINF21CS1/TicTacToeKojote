@@ -25,15 +25,22 @@ class player(tk.Container):
 
     def _create_widgets(self, number):
         self.frame = tk.Frame(self)
-        self.heading = tk.Label(self.frame.widget, text=f'Player {number}', font=self.master.master.title_font)
-        self.name = tk.Label(self.frame.widget, text=f'Player {number}')
-        self.symbol = tk.Label(self.frame.widget, text="unknown")
+        self.heading = tk.Label(self.frame.widget, text=f'Player {number}', font=self.master.master.title_font, border=0, margin=0)
+        self.name = tk.Label(self.frame.widget, text=f'Player {number}', border=0, margin=0)
+        self.symbol = tk.Label(self.frame.widget, text="unknown", border=0, margin=0)
             
     def highlight(self, highlight=True):
+        obj = [self.heading, self.name, self.symbol]
         if(highlight):
-            self.frame.config(border_color='green')
+            self.frame.config(bg=color.green)
+            for o in obj:
+                o.config(bg=color.green)
+                o.config(fg=color.green.complement)
         else:
-            self.frame.config(border_color=color.anthracite)
+            self.frame.config(bg=color.white)
+            for o in obj:
+                o.config(bg=color.white)
+                o.config(fg=color.white.complement)
 
     def set(self, name, type, uuid):
         self.name.config(text=name)
