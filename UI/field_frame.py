@@ -92,7 +92,6 @@ class Field(base_frame):
         self._create_widgets(chat, display_chat=len(kwargs)==1)
         self.controller = field_controller(self, [player1, player2], starting_player.uuid, **kwargs)
         self._display_widgets()
-        print("wigets displayed")
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
         #self.bind("<<game/end>>", self.controller.end)
         #self.bind("<<game/error>>", self.controller.error)

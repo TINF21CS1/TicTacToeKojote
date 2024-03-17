@@ -31,7 +31,6 @@ class gamefield_controller:
         self.currentplayer = starting_uuid
         self.input_methods = {input_methods.mouse: [], input_methods.qeyc: [], input_methods.uom: []}
         for uuid, input_method in kwargs.items():
-            print(uuid, input_method)
             self.input_methods[input_method].append(UUID(uuid))
         self._bind()
     
