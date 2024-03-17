@@ -151,11 +151,28 @@ class GameClientUI(GameClient):
 async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int) -> None:
     """The function that is run in the client thread. It connects to the server. It sends and receives messages."""
 
-    client = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
+    for _ in range(5):
+        try:
+            client = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
 
-    while client._websocket.open:
-        await asyncio.create_task(client.listen())
-        await asyncio.create_task(client.await_commands())
+            while client._websocket.open:
+                try:
+                    await asyncio.create_task(client.listen())
+                    await asyncio.create_task(client.await_commands())
+                except Exception as e:
+                    logger.error(e)
+                    out_queue.put({"message_type": "python/error", "error": e})
+                    tk_root.event_generate("<<queue_input>>", when="tail")
+            break
+        
+        # If the client is not able to connect to the server, try again
+        except Exception as e:
+            logger.error(e)
+            await asyncio.sleep(1)
+    
+    # If the client is not able to connect to the server after 5 tries, send an error message to the UI
+    out_queue.put({"message_type": "python/error", "error": e})
+    tk_root.event_generate("<<queue_input>>", when="tail")
 
 def asyncio_thread_wrapper(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int):
     """Wrapper function to run the client thread function in an asyncio event loop."""
