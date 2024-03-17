@@ -8,6 +8,7 @@ class Chat(tk.Frame):
         self._display_widgets()
         self.root.bind('<Return>', lambda *args: self._enter())
         self.root.network_events['chat/receive'] = self._chat_receive
+        self.widget.bind('<Destroy>', lambda *args: self._on_destroy())
 
     def _create_widgets(self, chat):
         #self.txtChat = tk.Text(self.widget, state=tk.DISABLED)
@@ -38,8 +39,9 @@ class Chat(tk.Frame):
         self.txtChat.insert(tk.END, f"{queue['sender'].display_name}: {queue['message']}\n")
         self.txtChat.config(state=tk.DISABLED)
 
-    def on_destroy(self):
-        del self.master.network_events['chat/receive']
+    def _on_destroy(self):
+        print(self.root.network_events)
+        del self.root.network_events['chat/receive']
 
     def _enter(self):
         if(self.focus_get() == self.etrMessage.widget):

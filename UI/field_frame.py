@@ -98,7 +98,7 @@ class Field(base_frame):
         self.master.network_events['game/turn'] = self.controller.sub_controller.turn
         self.master.network_events['game/end'] = self.controller.end
         self.master.network_events['game/error'] = self.controller.error
-        self.master.out_queue[starting_player.uuid].put({'message_type': 'game/gamestate', 'args' :{} })
+        self.bind('<Destroy>', lambda *args: self.on_destroy())
 
     def _create_widgets(self, chat, display_chat=True):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)

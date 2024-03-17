@@ -27,7 +27,7 @@ class Join(base_frame):
         #self.bind('<<game/start>>', self._start_game)
         self.master.network_events['lobby/status'] = self._update_lobby
         self.master.network_events['game/start'] = self._start_game
-        self.bind('Destroy', lambda *args: self.on_destroy())
+        self.bind('<Destroy>', lambda *args: self.on_destroy())
         self.ready = False
         if opponent not in [player_type.unknown, player_type.local]:
             server_thread(self.master.players[self.master.player])
@@ -152,6 +152,7 @@ class Lobby_Overview(tk.Container):
         self._display_widgets()
         self.master.master.network_events['lobby/connect'] = self._lobby_connect
         self.master.master.network_events['lobby/connect_error'] = self._connect_error
+        self.bind('<Destroy>', lambda *args: self.on_destroy())
 
     def _create_widgets(self):
         self.frame = tk.Frame(self)
@@ -199,6 +200,10 @@ class Lobby_Overview(tk.Container):
     def _lobby_connect(self, queue):
         root = self.master.master
         root.show(Join, local_players=[root.players[root.player].uuid])
+
+    def on_destroy(self):
+        del self.master.master.network_events['lobby/connect']
+        del self.master.master.network_events['lobby/connect_error']
 
 class Multiplayer(base_frame):
     def __new__(cls, master, *args, **kwargs):
