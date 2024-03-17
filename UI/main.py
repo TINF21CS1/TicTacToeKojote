@@ -74,9 +74,6 @@ class Root(tk.Tk):
     def start_mainloop(self):
         self.mainloop()
 
-    def start_server(self):
-        pass
-
     def network_event_handler(self):
         queue = self.in_queue.get()
         message_type = queue.pop('message_type', 'message type not found')
