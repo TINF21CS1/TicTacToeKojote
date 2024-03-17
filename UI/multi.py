@@ -101,6 +101,7 @@ class LocalProfileSelection(base_frame):
         self.drpPlayer2 = tk.OptionMenu(self, self.varPlayer2, *[o.display_name for o in self.master.players])
         self.btnnew = tk.Button(self, text='New Profile', command=lambda *args: self.master.show(NewProfile, return_to=LocalProfileSelection))
         self.btnStart = tk.Button(self, text='Start', command=lambda *args: self._start_game())
+        self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
 
     def _display_widgets(self):
         self.columnconfigure([0, 6], weight=1)
@@ -118,6 +119,7 @@ class LocalProfileSelection(base_frame):
         self.drpPlayer2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=4, columnspan=2)
         self.btnnew.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=5)
         self.btnStart.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=5, columnspan=2)
+        self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
     def _start_game(self):
         if(self.varPlayer1.get() == 'Select' or self.varPlayer2.get() == 'Select' or self.varPlayer1.get() == self.varPlayer2.get()):
@@ -142,6 +144,7 @@ class Lobby_Overview(tk.Container):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
+        self.master.master.network_events['lobby/connect'] = self._lobby_connect
 
     def _create_widgets(self):
         self.frame = tk.Frame(self)
@@ -177,6 +180,9 @@ class Lobby_Overview(tk.Container):
         root = self.master.master
         root.out_queue = {root.players[root.player].uuid: Queue()}
         root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
+
+    def _lobby_connect(self, queue):
+        root = self.master.master
         root.show(Join, local_players=[root.players[root.player].uuid])
 
 class Multiplayer(base_frame):

@@ -117,7 +117,7 @@ class Field(base_frame):
         self.heading.grid(row=0, column=0, columnspan=3)
         self.player[0].grid(row=1, column=0)
         self.player[1].grid(row=1, column=2)
-        self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=1)
+        self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=0, columnspan=3)
         if(hasattr(self, 'chat')):
             self.columnconfigure(3, weight=1)
             self.chat.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=3, rowspan=3)

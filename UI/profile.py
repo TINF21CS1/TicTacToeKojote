@@ -6,6 +6,7 @@ from .base_frame import base_frame
 from .field_frame import Field
 from Server.player import Player
 from Client.profile_save import Profile as ProfileIO
+from .messages import messages
 
 class NewProfile(base_frame):
     def __init__(self, master, *args, **kwargs):
@@ -16,6 +17,7 @@ class NewProfile(base_frame):
         self.id = kwargs.pop('id', None)
         self._create_widgets()
         self._display_widgets()
+        self.etrName.focus_set()
 
     def _create_widgets(self):
         task = 'Edit' if self.edit else 'Create'
@@ -25,6 +27,7 @@ class NewProfile(base_frame):
         self.etrName.val = self.master.players[self.master.player].display_name if self.edit else ''
         self.btnCreate = tk.Button(self, text=f'{task} profile', command=lambda *args: self._create())
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
+        self.master.bind('<Return>', lambda *args: self._enter())
 
     def _display_widgets(self):
         self.columnconfigure([0, 10], weight=1)
@@ -45,7 +48,15 @@ class NewProfile(base_frame):
         self.btnCreate.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=6, row=8, columnspan=3)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=9, row=1)
 
+    def _enter(self):
+        if(self.focus_get() == self.etrName.widget):
+            self._create()
+
     def _create(self):
+        if(self.etrName.val in [p.display_name for p in self.master.players]): 
+            msg = messages(type='info', message='This name is already in use.\nPlease select a differnt name!')
+            msg.display()
+            return
         if(self.edit):
             for i, player in enumerate(self.master.players):
                 if player.uuid == self.master.players[self.master.player].uuid:
