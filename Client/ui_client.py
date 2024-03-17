@@ -171,7 +171,7 @@ async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue,
             await asyncio.sleep(1)
     
     # If the client is not able to connect to the server after 5 tries, send an error message to the UI
-    out_queue.put({"message_type": "python/error", "error": e})
+    out_queue.put({"message_type": "python/error", "error": ConnectionError("Could not connect to server after 5 tries. Please try again later.")})
     tk_root.event_generate("<<queue_input>>", when="tail")
 
 def asyncio_thread_wrapper(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int):
