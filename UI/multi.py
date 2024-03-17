@@ -54,8 +54,6 @@ class Join(base_frame):
         # display the buttons created in the _create_widgets method
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
         self.btnRdy.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
-        if hasattr(self, 'btnRdy2'):
-            self.btnRdy2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.chat.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=2, rowspan=7)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
@@ -82,42 +80,6 @@ class Join(base_frame):
     def on_destroy(self):
         del self.master.network_events['lobby/status']
         del self.master.network_events['game/start']
-
-class Lobby_Overview(tk.Container):
-    def __init__(self, master):
-        super().__init__(master)
-        self._create_widgets()
-        self._display_widgets()
-
-    def _create_widgets(self):
-        self.frame = tk.Frame(self)
-        self.innerframe = self.frame.widget
-        self.lblHeading = tk.Label(self.innerframe, text="Join public lobbies", font=self.master.master.title_font)
-
-        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self.manually())
-        self.etrAddress = tk.Entry(self.innerframe)
-        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda *args: self._connect())
-
-    def _display_widgets(self):
-        self.frame.pack(expand=True, fill=tk.BOTH)
-        self.innerframe.columnconfigure([0, 2, 4], weight=1)
-        self.innerframe.columnconfigure([1, 3], weight=5)
-        self.innerframe.rowconfigure([0, 4], weight=2)
-        self.innerframe.rowconfigure([1, 3], weight=1)
-        self.innerframe.rowconfigure([2], weight=40)
-        self.lblHeading.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=0, columnspan=3)
-        self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=3)
-
-    def manually(self):
-        self.btnManual.grid_forget()
-        self.etrAddress.grid(column=1, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
-        self.btnConnect.grid(column=3, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
-
-    def _connect(self):
-        root = self.master.master
-        root.out_queue = {root.players[root.player].uuid: Queue()}
-        root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
-        root.show(Join, local_players=[root.players[root.player].uuid])
 
 class LocalProfileSelection(base_frame):
     def __init__(self, master, *args, **kwargs):
@@ -170,6 +132,48 @@ class LocalProfileSelection(base_frame):
         self.master.out_queue[player1.uuid].put({'message_type': 'lobby/ready', 'args' : {'ready': True}})
         self.master.out_queue[player2.uuid].put({'message_type': 'lobby/ready', 'args' : {'ready': True}})
         self.master.show(Join, opponent=player_type.local, local_players=[player1.uuid, player2.uuid])
+
+class Lobby_Overview(tk.Container):
+    def __init__(self, master):
+        super().__init__(master)
+        self._create_widgets()
+        self._display_widgets()
+
+    def _create_widgets(self):
+        self.frame = tk.Frame(self)
+        self.innerframe = self.frame.widget
+        self.lblHeading = tk.Label(self.innerframe, text="Join public lobbies", font=self.master.master.title_font)
+
+        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self.manually())
+        self.etrAddress = tk.Entry(self.innerframe)
+        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda *args: self._connect())
+        self.master.master.bind('<Return>', lambda *args: self._enter())
+
+    def _display_widgets(self):
+        self.frame.pack(expand=True, fill=tk.BOTH)
+        self.innerframe.columnconfigure([0, 2, 4], weight=1)
+        self.innerframe.columnconfigure([1, 3], weight=5)
+        self.innerframe.rowconfigure([0, 4], weight=2)
+        self.innerframe.rowconfigure([1, 3], weight=1)
+        self.innerframe.rowconfigure([2], weight=40)
+        self.lblHeading.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=0, columnspan=3)
+        self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=3)
+
+    def manually(self):
+        self.btnManual.grid_forget()
+        self.etrAddress.grid(column=1, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
+        self.btnConnect.grid(column=3, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
+        self.etrAddress.focus_set()
+
+    def _enter(self):
+        if(self.focus_get() == self.etrAddress.widget):
+            self._connect()
+
+    def _connect(self):
+        root = self.master.master
+        root.out_queue = {root.players[root.player].uuid: Queue()}
+        root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
+        root.show(Join, local_players=[root.players[root.player].uuid])
 
 class Multiplayer(base_frame):
     def __new__(cls, master, *args, **kwargs):

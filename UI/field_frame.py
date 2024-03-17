@@ -78,7 +78,7 @@ class field_controller():
 class Field(base_frame):
     def __init__(self, master, chat, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
         super().__init__(master)
-        self._create_widgets(chat)
+        self._create_widgets(chat, display_chat=len(kwargs)==1)
         self.controller = field_controller(self, [starting_player, opponent], starting_player.uuid, **kwargs)
         self._display_widgets()
         print("wigets displayed")
@@ -90,24 +90,27 @@ class Field(base_frame):
         self.master.network_events['game/error'] = self.controller.error
         self.master.out_queue[starting_player.uuid].put({'message_type': 'game/gamestate', 'args' :{} })
 
-    def _create_widgets(self, chat):
+    def _create_widgets(self, chat, display_chat=True):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)
         self.player = []
         self.player.append(player(self, 1))
         self.player.append(player(self, 2))
         self.gamefield = gamefield(self)
-        self.chat = Chat(self, self.master, chat)
+        if(display_chat):
+            self.chat = Chat(self, self.master, chat)
         self.close = tk.Button(self, text="close")
 
     def _display_widgets(self):
-        self.columnconfigure([1,3], weight=1)
+        self.columnconfigure([1], weight=1)
         self.rowconfigure(2, weight=1)
 
         self.heading.grid(row=0, column=0, columnspan=3)
         self.player[0].grid(row=1, column=0)
         self.player[1].grid(row=1, column=2)
         self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=1)
-        self.chat.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=3, rowspan=3)
+        if(hasattr(self, 'chat')):
+            self.columnconfigure(3, weight=1)
+            self.chat.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=3, rowspan=3)
         self.close.grid(row=3, column=2)
 
     def on_destroy(self):

@@ -6,6 +6,7 @@ class Chat(tk.Frame):
         self.root = root
         self._create_widgets(chat)
         self._display_widgets()
+        self.root.bind('<Return>', lambda *args: self._enter())
         self.root.network_events['chat/receive'] = self._chat_receive
 
     def _create_widgets(self, chat):
@@ -29,7 +30,7 @@ class Chat(tk.Frame):
         self.btnSend.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=1, columnspan=2)
 
     def _send(self):
-        self.root.out_queue.values[0].put({'message_type': 'chat/message', 'args' : {'message': self.etrMessage.val}})
+        list(self.root.out_queue.values())[0].put({'message_type': 'chat/message', 'args' : {'message': self.etrMessage.val}})
         self.etrMessage.val = ""
 
     def _chat_receive(self, queue):
@@ -39,3 +40,7 @@ class Chat(tk.Frame):
 
     def on_destroy(self):
         del self.master.network_events['chat/receive']
+
+    def _enter(self):
+        if(self.focus_get() == self.etrMessage.widget):
+            self._send()
