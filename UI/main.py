@@ -40,20 +40,30 @@ class Root(tk.Tk):
         if(self.current_frame != None):
             try:
                 self.current_frame.grid_forget()
-                self.current_frame.destroy()
+                if(self.current_frame.__class__.__name__ not in self.frames):
+                    self.current_frame.destroy()
             except _tkinter.TclError:
                 pass
         if(cache):
             if(Frame.__name__ not in self.frames):
                 self.add_frame(Frame)
             frame = self.frames[Frame.__name__]
+        elif(Frame.__name__ in self.frames):
+            frame = self.frames[Frame.__name__]
         else:
             frame = Frame(self, *args, **kwargs)
-            if(frame != None):
-                frame.grid(row=0, column=0, sticky="nsew")
+        if(frame != None):
+            frame.grid(row=0, column=0, sticky="nsew")
         self.current_frame = frame
         return frame
         
+    def cache_current_frame(self):
+        self.frames[self.current_frame.__class__.__name__] = self.current_frame
+
+    def remove_cached_frame(self, Frame):
+        if(Frame.__name__ in self.frames):
+            self.frames.pop(Frame.__name__)
+
     def add_frame(self, Frame):
         self.frames[Frame.__name__] = Frame(self)
         self.frames[Frame.__name__].grid(row=0, column=0, sticky="nsew")

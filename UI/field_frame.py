@@ -62,6 +62,39 @@ class player(tk.Container):
         self.name.grid(row=1, column=0)
         self.symbol.grid(row=1, column=1)
 
+class game_menu(base_frame):
+    def __init__(self, master, *args, **kwargs):
+        super().__init__(master)
+        self._create_widgets()
+        self._display_widgets()
+        self.address_toogle = False
+
+    def _create_widgets(self):
+        self.lblTitle = tk.Label(self, text='TicTacToe-Kojote', font=self.master.title_font)
+        self.btnBack = tk.Button(self, text='Continue', command=lambda *args: self.master.show(Field))
+        self.btnMenu = tk.Button(self, text='Main menu', command=lambda *args: self._menu())
+        self.btnExit = tk.Button(self, text='Exit', command=lambda: self.master.destroy())
+
+    def _display_widgets(self):
+        self.columnconfigure([0, 6], weight=1)
+        self.columnconfigure([1, 5], weight=2)
+        self.columnconfigure([2, 4], weight=4)
+        self.columnconfigure([3], weight=2)
+        self.rowconfigure([0, 11], weight=1)
+        self.rowconfigure([2], weight=2)
+        self.rowconfigure([4, 6, 10, 12], weight=4)
+        self.rowconfigure([3, 5, 7, 11, 13], weight=2)
+        # display the buttons created in the _create_widgets method
+        self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
+        self.btnBack.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4, columnspan=3)
+        self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6, columnspan=3)
+        self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+
+    def _menu(self):
+        self.master.remove_cached_frame(Field)
+        list(self.master.out_queue.values())[0].put({'message_type': 'server/terminate', 'args' :{} })
+        self.master.show_menu()
+
 class field_controller():
     def __init__(self, view, players, starting_uuid, **kwargs):
         self.view = view
@@ -71,11 +104,11 @@ class field_controller():
         self._bind()
 
     def _bind(self):
-        self.view.close.config(command=lambda *args: self.close())
+        self.view.menu.config(command=lambda *args: self._menu())
 
-    def close(self):
-        list(self.view.master.out_queue.values())[0].put({'message_type': 'server/terminate', 'args' :{} })
-        self.view.master.show_menu()
+    def _menu(self):
+        self.view.master.cache_current_frame()
+        self.view.master.show(game_menu)
 
     def end(self, queue, *args):
         root = self.view.master
@@ -98,7 +131,9 @@ class Field(base_frame):
         self.master.network_events['game/turn'] = self.controller.sub_controller.turn
         self.master.network_events['game/end'] = self.controller.end
         self.master.network_events['game/error'] = self.controller.error
+        self.master.out_queue[player1.uuid].put({'message_type': 'game/gamestate', 'args' :{} })
         self.bind('<Destroy>', lambda *args: self.on_destroy())
+        self.master.remove_cached_frame(Field)
 
     def _create_widgets(self, chat, display_chat=True):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)
@@ -108,7 +143,7 @@ class Field(base_frame):
         self.gamefield = gamefield(self)
         if(display_chat):
             self.chat = Chat(self, self.master, chat)
-        self.close = tk.Button(self, text="close")
+        self.menu = tk.Button(self, text="Menu")
 
     def _display_widgets(self):
         self.columnconfigure([1], weight=1)
@@ -120,8 +155,8 @@ class Field(base_frame):
         self.gamefield.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=2, column=0, columnspan=3)
         if(hasattr(self, 'chat')):
             self.columnconfigure(3, weight=1)
-            self.chat.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=3, rowspan=3)
-        self.close.grid(row=3, column=2)
+            self.chat.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=1, column=3, rowspan=3, columnspan=2)
+        self.menu.grid(row=0, column=4)
 
     def on_destroy(self):
         del self.master.network_events['game/turn']
