@@ -46,6 +46,13 @@ class gamefield_controller:
         if matrix != None:
             for i, row in enumerate(matrix):
                 for j, e in enumerate(row):
+                    match(e):
+                        case 1:
+                            e='X'
+                        case 2:
+                            e='O'
+                        case _:
+                            e = ''
                     self.view.fields[(i, j)].config(text=e)
         else:
             self.view.fields[position].config(text=value)
