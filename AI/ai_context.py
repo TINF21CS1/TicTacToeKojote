@@ -5,6 +5,9 @@ import time
 class AIContext():
 
     """
+    This is the context of the AI strategy pattern.
+    It holds the strategy and runs the strategy as a new thread.
+    It uses either the WeakAIStrategy or the AdvancedAIStrategy.
     Use: AIContext(strategy: ai_strategy.AIStrategy)
     -> Pass the strategy(WeakAIStrategy or StrongAIStrategy) to the AIContext, then call run_strategy() to run the strategy as a new thread.
     It will then connect to localhost and play the game using the strategy.

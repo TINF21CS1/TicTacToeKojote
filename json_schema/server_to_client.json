@@ -103,14 +103,13 @@
             "then": {
                 "properties": {
                     "server_statistics": {
-                        "$comment": "TODO: Implement the statistics schema",
                         "description": "The statistics of the players on the server",
                         "type": "array",
                         "items": {
                             "type": "object",
                             "properties": {
-                                "profile": {
-                                    "description": "The profile object of the player",
+                                "player": {
+                                    "description": "The player object for the statistics",
                                     "type": "object",
                                     "properties": {
                                         "uuid": {
@@ -141,7 +140,7 @@
                                             "minimum": 0
                                         },
                                         "losses": {
-                                            "description": "The number of losses",
+                                            "description": "The number of loses",
                                             "type": "integer",
                                             "minimum": 0
                                         },
@@ -149,12 +148,22 @@
                                             "description": "The number of draws",
                                             "type": "integer",
                                             "minimum": 0
+                                        },
+                                        "moves": {
+                                            "description": "The number of moves",
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "emojis": {
+                                            "description": "The number of emojis",
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
-                                    "required": ["wins", "losses", "draws"]
+                                    "required": ["wins", "losses", "draws", "moves", "emojis"]
                                 }
                             },
-                            "required": ["profile", "statistics"]
+                            "required": ["player", "statistics"]
                         }
                     }
                 },
@@ -225,7 +234,7 @@
                 "properties": {
                     "winner_uuid": {
                         "description": "Shows whether the receiving player is the winner. If null, the game ended in a draw",
-                        "type": "string",
+                        "type": ["string", "null"],
                         "format": "uuid"
                     },
                     "final_playfield": {

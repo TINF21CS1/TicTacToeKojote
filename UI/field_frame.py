@@ -119,6 +119,11 @@ class field_controller():
         msg = messages(type='move', message=queue['error_message'])
         msg.display()
 
+    def _close(self):
+        root = self.view.master
+        root.out_queue.put({'message_type': 'server/terminate', 'args': {}})
+        self.view.master.show_menu()
+
 class Field(base_frame):
     def __init__(self, master, chat, *args, starting_player, player1, player1_symbol, player2, player2_symbol, **kwargs):
         super().__init__(master)

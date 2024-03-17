@@ -50,4 +50,5 @@ package.nls.*.json
 l10n/
 launch.json
 venv
+*.db
 Client/Data/profiles.json

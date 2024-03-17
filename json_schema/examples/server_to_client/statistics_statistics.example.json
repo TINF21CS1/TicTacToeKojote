@@ -2,7 +2,7 @@
     "message_type": "statistics/statistics",
     "server_statistics": [
         {
-            "profile": {
+            "player": {
                 "uuid": "123e4567-e89b-12d3-a456-426614174000",
                 "display_name": "Player1",
                 "color": 16711680
@@ -10,19 +10,23 @@
             "statistics": {
                 "wins": 10,
                 "losses": 5,
-                "draws": 2
+                "draws": 2,
+                "moves": 100,
+                "emojis": 50
             }
         },
         {
-            "profile": {
-                "uuid": "c56e118d-e89b-12d3-a456-426614174000",
+            "player": {
+                "uuid": "123e4567-e89b-12d3-a456-426614174001",
                 "display_name": "Player2",
                 "color": 65280
             },
             "statistics": {
                 "wins": 5,
                 "losses": 10,
-                "draws": 2
+                "draws": 2,
+                "moves": 95,
+                "emojis": 45
             }
         }
     ]

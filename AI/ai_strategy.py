@@ -9,10 +9,16 @@ import logging
 import copy
 from uuid import UUID
 
-logging.basicConfig(level=logging.DEBUG)
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 class AIStrategy(ABC, GameClient):
+
+    """
+    This is the abstract strategy class for the AI.
+    It implements as many methods as possible and leaves the actual logic to the inheriting classes.
+    This avoids code duplication and makes it easier to add new strategies.
+    """
 
     def __init__(self):
         
@@ -34,19 +40,26 @@ class AIStrategy(ABC, GameClient):
         return UUID(self._current_uuid)
 
     def thread_entry(self):
+        """
+        Entry point for the AI thread. Run the AI in asyncio.
+        """
         asyncio.run(self.run())
 
     async def run(self):
+        """
+        Start running the AI by joining a game and getting ready for the game.
+        """
 
-        # The AI-UUID is hardcoded so that it can be excluded from statistics
         await self.join_game()
         asyncio.timeout(1)
         await self.lobby_ready()
-        logger.info("test")
 
         await self._listening_task
 
     async def join_game(self):
+        """
+        Join a game.
+        """
         
         await self.connect()
         self._listening_task = asyncio.create_task(self.listen())
@@ -56,6 +69,9 @@ class AIStrategy(ABC, GameClient):
 
 
     async def _message_handler(self, message_type: str):
+        """
+        Handle the incoming messages from the server.
+        """
         
         match message_type:
             case "lobby/status":
@@ -88,9 +104,15 @@ class AIStrategy(ABC, GameClient):
         return
 
     async def wish_good_luck(self):
+        """
+        Send a good luck message to the chat on game start.
+        """
         await self.chat_message(self._good_luck_message)
 
     async def say_good_game(self):
+        """
+        Send a good game message to the chat, depending on the outcome of the game.
+        """
         if self._winner.uuid == self._current_uuid:
             await self.chat_message(self._good_game_message_won)
         elif self._winner.uuid == None:
@@ -114,7 +136,13 @@ class AIStrategy(ABC, GameClient):
         pass
 
 class WeakAIStrategy(AIStrategy):
-    
+    """
+    Weak AI Strategy:
+    The weak AI strategy is a simple AI that makes random moves.
+    It is one strategy in the strategy pattern for the AI.
+    """
+
+
     def __init__(self, uuid: str = '108eaa05-2b0e-4e00-a190-8856edcd56a5'):
         super().__init__()
         self._current_uuid = uuid
@@ -127,11 +155,22 @@ class WeakAIStrategy(AIStrategy):
         self.post_init()
     
     async def do_turn(self):
+        """
+        Do one turn in the game.
+        Make the move on a random empty cell.
+        """
+
         empty_cells = self.get_empty_cells(self._playfield)
         move = random.randint(0, len(empty_cells) - 1)
         await self.game_make_move(empty_cells[move][0], empty_cells[move][1])
 
 class AdvancedAIStrategy(AIStrategy):
+
+    """
+    Advanced AI Strategy:
+    The advanced AI strategy is a more complex AI that tries to win the game.
+    It is one strategy in the strategy pattern for the AI.
+    """
 
     def __init__(self, uuid: str = 'd90397a5-a255-4101-9864-694b43ce8a6c'):
         super().__init__()
