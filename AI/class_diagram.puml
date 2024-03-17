@@ -1,0 +1,66 @@
+@startuml
+title AI Strategy Pattern
+skinparam classAttributeIconSize 0
+
+class AIContext {
+    -_strategy: AIStrategy
+    +setStrategy(strategy: AIStrategy): None
+    +runStrategy(): Thread
+
+}
+
+abstract class AIStrategy {
+    -_strength: str
+    -_good_luck_message: str
+    -_good_game_message_lost: str
+    -_good_game_message_won: str
+    -_good_game_message_draw: str
+    -_current_uuid: str
+    -_rulebase: AIRulebase
+    -_ip: str
+    -_port: int
+    +post_init(): None
+    +thread_entry(): None
+    +run(): None
+    +join_game(): None
+    +message_handler(message_type: str): None
+    +wish_good_luck(): None
+    +say_good_game(): None
+    +get_empty_cells(game_status: list): list
+    +do_turn(): None
+}
+
+class WeakAIStrategy {
+    +do_turn(): None
+}
+
+class AdvancedAIStrategy {
+    +do_turn(): None
+    +check_winning_move(empty_cells: list, player: int): list|None
+}
+
+class AIRuleBase{
+
+    +check_win(game_state: GameState): None
+
+}
+
+class ABC{
+    --Python's Abstract Base Class--
+}
+class GameClient{
+    --The Client's GameClient--
+}
+class RuleBase{
+    --The Server's RuleBase--
+}
+
+AIContext --* AIStrategy
+AIStrategy --|> ABC
+AIStrategy --|> GameClient
+AIStrategy --* AIRuleBase
+AIRuleBase --|> RuleBase
+AIStrategy <|-- WeakAIStrategy
+AIStrategy <|-- AdvancedAIStrategy
+
+@enduml
