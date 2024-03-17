@@ -71,7 +71,11 @@ class field_controller():
         self._bind()
 
     def _bind(self):
-        self.view.close.config(command=self.view.master.show_menu)
+        self.view.close.config(command=lambda *args: self.close())
+
+    def close(self):
+        list(self.view.master.out_queue.values())[0].put({'message_type': 'server/terminate', 'args' :{} })
+        self.view.master.show_menu()
 
     def end(self, queue, *args):
         root = self.view.master

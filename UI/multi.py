@@ -38,7 +38,7 @@ class Join(base_frame):
         title = 'Waiting for players to join' if opponent in [player_type.network, player_type.unknown] else 'Play local game against AI' if opponent in [player_type.ai_weak, player_type.ai_strong] else 'Play local game against a friend'
         self.lblTitle = tk.Label(self, text=title, font=self.master.title_font)
         self.btnRdy = tk.Button(self, text='Start', command=lambda *args: list(self.master.out_queue.values())[0].put({'message_type': 'lobby/ready', 'args' : {'ready': not self.ready}}))
-        self.btnExit = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
+        self.btnExit = tk.Button(self, text='Menu', command=lambda *args: self._menu())
         self.chat = Chat(self, self.master)
 
     def _display_widgets(self):
@@ -56,6 +56,10 @@ class Join(base_frame):
         self.btnRdy.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.chat.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=2, rowspan=7)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+
+    def _menu(self):
+        list(self.master.out_queue.values())[0].put({'message_type': 'server/terminate', 'args' :{} })
+        self.master.show_menu()
 
     def _update_lobby(self, queue):
         self.playerlist = []
