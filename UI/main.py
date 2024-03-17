@@ -68,11 +68,13 @@ class Root(tk.Tk):
         pass
 
     def network_event_handler(self):
+        queue = self.in_queue.get()
+        message_type = queue.pop('message_type', 'message type not found')
         try:
-            queue = self.in_queue.get()
-            self.network_events[queue.pop('message_type', 'message type not found')](queue)
+            function = self.network_events[message_type]
         except KeyError:
-            pass
+            print(f"message type not found {message_type}")
+        function(queue)
 
 def main():
     app = Root()
