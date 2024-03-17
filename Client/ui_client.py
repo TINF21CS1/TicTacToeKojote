@@ -68,9 +68,10 @@ class GameClientUI(GameClient):
                 self._out_queue.put({
                     "message_type": "game/start",
                     "starting_player": self._current_player,
-                    "starting_player_symbol": self._symbol == "X",
-                    "opponent": self._opponent,
-                    "opponent_symbol": self._symbol != "X"
+                    "player1": self._player,
+                    "player2": self._opponent,
+                    "player1_symbol": self._symbol == "X",
+                    "player2_symbol": self._symbol != "X"
                 })
                 self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "game/end":
