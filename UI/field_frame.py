@@ -112,7 +112,7 @@ class field_controller():
 
     def end(self, queue, *args):
         root = self.view.master
-        root.show(EndScreen, queue['win'])
+        root.show(EndScreen, queue['win'], queue['winner'], queue['final_playfield'])
 
     def error(self, queue, *args):
         root = self.view.master
