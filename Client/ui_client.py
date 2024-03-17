@@ -155,6 +155,9 @@ async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue,
         try:
             client = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
 
+            out_queue.put({"message_type": "lobby/connect"})
+            tk_root.event_generate("<<queue_input>>", when="tail")
+
             while client._websocket.open:
                 try:
                     await asyncio.create_task(client.listen())
