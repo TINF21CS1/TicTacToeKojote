@@ -7,6 +7,7 @@ from .gamefield import gamefield, gamefield_controller
 from .endscreen import EndScreen
 from .messages import messages
 from .chat import Chat
+from .lib.colors import color
 
 class player_type(Enum):
     local = auto()
@@ -16,25 +17,27 @@ class player_type(Enum):
     unknown = auto()
 
 class player(tk.Container):
-    def __init__(self, master, number):
+    def __init__(self, master, number, uuid=None):
         super().__init__(master)
+        self.uuid = uuid
         self._create_widgets(number)
         self._display_widgets()
 
     def _create_widgets(self, number):
-        
-        self.heading = tk.Label(self, text=f'Player {number}', font=self.master.master.title_font)
-        self.name = tk.Label(self, text=f'Player {number}')
-        self.symbol = tk.Label(self, text="unknown")
+        self.frame = tk.Frame(self)
+        self.heading = tk.Label(self.frame.widget, text=f'Player {number}', font=self.master.master.title_font)
+        self.name = tk.Label(self.frame.widget, text=f'Player {number}')
+        self.symbol = tk.Label(self.frame.widget, text="unknown")
             
     def highlight(self, highlight=True):
         if(highlight):
-            pass
+            self.frame.config(border_color='green')
         else:
-            pass
+            self.frame.config(border_color=color.anthracite)
 
-    def set(self, name, type):
+    def set(self, name, type, uuid):
         self.name.config(text=name)
+        self.uuid = uuid
         match type:
             case player_type.local:
                 self.symbol.config(text="Lokal")
@@ -47,16 +50,17 @@ class player(tk.Container):
             #durch pictogramme ersetzen
 
     def _display_widgets(self):
+        self.frame.pack(fill=tk.BOTH, expand=True)
         self.heading.grid(row=0, column=0, columnspan=2)
         self.name.grid(row=1, column=0)
         self.symbol.grid(row=1, column=1)
 
 class field_controller():
-    def __init__(self, view, players):
+    def __init__(self, view, players, starting_uuid, **kwargs):
         self.view = view
-        self.sub_controller = gamefield_controller(self.view.gamefield)
+        self.sub_controller = gamefield_controller(self.view.gamefield, starting_uuid, **kwargs)
         for player_lbl, player in zip(self.view.player, players):
-            player_lbl.set(player.display_name, player_type.unknown)
+            player_lbl.set(player.display_name, player_type.unknown, player.uuid)
         self._bind()
 
     def _bind(self):
@@ -75,15 +79,16 @@ class Field(base_frame):
     def __init__(self, master, chat, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
         super().__init__(master)
         self._create_widgets(chat)
-        self.controller = field_controller(self, [starting_player, opponent])
+        self.controller = field_controller(self, [starting_player, opponent], starting_player.uuid, **kwargs)
         self._display_widgets()
+        print("wigets displayed")
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
         #self.bind("<<game/end>>", self.controller.end)
         #self.bind("<<game/error>>", self.controller.error)
         self.master.network_events['game/turn'] = self.controller.sub_controller.turn
         self.master.network_events['game/end'] = self.controller.end
         self.master.network_events['game/error'] = self.controller.error
-        self.master.out_queue.put({'message_type': 'game/gamestate', 'args' :{} })
+        self.master.out_queue[starting_player.uuid].put({'message_type': 'game/gamestate', 'args' :{} })
 
     def _create_widgets(self, chat):
         self.heading = tk.Label(self, text="Tic Tac Toe Kojote", font=self.master.title_font)

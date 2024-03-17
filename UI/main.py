@@ -1,4 +1,5 @@
-import tkinter as tk
+#import tkinter as tk
+from .lib import tttk_tk as tk
 from tkinter import _tkinter
 from tkinter import font as tkfont
 from queue import Queue
@@ -18,10 +19,9 @@ class Root(tk.Tk):
         self.players, self.player = ProfileIO.get_profiles()
         self.ai_thread = None
         self.network_events = {}
-        self.out_queue = Queue()
+        self.out_queue = {}
         self.in_queue = Queue()
-
-
+        self.dummy = tk.Container()
 
         self.geometry(f"{start_width}x{start_height}")
         self.minsize(width=min_width, height=min_height)

@@ -103,7 +103,7 @@ class GameClientUI(GameClient):
     def send_gamestate_to_ui(self):
         self._out_queue.put({
             "message_type": "game/turn",
-            "next_player": int(self._current_player == self._opponent),
+            "next_player": self._current_player.uuid,
             "playfield": self._playfield
         })
         self._tk_root.event_generate("<<queue_input>>", when="tail")

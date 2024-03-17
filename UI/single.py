@@ -1,5 +1,6 @@
 #import tkinter as tk
 from .lib import tttk_tk as tk
+from queue import Queue
 
 from .base_frame import base_frame
 from .multi import Join
@@ -15,6 +16,7 @@ class Singleplayer(base_frame):
     
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
+        self.master.out_queue = {}
         self._create_widgets()
         self._display_widgets()
         self.address_toogle = False
@@ -41,8 +43,11 @@ class Singleplayer(base_frame):
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
     def join_ai(self, strong: bool):
-        self.master.network_thread = client_thread(self.master, in_queue=self.master.out_queue, out_queue=self.master.in_queue, player=self.master.players[self.master.player], ip='localhost')
+        self.master.out_queue = {self.master.players[self.master.player].uuid: Queue()}
+        test = list(self.master.out_queue.values())[0]
+        self.master.network_thread = client_thread(self.master, in_queue=list(self.master.out_queue.values())[0], out_queue=self.master.in_queue, player=self.master.players[self.master.player], ip='localhost')
         if strong:
-            self.master.show(Join, opponent=player_type.ai_strong)
+            ai = player_type.ai_strong
         else:
-            self.master.show(Join, opponent=player_type.ai_weak)
+            ai = player_type.ai_weak
+        self.master.show(Join, opponent=ai, local_players=[self.master.players[self.master.player].uuid])
