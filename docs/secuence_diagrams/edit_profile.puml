@@ -1,5 +1,5 @@
 @startuml
-title Create Player Profile
+title Edit Player Profile
 
 actor Player
 database System

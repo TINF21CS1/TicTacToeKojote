@@ -17,8 +17,5 @@ System->p: Show AI is ready
 p->System: Click Ready Button
 p->System: Click Start Game Button
 System->p: Show Playfield
-p->p: Play Game
-System->System: Process Game
-a->a: Play Game
 
 @enduml
