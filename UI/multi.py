@@ -145,6 +145,7 @@ class Lobby_Overview(tk.Container):
         self._create_widgets()
         self._display_widgets()
         self.master.master.network_events['lobby/connect'] = self._lobby_connect
+        self.master.master.network_events['lobby/connect_error'] = self._connect_error
 
     def _create_widgets(self):
         self.frame = tk.Frame(self)
@@ -180,6 +181,14 @@ class Lobby_Overview(tk.Container):
         root = self.master.master
         root.out_queue = {root.players[root.player].uuid: Queue()}
         root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
+        self.etrAddress.config(state=tk.DISABLED)
+        self.btnConnect.config(text="Connecting...", state=tk.DISABLED)
+
+    def _connect_error(self, queue):
+        msg = messages(type='info', message=f'Could not connect to the server "{self.etrAddress.get()}"')
+        self.etrAddress.config(state=tk.NORMAL)
+        self.btnConnect.config(text="Connect", state=tk.NORMAL)
+        msg.display()
 
     def _lobby_connect(self, queue):
         root = self.master.master

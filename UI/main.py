@@ -70,6 +70,11 @@ class Root(tk.Tk):
     def network_event_handler(self):
         queue = self.in_queue.get()
         message_type = queue.pop('message_type', 'message type not found')
+        if(message_type == 'python/error'):
+            try:
+                raise queue['error']
+            except ConnectionError:
+                message_type = 'lobby/connect_error'
         try:
             function = self.network_events[message_type]
         except KeyError:
