@@ -87,10 +87,10 @@ class field_controller():
         msg.display()
 
 class Field(base_frame):
-    def __init__(self, master, chat, *args, starting_player, starting_player_symbol, opponent, opponent_symbol, **kwargs):
+    def __init__(self, master, chat, *args, starting_player, player1, player1_symbol, player2, player2_symbol, **kwargs):
         super().__init__(master)
         self._create_widgets(chat, display_chat=len(kwargs)==1)
-        self.controller = field_controller(self, [starting_player, opponent], starting_player.uuid, **kwargs)
+        self.controller = field_controller(self, [player1, player2], starting_player.uuid, **kwargs)
         self._display_widgets()
         print("wigets displayed")
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
