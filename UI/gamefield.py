@@ -26,9 +26,10 @@ class gamefield(tk.Frame):
             field.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=position[0], column=position[1])
 
 class gamefield_controller:
-    def __init__(self, view: gamefield, starting_uuid: UUID, **kwargs):
+    def __init__(self, view: gamefield, starting_uuid: UUID, symbol_colors, **kwargs):
         self.view = view
         self.currentplayer = starting_uuid
+        self.symbol_colors = symbol_colors
         self.input_methods = {input_methods.mouse: [], input_methods.qeyc: [], input_methods.uom: []}
         for uuid, input_method in kwargs.items():
             self.input_methods[input_method].append(UUID(uuid))
@@ -48,12 +49,14 @@ class gamefield_controller:
                 for j, e in enumerate(row):
                     match(e):
                         case 1:
-                            e='X'
+                            f='X'
                         case 2:
-                            e='O'
+                            f='O'
                         case _:
-                            e = ''
-                    self.view.fields[(i, j)].config(text=e)
+                            f = ''
+                    self.view.fields[(i, j)].config(text=f)
+                    if(e != 0):
+                        self.view.fields[(i, j)].config( fg=self.symbol_colors[e-1])
         else:
             self.view.fields[position].config(text=value)
 

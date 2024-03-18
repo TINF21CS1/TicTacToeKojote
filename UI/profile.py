@@ -1,5 +1,6 @@
 #import tkinter as tk
 from .lib import tttk_tk as tk
+from tkinter import colorchooser
 from uuid import UUID, uuid4
 
 from .base_frame import base_frame
@@ -11,7 +12,7 @@ from .messages import messages
 class NewProfile(base_frame):
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
-        self.address_toogle = False
+        self.color_str = None
         self.next = kwargs.pop('return_to', Profile)
         self.edit = kwargs.pop('edit', False)
         self.id = kwargs.pop('id', None)
@@ -25,6 +26,11 @@ class NewProfile(base_frame):
         self.lblName = tk.Label(self, text='Name')
         self.etrName = tk.Entry(self)
         self.etrName.val = self.master.players[self.master.player].display_name if self.edit else ''
+        self.lblColor = tk.Label(self, text='Color')
+        self.btnColor = tk.Button(self, command=lambda *args: self._color())
+        if self.edit:
+            self.color_str = self.master.players[self.master.player].color_str
+            self.btnColor.config(bg=self.color_str)
         self.btnCreate = tk.Button(self, text=f'{task} profile', command=lambda *args: self._create())
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
         self.master.bind('<Return>', lambda *args: self._enter())
@@ -45,6 +51,8 @@ class NewProfile(base_frame):
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=7)
         self.lblName.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4)
         self.etrName.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=5)
+        self.lblColor.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6)
+        self.btnColor.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=6, columnspan=5)
         self.btnCreate.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=6, row=8, columnspan=3)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=9, row=1)
 
@@ -53,20 +61,35 @@ class NewProfile(base_frame):
             self._create()
 
     def _create(self):
-        if(self.etrName.val in [p.display_name for p in self.master.players]): 
+        tmp = self.master.players.copy()
+        if(self.master.player != None):
+            tmp.remove(self.master.players[self.master.player])
+        if(self.etrName.val in [p.display_name for p in tmp]): 
             msg = messages(type='info', message='This name is already in use.\nPlease select a differnt name!')
+            msg.display()
+            return
+        if(self.color_str==None):
+            msg = messages(type='info', message='Please select a color!')
             msg.display()
             return
         if(self.edit):
             for i, player in enumerate(self.master.players):
                 if player.uuid == self.master.players[self.master.player].uuid:
-                    self.master.players[i] = Player(self.etrName.val, 0)
+                    self.master.players[i] = Player.with_color_str(self.etrName.val, self.color_str)
         else:
-            self.master.players.append(Player(self.etrName.val, 0))
+            self.master.players.append(Player.with_color_str(self.etrName.val, self.color_str))
         #self.master.player = Player(self.etrName.val, 0)
         print([o.uuid for o in self.master.players])
         ProfileIO.set_profiles(self.master.players, self.master.player)
         self.master.show(self.next)
+
+    def _color(self):
+        color_str = colorchooser.askcolor(title ="Choose color")
+        if(color_str[1] == None):
+            return
+        self.color_str = color_str[1]
+        print(self.color_str)
+        self.btnColor.config(bg=self.color_str)
 
 class Profile(base_frame):
     def __new__(cls, master, *args, **kwargs):
@@ -84,12 +107,15 @@ class Profile(base_frame):
         self.lblTitle = tk.Label(self, text='Multiplayer', font=self.master.title_font)
         self.lblName = tk.Label(self, text='Name')
         #self.lblNameValue = tk.Label(self, text=self.master.player.display_name)
-        self.lblvar = tk.StringVar(self, self.master.players[self.master.player].display_name)
+        self.lblvar = tk.StringVar(self, self.master.players[self.master.player].display_name) if self.master.player != None else tk.StringVar(self, "Please select a profile")
         self.lblvar.trace_add('write', self._dropdown_changed)
         #print([o.display_name for o in self.master.players])
         self.lblNameValue = tk.OptionMenu(self, self.lblvar, *[o.display_name for o in self.master.players]) #[o.attr for o in objs]
         self.lblUUDI = tk.Label(self, text='User ID')
-        self.lblUUIDValue = tk.Label(self, text=self.master.players[self.master.player].uuid)
+        self.lblUUIDValue = tk.Label(self, text=self.master.players[self.master.player].uuid) if self.master.player != None else tk.Label(self)
+        self.lblColor = tk.Label(self, text='Color')
+        self.lblColorValue = tk.Label(self)
+        if(self.master.player != None): self.lblColorValue.config(bg=self.master.players[self.master.player].color_str)
         self.btnEdit = tk.Button(self, text='Edit Profile', command=lambda *args: self.master.show(NewProfile, edit=True, id=self.master.player))
         self.btnDelete = tk.Button(self, text='Delete profile', command=lambda *args: self._delete())
         self.btnAdd = tk.Button(self, text='Add profile', command=lambda *args: self.master.show(NewProfile))
@@ -113,9 +139,11 @@ class Profile(base_frame):
         self.lblNameValue.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=5)
         self.lblUUDI.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6)
         self.lblUUIDValue.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=6, columnspan=5)
-        self.btnAdd.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, columnspan=2)
-        self.btnEdit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=8, columnspan=3)
-        self.btnDelete.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=8, row=8)
+        self.lblColor.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8)
+        self.lblColorValue.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=8, columnspan=5)
+        self.btnAdd.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10, columnspan=2)
+        self.btnEdit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=10, columnspan=3)
+        self.btnDelete.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=8, row=10)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=9, row=1)
     
     def _delete(self):
@@ -131,3 +159,4 @@ class Profile(base_frame):
                 break
         ProfileIO.set_profiles(self.master.players, self.master.player)
         self.lblUUIDValue.config(text=self.master.players[self.master.player].uuid)
+        self.lblColorValue.config(bg=self.master.players[self.master.player].color_str)

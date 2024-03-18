@@ -116,8 +116,12 @@ class LocalProfileSelection(base_frame):
         self.lblPlayer2 = tk.Label(self, text='Player 2')
         self.varPlayer1 = tk.StringVar(self, value='Select')
         self.varPlayer2 = tk.StringVar(self, value='Select')
+        self.varPlayer1.trace_add('write', lambda *args: self._dropdown_changed(1))
+        self.varPlayer2.trace_add('write', lambda *args: self._dropdown_changed(2))
         self.drpPlayer1 = tk.OptionMenu(self, self.varPlayer1, *[o.display_name for o in self.master.players])
         self.drpPlayer2 = tk.OptionMenu(self, self.varPlayer2, *[o.display_name for o in self.master.players])
+        self.lblColor1 = tk.Label(self)
+        self.lblColor2 = tk.Label(self)
         self.btnnew = tk.Button(self, text='New Profile', command=lambda *args: self.master.show(NewProfile, return_to=LocalProfileSelection))
         self.btnStart = tk.Button(self, text='Start', command=lambda *args: self._start_game())
         self.btnMenu = tk.Button(self, text='Menu', command=lambda: self.master.show_menu())
@@ -132,13 +136,25 @@ class LocalProfileSelection(base_frame):
         self.rowconfigure([4, 6, 8, 10], weight=4)
         self.rowconfigure([3, 5, 7, 9, 11], weight=2)
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
-        self.lblPlayer1.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=3)
-        self.lblPlayer2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4)
-        self.drpPlayer1.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=3, columnspan=2)
-        self.drpPlayer2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=4, columnspan=2)
-        self.btnnew.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=5)
-        self.btnStart.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=5, columnspan=2)
+        self.lblPlayer1.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4)
+        self.lblPlayer2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6)
+        self.drpPlayer1.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=4, columnspan=2)
+        self.drpPlayer2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=3, row=6, columnspan=2)
+        self.lblColor1.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=4)
+        self.lblColor2.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=6)
+        self.btnnew.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8)
+        self.btnStart.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=8, columnspan=2)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+
+    def _dropdown_changed(self, player):
+        if(player == 1):
+            for profile in self.master.players:
+                if(profile.display_name == self.varPlayer1.get()):
+                    self.lblColor1.config(bg=profile.color_str)
+        else:
+            for profile in self.master.players:
+                if(profile.display_name == self.varPlayer2.get()):
+                    self.lblColor2.config(bg=profile.color_str)
 
     def _start_game(self):
         if(self.varPlayer1.get() == 'Select' or self.varPlayer2.get() == 'Select' or self.varPlayer1.get() == self.varPlayer2.get()):

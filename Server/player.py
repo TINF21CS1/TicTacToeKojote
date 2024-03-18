@@ -38,3 +38,15 @@ class Player:
     @classmethod
     def from_dict(cls, player_dict: dict):
         return cls(player_dict["display_name"], player_dict["color"], UUID(player_dict["uuid"]), player_dict["ready"])
+    
+    @classmethod
+    def with_color_str(cls, display_name: str, color_str: str, uuid: UUID = None, ready:bool = False):
+        return cls(display_name, int(color_str[1:], 16), uuid, ready)
+    
+    @property
+    def color_str(self) -> str:
+        return f"#{self.color:06x}"
+
+    @color_str.setter
+    def color_str(self, color: str):
+        self.color = int(color.removeprefix('#'), 16)

@@ -3,6 +3,12 @@ from .lib import tttk_tk as tk
 from .base_frame import base_frame
 #from .field_frame import Field
 
+def too_dark(hex_color: str):
+    r = int(hex_color[1:3], 16)
+    g = int(hex_color[3:5], 16)
+    b = int(hex_color[5:7], 16)
+    return (r+g+b)/3 < 85
+
 class EndScreen(base_frame):
     def __init__(self, master, win:bool, winner, final_playfield, *args, local_mp=False, **kwargs):
         super().__init__(master)
@@ -15,6 +21,10 @@ class EndScreen(base_frame):
         else:
             message = "It's a draw!" if winner == None else f"{winner.display_name} won the game!"
         self.lblWinner = tk.Label(self, width=20, height=5, bg="white", text=message)
+        if(winner != None):
+            self.lblWinner.config(bg=winner.color_str)
+            if too_dark(winner.color_str):
+                self.lblWinner.config(fg="white")
         for i in range(3):
             for j in range(3):
                 match fp[i][j]:

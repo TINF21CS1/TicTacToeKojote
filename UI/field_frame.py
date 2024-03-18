@@ -43,19 +43,14 @@ class player(tk.Container):
                 o.config(bg=color.white)
                 o.config(fg=color.white.complement)
 
-    def set(self, name, type, uuid):
+    def set(self, name, symbol, uuid):
         self.name.config(text=name)
         self.uuid = uuid
-        match type:
-            case player_type.local:
-                self.symbol.config(text="Lokal")
-            case player_type.ai_strong, player_type.ai_weak:
-                self.symbol.config( text="Computer")
-            case player_type.network:
-                self.symbol.config(text="Online")
-            case player_type.unknown:
-                self.symbol.config(text="unkown")
-            #durch pictogramme ersetzen
+        match symbol:
+            case 0:
+                self.symbol.config(text="O")
+            case 1:
+                self.symbol.config(text="X")
 
     def _display_widgets(self):
         self.frame.pack(fill=tk.BOTH, expand=True)
@@ -68,7 +63,6 @@ class game_menu(base_frame):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
-        self.address_toogle = False
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='TicTacToe-Kojote', font=self.master.title_font)
@@ -99,12 +93,13 @@ class game_menu(base_frame):
         self.master.show_menu()
 
 class field_controller():
-    def __init__(self, view, players, starting_uuid, local_mp, **kwargs):
+    def __init__(self, view, players, player_symbols, starting_uuid, local_mp, **kwargs):
         self.view = view
         self.local_mp = local_mp
-        self.sub_controller = gamefield_controller(self.view.gamefield, starting_uuid, **kwargs)
-        for player_lbl, player in zip(self.view.player, players):
-            player_lbl.set(player.display_name, player_type.unknown, player.uuid)
+        symbol_colors = {player_symbols[0]: players[1].color_str, player_symbols[1]: players[0].color_str}
+        self.sub_controller = gamefield_controller(self.view.gamefield, starting_uuid, symbol_colors,  **kwargs)
+        for player_lbl, player, symbol in zip(self.view.player, players, player_symbols):
+            player_lbl.set(player.display_name, symbol, player.uuid)
         self._bind()
 
     def _bind(self):
@@ -133,7 +128,7 @@ class Field(base_frame):
         super().__init__(master)
         local_mp = not (len(kwargs)==1)
         self._create_widgets(chat, display_chat=not local_mp)
-        self.controller = field_controller(self, [player1, player2], starting_player.uuid, local_mp, **kwargs)
+        self.controller = field_controller(self, [player1, player2], [player1_symbol, player2_symbol], starting_player.uuid, local_mp, **kwargs)
         self._display_widgets()
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
         #self.bind("<<game/end>>", self.controller.end)

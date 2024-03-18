@@ -29,7 +29,7 @@ class Profile:
                     output.append(Player.from_dict(profile))
                 return output, selected
         else:
-            return [], 0
+            return [], None
 
     @staticmethod
     def set_profiles(players: list, selected: int):
