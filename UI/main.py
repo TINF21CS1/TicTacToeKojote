@@ -36,8 +36,8 @@ class Root(tk.Tk):
         self.bind("<<queue_input>>", lambda *args: self.network_event_handler())
         self.show(Menu, True)
 
-    def show(self, Frame, *args, cache=False, **kwargs):
-        if(self.current_frame != None):
+    def show(self, Frame, *args, cache=False, display=True, **kwargs):
+        if(self.current_frame != None and display):
             try:
                 self.current_frame.grid_forget()
                 if(self.current_frame.__class__.__name__ not in self.frames):
@@ -52,7 +52,7 @@ class Root(tk.Tk):
             frame = self.frames[Frame.__name__]
         else:
             frame = Frame(self, *args, **kwargs)
-        if(frame != None):
+        if(frame != None and display):
             frame.grid(row=0, column=0, sticky="nsew")
         self.current_frame = frame
         return frame

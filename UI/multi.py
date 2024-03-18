@@ -17,13 +17,16 @@ from .gamefield import input_methods
 from .statistics import Statistics
 
 class Join(base_frame):
-    def __init__(self, master, *args, opponent=player_type.unknown, local_players, **kwargs):
+    def __init__(self, master, *args, opponent=player_type.unknown, local_players, quiet=False, **kwargs):
         super().__init__(master)
+        self.quiet = quiet
         self._create_widgets(opponent)
-        self._display_widgets()
+        if(not quiet):
+            self._display_widgets()
         self.playerlist = []
         self.local_players = local_players
         self.ai_players = []
+
         #self.bind('<<lobby/status>>', self._update_lobby)
         #self.bind('<<game/start>>', self._start_game)
         self.master.network_events['lobby/status'] = self._update_lobby
@@ -83,9 +86,10 @@ class Join(base_frame):
                     self.btnRdy.config(text="not Ready")
                 else:
                     self.btnRdy.config(text="Ready")
-        for i, player in enumerate(self.playerlist):
-            for j, object in enumerate(player):
-                object.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2+j, row=4+i)
+        if(not self.quiet):
+            for i, player in enumerate(self.playerlist):
+                for j, object in enumerate(player):
+                    object.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2+j, row=4+i)
         
 
     def _start_game(self, queue):
@@ -172,7 +176,7 @@ class LocalProfileSelection(base_frame):
         client_thread(self.master.dummy, in_queue=self.master.out_queue[player2.uuid], out_queue=Queue(), player=player2, ip='localhost')
         self.master.out_queue[player1.uuid].put({'message_type': 'lobby/ready', 'args' : {'ready': True}})
         self.master.out_queue[player2.uuid].put({'message_type': 'lobby/ready', 'args' : {'ready': True}})
-        self.master.show(Join, opponent=player_type.local, local_players=[player1.uuid, player2.uuid])
+        self.master.show(Join, display=False, opponent=player_type.local, local_players=[player1.uuid, player2.uuid],quiet=True)
 
 class Lobby_Overview(tk.Container):
     def __init__(self, master):
