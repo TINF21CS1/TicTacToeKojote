@@ -1,6 +1,8 @@
 #import tkinter as tk
 from .lib import tttk_tk as tk
-from uuid import UUID
+from threading import Thread
+from queue import Queue
+from sys import exit
 
 from .base_frame import base_frame
 from .field_frame import Field
@@ -9,7 +11,8 @@ from Client.ui_client import client_thread
 from .field_frame import player_type
 from Server.main import server_thread
 from AI.ai_context import AIContext
-from AI.ai_strategy import AIStrategy, WeakAIStrategy, AdvancedAIStrategy
+from AI.ai_strategy import WeakAIStrategy, AdvancedAIStrategy
+from .autodiscovery import discover_games
 
 class Join(base_frame):
     def __init__(self, master, *args, opponent=player_type.unknown, **kwargs):
@@ -81,40 +84,83 @@ class Join(base_frame):
         self.master.out_queue.put({'message_type': 'server/terminate', 'args': {}})
         self.master.show_menu()
 
+
+def reload(tkinter_obj: tk.Widget, queue: Queue):
+    print('hiu')
+    for i in range(10):
+        servers = discover_games(i+1)
+        queue.put(servers)
+        tkinter_obj.event_generate('<<lobby/reload>>')
+        print(servers)
+    tkinter_obj.event_generate('<<thread/exit>>')
+    print('dead')
+    exit()
+
 class Lobby_Overview(tk.Container):
     def __init__(self, master):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
+        self.queue = Queue()
+        self.thread = False
+        self.servers = {}
+        self.bind('<<lobby/reload>>', lambda *args: self._finish_reload())
+        self.bind('<<thread/exit>>', lambda *args: self._thread_reset())
+        self._start_reload()
 
     def _create_widgets(self):
         self.frame = tk.Frame(self)
         self.innerframe = self.frame.widget
         self.lblHeading = tk.Label(self.innerframe, text="Join public lobbies", font=self.master.master.title_font)
-
-        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self.manually())
+        self.btnReload = tk.Button(self.innerframe, text="\u21BB", command=lambda *args: self._start_reload(), border=0)
+        self.wrapper = tk.Container(self.innerframe)
+        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self._manually())
         self.etrAddress = tk.Entry(self.innerframe)
-        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda *args: self._connect())
+        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda ip=self.etrAddress.get(), *args: self._connect(ip))
 
     def _display_widgets(self):
         self.frame.pack(expand=True, fill=tk.BOTH)
-        self.innerframe.columnconfigure([0, 2, 4], weight=1)
+        self.innerframe.columnconfigure([0, 2, 4, 5], weight=1)
         self.innerframe.columnconfigure([1, 3], weight=5)
         self.innerframe.rowconfigure([0, 4], weight=2)
         self.innerframe.rowconfigure([1, 3], weight=1)
         self.innerframe.rowconfigure([2], weight=40)
         self.lblHeading.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=0, columnspan=3)
-        self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=3)
+        self.btnReload.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=0)
+        self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=4)
 
-    def manually(self):
+    def _manually(self):
         self.btnManual.grid_forget()
         self.etrAddress.grid(column=1, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
-        self.btnConnect.grid(column=3, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
+        self.btnConnect.grid(column=3, row=10, columnspan=2, sticky=tk.E+tk.W+tk.N+tk.S)
 
-    def _connect(self):
+    def _connect(self, ip):
         root = self.master.master
-        root.network_client = client_thread(root, in_queue=root.out_queue, out_queue=root.in_queue, player=root.player, ip=self.etrAddress.get())
+        root.network_client = client_thread(root, in_queue=root.out_queue, out_queue=root.in_queue, player=root.player, ip=ip)
         root.show(Join)
+
+    def _start_reload(self):
+        if(self.thread):
+            return
+        Thread(target=reload, args=(self, self.queue), daemon=True).start()
+        self.thread = True
+
+    def _finish_reload(self):
+        servers = self.queue.get()
+        if(servers == self.servers):
+            return
+        self.servers = servers
+        self.wrapper.destroy()
+        self.wrapper = tk.Container(self.innerframe)
+        self.wrapper.columnconfigure([0], weight=1)
+        self.wrapper.columnconfigure([1], weight=0)
+        for i, (server, ip) in enumerate(self.servers.items()):
+            tk.Label(self.wrapper, text=server).grid(column=0, row=i, sticky=tk.W+tk.N+tk.S)
+            tk.Button(self.wrapper, text="Join", command=lambda ip=ip, *args: self._connect(ip)).grid(column=1, row=i, sticky=tk.E+tk.W+tk.N+tk.S)
+        self.wrapper.grid(column=1, row=2, columnspan=4, sticky=tk.E+tk.W+tk.N+tk.S)
+
+    def _thread_reset(self):
+        self.thread = False
 
 class Multiplayer(base_frame):
     def __new__(cls, master, *args, **kwargs):
@@ -126,7 +172,7 @@ class Multiplayer(base_frame):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
-        self.address_toogle = False
+
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Multiplayer', font=self.master.title_font)
