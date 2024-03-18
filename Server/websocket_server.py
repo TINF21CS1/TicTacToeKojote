@@ -10,6 +10,7 @@ import json
 from jsonschema import validate, ValidationError
 import uuid
 from zeroconf import ServiceInfo, Zeroconf
+import socket
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,7 +31,8 @@ class Lobby:
         # MDNS
         #https://stackoverflow.com/a/74633230
         self._mdns = Zeroconf()
-        wsInfo = ServiceInfo(type_ = '_tictactoe._tcp.local.', name = 'tttk-'+str(uuid.uuid4())+'._tictactoe._tcp.local.', port = self._port)
+        ip = socket.inet_aton(socket.gethostbyname(socket.gethostname())) # this is a dirty hack and also doesnt work dual stack :'(
+        wsInfo = ServiceInfo(type_ = '_tictactoe._tcp.local.', name = admin.display_name+'s-Server'+'._tictactoe._tcp.local.', port = self._port, addresses = [ip])
         self._mdns.register_service(wsInfo)
 
 
