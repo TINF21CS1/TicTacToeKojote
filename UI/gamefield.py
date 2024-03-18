@@ -30,18 +30,35 @@ class gamefield_controller:
         self.view = view
         self.currentplayer = starting_uuid
         self.symbol_colors = symbol_colors
+        self.current_font = ('Helvetica', 20, 'bold')
         self.input_methods = {input_methods.mouse: [], input_methods.qeyc: [], input_methods.uom: []}
         for uuid, input_method in kwargs.items():
             self.input_methods[input_method].append(UUID(uuid))
         self._bind()
     
     def _bind(self):
+        self.view.fields[(0,0)].bind('<Configure>', self._update_font)
         for position, button in self.view.fields.items():
             button.config(command=lambda e=position: self._game_input(e, input_methods.mouse))
         for position, button in zip(self.view.fields.keys(),['q', 'w', 'e', 'a', 's', 'd', 'y', 'x', 'c']):
             self.view.bind(f'<KeyPress-{button}>', lambda e=position: self._game_input(e, input_methods.qeyc))
         for position, button in zip(self.view.fields.keys(),['u', 'i', 'o', 'j', 'k', 'l', 'm', ',', '.']):
             self.view.bind(f'<KeyPress-{button}>', lambda e=position: self._game_input(e, input_methods.uom))
+
+    def _update_font(self, event):
+        label_width = event.width
+        label_height = event.height
+    
+        # Calculate the new font size (you might need to adjust this formula)
+        new_font_size = min(label_width//2, label_height//2)  # Example ratio, adjust as needed
+
+        # Update the label's font size
+        if((tmp := abs(new_font_size-self.current_font[1]) )> 1):
+            print(tmp, new_font_size)
+            new_font = (self.current_font[0], new_font_size, self.current_font[2])
+            for position, button in self.view.fields.items():
+                button.config(font=new_font)
+            self.current_font = new_font
 
     def draw_field(self, matrix=None, position=None, value=None): #either matrix as a 3x3 list or position and value need to be provided
         if matrix != None:
@@ -53,7 +70,7 @@ class gamefield_controller:
                         case 2:
                             f='O'
                         case _:
-                            f = ''
+                            f = '  '
                     self.view.fields[(i, j)].config(text=f)
                     if(e != 0):
                         self.view.fields[(i, j)].config( fg=self.symbol_colors[e-1])
