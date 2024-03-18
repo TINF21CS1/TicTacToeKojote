@@ -32,7 +32,7 @@ class Profile:
 
     @staticmethod
     def set_profiles(players: list, selected: int):
-        with open(path, 'w') as file:
+        with open(path, 'w+') as file:
                 entry = []
                 for player in players:
                     entry.append(player.as_dict())
