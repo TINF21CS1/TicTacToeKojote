@@ -2,12 +2,12 @@
 title Delete Player Profile
 
 actor Player
-database System
+database Client
 
-Player->System: Click Profile Button
-System->Player: Show Profile
-Player->System: Click Delete Profile Button
-System->System: Delete Profile from Disk
-System->Player: Show Profile Creation Prompt
+Player->Client: Click Profile Button
+Client->Player: Show Profile
+Player->Client: Click Delete Profile Button
+Client->Client: Delete Profile from Disk
+Client->Player: Show Profile Creation Prompt
 
 @enduml

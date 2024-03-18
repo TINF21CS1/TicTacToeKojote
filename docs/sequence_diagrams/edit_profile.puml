@@ -2,15 +2,15 @@
 title Edit Player Profile
 
 actor Player
-database System
+database Client
 
-Player->System: Click Profile Button
-System->Player: Show Profile
-Player->System: Click Edit Profile Button
-Player->System: Change Name
-Player->System: Change Color
-Player->System: Click Edit Profile Button
-System->System: Save Profile on Disk
-System->Player: Show Profile
+Player->Client: Click Profile Button
+Client->Player: Show Profile
+Player->Client: Click Edit Profile Button
+Player->Client: Change Name
+Player->Client: Change Color
+Player->Client: Click Edit Profile Button
+Client->Client: Save Profile on Disk
+Client->Player: Show Profile
 
 @enduml
