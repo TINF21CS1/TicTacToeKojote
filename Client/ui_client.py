@@ -99,10 +99,11 @@ class GameClientUI(GameClient):
                 })
                 self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "lobby/kick":
-                self._out_queue.put({
-                    "message_type": "lobby/kick",
-                })
-                self._tk_root.event_generate("<<queue_input>>", when="tail")
+                if self._kicked:
+                    self._out_queue.put({
+                        "message_type": "lobby/kick",
+                    })
+                    self._tk_root.event_generate("<<queue_input>>", when="tail")
         return
     
     def send_gamestate_to_ui(self):

@@ -61,6 +61,7 @@ class GameClient:
         self._player: Player = player
         self._player_number: int = None
         self._symbol: str = None
+        self._kicked: bool = False
 
         # Opponent info
         self._opponent: Player = None
@@ -152,6 +153,10 @@ class GameClient:
 
             if message_type == "game/end":
                 await self.terminate()
+                break
+            elif self._kicked:
+                await self.close()
+                break
 
     def get_player_by_uuid(self, uuid:str) -> Player:
         for player in self._lobby_status:
@@ -216,8 +221,8 @@ class GameClient:
                     await self.join_lobby()
                 case "lobby/kick":
                     if str(self._player.uuid) == message_json["kick_player_uuid"]:
-                        logger.info("You have been kicked from the lobby.")
-                        await self.close()
+                        logger.info("You have been kicked from the lobby. Closing after processing the message...")
+                        self._kicked = True
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
                     raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
