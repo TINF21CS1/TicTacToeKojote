@@ -12,15 +12,15 @@ class AI.ai_rulebase.AIRulebase {
     + check_win(state: Server.game_state.GameState)
 }
 abstract class AI.ai_strategy.AIStrategy {
-  _strength: str
-  _good_luck_message: str
-  _good_game_message_lost: str
-  _good_game_message_won: str
-  _good_game_message_draw: str
-  _current_uuid: str
-  _rulebase: AI.ai_rulebase.AIRulebase
-  _ip: str
-  _port: int
+  - _strength: str
+  - _good_luck_message: str
+  - _good_game_message_lost: str
+  - _good_game_message_won: str
+  - _good_game_message_draw: str
+  - _current_uuid: str
+  - _rulebase: AI.ai_rulebase.AIRulebase
+  - _ip: str
+  - _port: int
 
   + AIStrategy()
   - post_init()
@@ -35,26 +35,26 @@ abstract class AI.ai_strategy.AIStrategy {
 }
 
 class AI.ai_strategy.AdvancedAIStrategy {
-  _current_uuid: str
-  _strength: str
-  _good_luck_message: str
-  _good_game_message_lost: str
-  _good_game_message_won: str
-  _good_game_message_draw: str
-  _player: Server.player.Player
+  - _current_uuid: str
+  - _strength: str
+  - _good_luck_message: str
+  - _good_game_message_lost: str
+  - _good_game_message_won: str
+  - _good_game_message_draw: str
+  - _player: Server.player.Player
 
   + AdvancedAIStrategy(uuid: str = 'd90397a5-a255-4101-9864-694b43ce8a6c')
   + None do_turn()
 }
 
 class AI.ai_strategy.WeakAIStrategy {
-  _current_uuid: str
-  _strength: str
-  _good_luck_message: str
-  _good_game_message_lost: str
-  _good_game_message_won: str
-  _good_game_message_draw: str
-  _player: Server.player.Player
+  - _current_uuid: str
+  - _strength: str
+  - _good_luck_message: str
+  - _good_game_message_lost: str
+  - _good_game_message_won: str
+  - _good_game_message_draw: str
+  - _player: Server.player.Player
 
     + WeakAIStrategy(uuid: str = '108eaa05-2b0e-4e00-a190-8856edcd56a5')
     - check_winning_move(empty_cells: list[list[int]], player:int)
@@ -66,7 +66,7 @@ AI.ai_strategy.AIStrategy <|-- AI.ai_strategy.AdvancedAIStrategy
 AI.ai_strategy.AIStrategy <|-- AI.ai_strategy.WeakAIStrategy
 AI.ai_strategy.AIStrategy *-- AI.ai_rulebase.AIRulebase
 AI.ai_strategy.AIStrategy --|> Client.client.GameClient
-AI.ai_rulebase.AIRulebase <|-- Server.rulebase.Rulebase
+AI.ai_rulebase.AIRulebase --|> Server.rulebase.Rulebase
 
 AI.ai_strategy.AdvancedAIStrategy *-- Server.player.Player
 AI.ai_strategy.WeakAIStrategy *-- Server.player.Player
