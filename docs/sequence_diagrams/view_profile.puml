@@ -2,9 +2,9 @@
 title View Player Profile
 
 actor Player
-database System
+database Client
 
-Player->System: Click Profile Button
-System->Player: Show Profile
+Player->Client: Click Profile Button
+Client->Player: Show Profile
 
 @enduml

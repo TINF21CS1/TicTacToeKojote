@@ -2,14 +2,14 @@
 title Host Game
 
 actor Player as p
-database System
+database Client
 
-p->System: Click Multiplayer Button
-System->p: Display Multiplayer Menu
-p->System: Click Create a new online game Button
-System->System: Host Server locally
-System->p: Display Multiplayer Lobby
-System->Network: Send advertisements
-System->System: Wait for other players to join
+p->Client: Click Multiplayer Button
+Client->p: Display Multiplayer Menu
+p->Client: Click Create a new online game Button
+Client->Client: Host Server locally
+Client->p: Display Multiplayer Lobby
+Client->Network: Send advertisements
+Client->Client: Wait for other players to join
 
 @enduml

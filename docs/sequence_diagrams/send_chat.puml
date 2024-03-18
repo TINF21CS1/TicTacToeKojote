@@ -2,16 +2,16 @@
 title Send Chat Message
 
 actor Player as p
-database System
+database Client
 database Server as s
 actor Player2 as p2
 
-p->System: Click on the message entry box
+p->Client: Click on the message entry box
 p->p: Enter message
-p->System: Click Send Button
-System->s: Send chat message
+p->Client: Click Send Button
+Client->s: Send chat message
 s->p2: Send chat message
-s-> System: Send chat message
-System->p: Display chat message
+s-> Client: Send chat message
+Client->p: Display chat message
 
 @enduml

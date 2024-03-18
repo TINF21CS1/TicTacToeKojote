@@ -2,14 +2,14 @@
 title Leave Game
 
 actor Player as p
-database System
+database Client
 database Server as s
 actor Player2 as p2
 
-p->System: Click Menu Button
-System->s: Player disconnected
-System->s: Close connection
-System->p: Show Main Menu
+p->Client: Click Menu Button
+Client->s: Player disconnected
+Client->s: Close connection
+Client->p: Show Main Menu
 s->p2: You have won
 s->p2: Close Connection
 s->s: Terminate

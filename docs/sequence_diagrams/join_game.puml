@@ -2,20 +2,20 @@
 title Join Game
 
 actor Player as p
-database System
+database Client
 database Server as s
 
-p->System: Click Multiplayer Button
-System->p: Display Multiplayer Menu
-p->System: Click Join by address Button
-System->p: Show IP-Address Input field
-p->System: Enter IP-Address
-p->System: Click Connect Button
-System->s: Join Lobby
-s->System: Send Server information
-System->p: Display Game Lobby
-p->System: Click Ready Button
-System->s: Get Ready
+p->Client: Click Multiplayer Button
+Client->p: Display Multiplayer Menu
+p->Client: Click Join by address Button
+Client->p: Show IP-Address Input field
+p->Client: Enter IP-Address
+p->Client: Click Connect Button
+Client->s: Join Lobby
+s->Client: Send Server information
+Client->p: Display Game Lobby
+p->Client: Click Ready Button
+Client->s: Get Ready
 s->s: Wait for other Player to get ready
 
 @enduml
