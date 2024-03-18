@@ -113,9 +113,9 @@ class Profile(base_frame):
         self.lblNameValue.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=5)
         self.lblUUDI.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6)
         self.lblUUIDValue.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=6, columnspan=5)
-        self.btnDelete.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, columnspan=3)
-        self.btnAdd.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=8, columnspan=3)
-        self.btnEdit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=6, row=8, columnspan=3)
+        self.btnAdd.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, columnspan=2)
+        self.btnEdit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=8, columnspan=3)
+        self.btnDelete.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=8, row=8)
         self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=9, row=1)
     
     def _delete(self):
