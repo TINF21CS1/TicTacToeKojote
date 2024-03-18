@@ -11,7 +11,7 @@ class Chat(tk.Frame):
         self.widget.bind('<Destroy>', lambda *args: self._on_destroy())
 
     def _create_widgets(self, chat):
-        #self.txtChat = tk.Text(self.widget, state=tk.DISABLED)
+        self.lblheading = tk.Label(self.widget, text="Chat")
         self.txtChat = tk.Text(self.widget, width=0)
         self.txtScroll = tk.Scrollbar(self.widget, command=self.txtChat.yview)
         self.txtChat.config(yscrollcommand=self.txtScroll.set)
@@ -25,10 +25,13 @@ class Chat(tk.Frame):
         self.widget.columnconfigure([1], weight=1)
         self.widget.rowconfigure([0], weight=1)
         self.widget.rowconfigure([1,2], weight=0)
-        self.txtChat.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=0, columnspan=2)
-        self.txtScroll.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=0)
-        self.etrMessage.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=1)
-        self.btnSend.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=1, columnspan=2)
+        self.widget.rowconfigure([0,2], weight=0)
+        self.widget.rowconfigure([1], weight=1)
+        self.lblheading.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=0, columnspan=3)
+        self.txtChat.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=1, columnspan=2)
+        self.txtScroll.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=1)
+        self.etrMessage.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=2)
+        self.btnSend.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=2, columnspan=2)
 
     def _send(self):
         list(self.root.out_queue.values())[0].put({'message_type': 'chat/message', 'args' : {'message': self.etrMessage.val}})
