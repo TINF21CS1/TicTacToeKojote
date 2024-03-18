@@ -99,8 +99,9 @@ class game_menu(base_frame):
         self.master.show_menu()
 
 class field_controller():
-    def __init__(self, view, players, starting_uuid, **kwargs):
+    def __init__(self, view, players, starting_uuid, local_mp, **kwargs):
         self.view = view
+        self.local_mp = local_mp
         self.sub_controller = gamefield_controller(self.view.gamefield, starting_uuid, **kwargs)
         for player_lbl, player in zip(self.view.player, players):
             player_lbl.set(player.display_name, player_type.unknown, player.uuid)
@@ -115,7 +116,7 @@ class field_controller():
 
     def end(self, queue, *args):
         root = self.view.master
-        root.show(EndScreen, queue['win'], queue['winner'], queue['final_playfield'])
+        root.show(EndScreen, queue['win'], queue['winner'], queue['final_playfield'], local_mp=self.local_mp)
 
     def error(self, queue, *args):
         root = self.view.master
@@ -130,8 +131,9 @@ class field_controller():
 class Field(base_frame):
     def __init__(self, master, chat, *args, starting_player, player1, player1_symbol, player2, player2_symbol, **kwargs):
         super().__init__(master)
-        self._create_widgets(chat, display_chat=len(kwargs)==1)
-        self.controller = field_controller(self, [player1, player2], starting_player.uuid, **kwargs)
+        local_mp = not (len(kwargs)==1)
+        self._create_widgets(chat, display_chat=not local_mp)
+        self.controller = field_controller(self, [player1, player2], starting_player.uuid, local_mp, **kwargs)
         self._display_widgets()
         #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
         #self.bind("<<game/end>>", self.controller.end)
