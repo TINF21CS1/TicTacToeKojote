@@ -1,10 +1,8 @@
 #import tkinter as tk
 from .lib import tttk_tk as tk
 from tkinter import colorchooser
-from uuid import UUID, uuid4
 
 from .base_frame import base_frame
-from .field_frame import Field
 from Server.player import Player
 from Client.profile_save import Profile as ProfileIO
 from .messages import messages
@@ -78,8 +76,6 @@ class NewProfile(base_frame):
                     self.master.players[i] = Player.with_color_str(self.etrName.val, self.color_str)
         else:
             self.master.players.append(Player.with_color_str(self.etrName.val, self.color_str))
-        #self.master.player = Player(self.etrName.val, 0)
-        print([o.uuid for o in self.master.players])
         ProfileIO.set_profiles(self.master.players, self.master.player)
         self.master.show(self.next)
 
@@ -88,7 +84,6 @@ class NewProfile(base_frame):
         if(color_str[1] == None):
             return
         self.color_str = color_str[1]
-        print(self.color_str)
         self.btnColor.config(bg=self.color_str)
 
 class Profile(base_frame):
@@ -101,16 +96,13 @@ class Profile(base_frame):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
-        self.address_toogle = False
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Multiplayer', font=self.master.title_font)
         self.lblName = tk.Label(self, text='Name')
-        #self.lblNameValue = tk.Label(self, text=self.master.player.display_name)
         self.lblvar = tk.StringVar(self, self.master.players[self.master.player].display_name) if self.master.player != None else tk.StringVar(self, "Please select a profile")
         self.lblvar.trace_add('write', self._dropdown_changed)
-        #print([o.display_name for o in self.master.players])
-        self.lblNameValue = tk.OptionMenu(self, self.lblvar, *[o.display_name for o in self.master.players]) #[o.attr for o in objs]
+        self.lblNameValue = tk.OptionMenu(self, self.lblvar, *[o.display_name for o in self.master.players])
         self.lblUUDI = tk.Label(self, text='User ID')
         self.lblUUIDValue = tk.Label(self, text=self.master.players[self.master.player].uuid) if self.master.player != None else tk.Label(self)
         self.lblColor = tk.Label(self, text='Color')

@@ -78,7 +78,7 @@ class game_menu(base_frame):
         self.columnconfigure([3], weight=2)
         self.rowconfigure([0, 11], weight=1)
         self.rowconfigure([2], weight=2)
-        self.rowconfigure([4, 6, 10, 12], weight=4)
+        self.rowconfigure([4, 6, 8, 10, 12], weight=4)
         self.rowconfigure([3, 5, 7, 11, 13], weight=2)
         # display the buttons created in the _create_widgets method
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
@@ -130,9 +130,6 @@ class Field(base_frame):
         self._create_widgets(chat, display_chat=not local_mp)
         self.controller = field_controller(self, [player1, player2], [player1_symbol, player2_symbol], starting_player.uuid, local_mp, **kwargs)
         self._display_widgets()
-        #self.bind("<<game/turn>>", self.controller.sub_controller.turn)
-        #self.bind("<<game/end>>", self.controller.end)
-        #self.bind("<<game/error>>", self.controller.error)
         self.master.network_events['game/turn'] = self.controller.sub_controller.turn
         self.master.network_events['game/end'] = self.controller.end
         self.master.network_events['game/error'] = self.controller.error

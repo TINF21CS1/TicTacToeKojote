@@ -2,7 +2,6 @@
 from .lib import tttk_tk as tk
 
 from .base_frame import base_frame
-from .field_frame import Field
 
 class Credits(base_frame):
     def __init__(self, master, *args, **kwargs):

@@ -19,7 +19,6 @@ class availableClients(tk.Frame):
         for entry in self.widgets:
             for widget in entry:
                 widget.forget()
-        #reload self.network
         for i, client in enumerate(self.local + self.ai + self.network):
             name = tk.Label(self, text=client)
             button0 = tk.Button(self, text="Slot1")

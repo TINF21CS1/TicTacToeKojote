@@ -43,7 +43,6 @@ class Chat(tk.Frame):
         self.txtChat.config(state=tk.DISABLED)
 
     def _on_destroy(self):
-        print(self.root.network_events)
         del self.root.network_events['chat/receive']
 
     def _enter(self):

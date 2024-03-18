@@ -50,11 +50,10 @@ class gamefield_controller:
         label_height = event.height
     
         # Calculate the new font size (you might need to adjust this formula)
-        new_font_size = min(label_width//2, label_height//2)  # Example ratio, adjust as needed
+        new_font_size = min(label_width//2, label_height//2)
 
         # Update the label's font size
-        if((tmp := abs(new_font_size-self.current_font[1]) )> 1):
-            print(tmp, new_font_size)
+        if(abs(new_font_size-self.current_font[1]) )> 1:
             new_font = (self.current_font[0], new_font_size, self.current_font[2])
             for position, button in self.view.fields.items():
                 button.config(font=new_font)

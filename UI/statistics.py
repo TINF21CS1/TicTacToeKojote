@@ -9,7 +9,6 @@ class Statistics_data(tk.Container):
         super().__init__(master)
 
     def _update_statistics(self, queue):
-        print(queue)
         heading = {Player('Player', 0): {'wins': 'Wins', 'losses': 'Losses', 'draws': 'Draws', 'moves': 'Moves', 'emojis': 'Emojis'}}
         for i, (player, values) in enumerate((heading | queue['statistics']).items()):
             tk.Label(self, text=player.display_name).grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=i)

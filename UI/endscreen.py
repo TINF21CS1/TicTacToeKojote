@@ -1,7 +1,6 @@
 #import tkinter as tk
 from .lib import tttk_tk as tk
 from .base_frame import base_frame
-#from .field_frame import Field
 
 def too_dark(hex_color: str):
     r = int(hex_color[1:3], 16)

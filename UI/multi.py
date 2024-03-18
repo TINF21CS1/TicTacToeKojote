@@ -26,9 +26,6 @@ class Join(base_frame):
         self.playerlist = []
         self.local_players = local_players
         self.ai_players = []
-
-        #self.bind('<<lobby/status>>', self._update_lobby)
-        #self.bind('<<game/start>>', self._start_game)
         self.master.network_events['lobby/status'] = self._update_lobby
         self.master.network_events['game/start'] = self._start_game
         self.master.network_events['lobby/kick'] = self._lobby_kick
@@ -76,7 +73,6 @@ class Join(base_frame):
             rdy = '\u2611' if player.ready else ''
             buffer = []
             buffer.append(tk.Label(self, text=rdy + ' ' + player.display_name))
-            print(player.uuid, self.local_players + self.ai_players)
             if(player.uuid not in (self.local_players + self.ai_players)):
                 buffer.append(tk.Button(self, text='Kick', command=lambda uuid=player.uuid, *args: list(self.master.out_queue.values())[0].put({'message_type': 'lobby/kick', 'args' : {'player_to_kick': uuid}})))
             self.playerlist.append(buffer)
