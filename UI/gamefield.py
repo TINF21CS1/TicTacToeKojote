@@ -8,6 +8,9 @@ class input_methods(Enum):
     uom= auto()
 
 class gamefield(tk.Frame):
+    """
+    Class for the gamefield in the game. This class is used to display the gamefield
+    """
     def __init__(self, master):
         super().__init__(master)
         self._create_widgets()
@@ -26,6 +29,9 @@ class gamefield(tk.Frame):
             field.grid(sticky=tk.N+tk.S+tk.E+tk.W, row=position[0], column=position[1])
 
 class gamefield_controller:
+    """
+    Class for the gamefield controller in the game. This class is used to control the gamefield
+    """
     def __init__(self, view: gamefield, starting_uuid: UUID, symbol_colors, **kwargs):
         self.view = view
         self.currentplayer = starting_uuid

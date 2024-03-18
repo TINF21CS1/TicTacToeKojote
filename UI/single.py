@@ -9,6 +9,9 @@ from Client.ui_client import client_thread
 from .profile import Profile
 
 class Singleplayer(base_frame):
+    """
+    The singleplayer menu. This screen is used to choose the opponent for a singleplayer game.
+    """
     def __new__(cls, master, *args, **kwargs):
         if(len(master.players) == 0 or master.player == None):
             return Profile(master, *args, return_to=Singleplayer, **kwargs)

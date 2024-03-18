@@ -8,6 +8,10 @@ from .menu import Menu
 from Client.profile_save import Profile as ProfileIO
 
 class Root(tk.Tk):
+    """
+    Root class for the application. This class is the main window and handles the switching of frames.
+    It also handles the network events and the queues for the network events.
+    """
     def __init__(self):
         super().__init__()
         start_width = 500

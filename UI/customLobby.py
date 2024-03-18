@@ -71,6 +71,10 @@ class slot(tk.Frame):
         self.master.clear(self.slot)
 
 class CustomLobby(base_frame):
+    """
+    Custom lobby for the game. This class is used to display the custom lobby window and send messages to the server.
+    It is only used for internal testing.
+    """
     def __init__(self, master, *args):
         super().__init__(master)
         self.player = list()

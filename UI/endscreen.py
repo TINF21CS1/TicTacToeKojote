@@ -9,6 +9,9 @@ def too_dark(hex_color: str):
     return (r+g+b)/3 < 85
 
 class EndScreen(base_frame):
+    """
+    The end screen is displayed after a game has ended. It shows the winner and the final playfield.
+    """
     def __init__(self, master, win:bool, winner, final_playfield, *args, local_mp=False, **kwargs):
         super().__init__(master)
         self._create_widgets(win, winner, final_playfield, local_mp)

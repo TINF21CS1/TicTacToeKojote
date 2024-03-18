@@ -2,6 +2,9 @@ from tkinter import messagebox as mb
 
 
 class messages:
+    """
+    Class for the different message boxes
+    """
     def __init__(self, type : str = "error", message : str = None):
         """"
         Constructor for the messages class
