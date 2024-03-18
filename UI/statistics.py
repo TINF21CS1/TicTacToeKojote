@@ -5,6 +5,9 @@ from .base_frame import base_frame
 from Server.player import Player
 
 class Statistics_data(tk.Container):
+    """
+    Class for the statistics data in the statistics frame. This class is used to display the statistics of the players.
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
 
@@ -16,6 +19,9 @@ class Statistics_data(tk.Container):
                 tk.Label(self, text=value).grid(sticky=tk.E+tk.W+tk.N+tk.S, column=j+1, row=i)
 
 class Statistics(base_frame):
+    """
+    The statistics menu. This screen is used to display the statistics of the players.
+    """
     def __init__(self, master, return_to, *args, **kwargs):
         super().__init__(master)
         self.return_to = return_to

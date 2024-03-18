@@ -11,6 +11,9 @@ from .lib.colors import color
 from .statistics import Statistics
 
 class player_type(Enum):
+    """
+    Enum for the different player types
+    """
     local = auto()
     ai_weak = auto()
     ai_strong = auto()
@@ -18,6 +21,9 @@ class player_type(Enum):
     unknown = auto()
 
 class player(tk.Container):
+    """
+    Class for the player labels in the gamefield
+    """
     def __init__(self, master, number, uuid=None):
         super().__init__(master)
         self.uuid = uuid
@@ -59,6 +65,9 @@ class player(tk.Container):
         self.symbol.grid(row=1, column=1)
 
 class game_menu(base_frame):
+    """
+    The game menu can be accessed from the gamefield. It allows the user to return to the main menu, the statistics or to exit the game.
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
@@ -93,6 +102,9 @@ class game_menu(base_frame):
         self.master.show_menu()
 
 class field_controller():
+    """
+    The controller for the gamefield. It is used to control the gamefield and access the game menu.
+    """
     def __init__(self, view, players, player_symbols, starting_uuid, local_mp, **kwargs):
         self.view = view
         self.local_mp = local_mp
@@ -124,6 +136,9 @@ class field_controller():
         self.view.master.show_menu()
 
 class Field(base_frame):
+    """
+    The field frame is used to display the gamefield and the player labels.
+    """
     def __init__(self, master, chat, *args, starting_player, player1, player1_symbol, player2, player2_symbol, **kwargs):
         super().__init__(master)
         local_mp = not (len(kwargs)==1)

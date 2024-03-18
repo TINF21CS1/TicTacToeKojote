@@ -1,6 +1,10 @@
 from .lib import tttk_tk as tk
 
 class Chat(tk.Frame):
+    """
+    Chat window for the game. This class is used to display the chat window and send messages to the server. 
+    It also listens for incoming chat messages from the server.
+    """
     def __init__(self, master, root, chat='', *args, **kwargs):
         super().__init__(master)
         self.root = root

@@ -8,6 +8,9 @@ from Client.profile_save import Profile as ProfileIO
 from .messages import messages
 
 class NewProfile(base_frame):
+    """
+    Class for the creation of a new profile. This class is used to create a new profile or edit an existing one.
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self.color_str = None
@@ -87,6 +90,9 @@ class NewProfile(base_frame):
         self.btnColor.config(bg=self.color_str)
 
 class Profile(base_frame):
+    """
+    Class for the profile selection. This class is used to select a profile for the game.
+    """
     def __new__(cls, master, *args, **kwargs):
         if len(master.players) == 0:
             return NewProfile(master, *args, **kwargs)

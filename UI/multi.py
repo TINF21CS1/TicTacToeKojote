@@ -17,6 +17,9 @@ from .gamefield import input_methods
 from .statistics import Statistics
 
 class Join(base_frame):
+    """
+    Class for the join screen. This screen is used to join a lobby and to display the players in the lobby.
+    """
     def __init__(self, master, *args, opponent=player_type.unknown, local_players, quiet=False, **kwargs):
         super().__init__(master)
         self.quiet = quiet
@@ -105,6 +108,9 @@ class Join(base_frame):
         self.master.show(Statistics, return_to=Join)
 
 class LocalProfileSelection(base_frame):
+    """
+    Class for the local profile selection screen. This screen is used to select the local profiles for the game.
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
@@ -175,6 +181,9 @@ class LocalProfileSelection(base_frame):
         self.master.show(Join, display=False, opponent=player_type.local, local_players=[player1.uuid, player2.uuid],quiet=True)
 
 class Lobby_Overview(tk.Container):
+    """
+    Class for the lobby overview. This screen is part of the multiplayer screen and used to display the available lobbies and to join them.
+    """
     def __init__(self, master):
         super().__init__(master)
         self._create_widgets()
@@ -235,6 +244,10 @@ class Lobby_Overview(tk.Container):
         del self.master.master.network_events['lobby/connect_error']
 
 class Multiplayer(base_frame):
+    """
+    Class for the multiplayer screen. This screen is used to select the multiplayer mode and to create or join lobbies.
+    It houses the lobby overview.
+    """
     def __new__(cls, master, *args, **kwargs):
         if(len(master.players) == 0 or master.player == None):
             return Profile(master, *args, return_to=Multiplayer, **kwargs)
