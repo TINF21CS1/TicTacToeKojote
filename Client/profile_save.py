@@ -10,9 +10,8 @@ class Profile:
     This class is used to handle the profiles.json file. It is used to get, set, and add profiles to the file.
     """
 
-
+    @staticmethod
     def get_profiles():
-        global path
         """
         This method returns all the profiles from the file
         :return: An array of all profiles
@@ -20,6 +19,8 @@ class Profile:
         if exists(path):
             with open(path, 'r') as file:
                 data = json.load(file)
+                if not data:
+                    return [], 0
                 output = []
                 profile_data = data[0]
                 selected = data[1]
@@ -29,26 +30,16 @@ class Profile:
         else:
             return [], 0
 
-    def set_profiles( players: list, selected: int):
-        global path
-        """
-        This method sets the profile name and/or color by the uuid
-        :param profile_uuid:
-        :param profile_name:
-        :param profile_color:
-        """
-
-        #try:
+    @staticmethod
+    def set_profiles(players: list, selected: int):
         with open(path, 'w') as file:
                 entry = []
                 for player in players:
                     entry.append(player.as_dict())
                 json.dump([entry, selected], file)
-        #except:
-        #    raise RuntimeError("json error: Make sure profiles.json is formatted correctly")
 
+    @staticmethod
     def delete_all_profiles():
-        global path
         """
         This method deletes all profiles
         """
