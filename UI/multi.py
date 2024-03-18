@@ -14,6 +14,7 @@ from AI.ai_strategy import WeakAIStrategy, AdvancedAIStrategy
 from .chat import Chat
 from .messages import messages
 from .gamefield import input_methods
+from .statistics import Statistics
 
 class Join(base_frame):
     def __init__(self, master, *args, opponent=player_type.unknown, local_players, **kwargs):
@@ -43,6 +44,7 @@ class Join(base_frame):
         self.btnRdy = tk.Button(self, text='Start', command=lambda *args: list(self.master.out_queue.values())[0].put({'message_type': 'lobby/ready', 'args' : {'ready': not self.ready}}))
         self.btnExit = tk.Button(self, text='Menu', command=lambda *args: self._menu())
         self.chat = Chat(self, self.master)
+        self.btnStatistics = tk.Button(self, text='Statistics', command=lambda *args: self._show_statistics())
 
     def _display_widgets(self):
         self.columnconfigure([0, 6], weight=1)
@@ -59,6 +61,7 @@ class Join(base_frame):
         self.btnRdy.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=10)
         self.chat.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=4, columnspan=2, rowspan=7)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
+        self.btnStatistics.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=2)
 
     def _menu(self):
         list(self.master.out_queue.values())[0].put({'message_type': 'server/terminate', 'args' :{} })
@@ -96,6 +99,10 @@ class Join(base_frame):
         msg = messages(type='info', message=f'You have been kicked from the lobby by the host')
         msg.display()
         self._menu()
+
+    def _show_statistics(self):
+        self.master.cache_current_frame()
+        self.master.show(Statistics, return_to=Join)
 
 class LocalProfileSelection(base_frame):
     def __init__(self, master, *args, **kwargs):

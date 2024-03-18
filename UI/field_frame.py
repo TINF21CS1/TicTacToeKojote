@@ -8,6 +8,7 @@ from .endscreen import EndScreen
 from .messages import messages
 from .chat import Chat
 from .lib.colors import color
+from .statistics import Statistics
 
 class player_type(Enum):
     local = auto()
@@ -72,6 +73,7 @@ class game_menu(base_frame):
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='TicTacToe-Kojote', font=self.master.title_font)
         self.btnBack = tk.Button(self, text='Continue', command=lambda *args: self.master.show(Field))
+        self.btnSatistics = tk.Button(self, text='Statistics', command=lambda *args: self.master.show(Statistics, return_to=game_menu))
         self.btnMenu = tk.Button(self, text='Main menu', command=lambda *args: self._menu())
         self.btnExit = tk.Button(self, text='Exit', command=lambda: self.master.destroy())
 
@@ -87,7 +89,8 @@ class game_menu(base_frame):
         # display the buttons created in the _create_widgets method
         self.lblTitle.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=2, columnspan=3)
         self.btnBack.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=4, columnspan=3)
-        self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6, columnspan=3)
+        self.btnSatistics.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=6, columnspan=3)
+        self.btnMenu.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=2, row=8, columnspan=3)
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
 
     def _menu(self):
