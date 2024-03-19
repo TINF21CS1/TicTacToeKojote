@@ -13,8 +13,8 @@ class Player:
         color (int): The color of the player.
         ready (bool): Whether the player is ready to start the game.
     """
-    def __init__(self, display_name: str, color: int, uuid: UUID = uuid4(), ready:bool = False):
-        self.uuid: UUID = uuid
+    def __init__(self, display_name: str, color: int, uuid: UUID = None, ready:bool = False):
+        self.uuid: UUID = uuid if uuid else uuid4()
         self.display_name = display_name
         self.color = color
         self.ready = ready
@@ -37,4 +37,16 @@ class Player:
     
     @classmethod
     def from_dict(cls, player_dict: dict):
-        return cls(player_dict["display_name"], player_dict["color"], player_dict["uuid"], player_dict["ready"])
+        return cls(player_dict["display_name"], player_dict["color"], UUID(player_dict["uuid"]), player_dict["ready"])
+    
+    @classmethod
+    def with_color_str(cls, display_name: str, color_str: str, uuid: UUID = None, ready:bool = False):
+        return cls(display_name, int(color_str[1:], 16), uuid, ready)
+    
+    @property
+    def color_str(self) -> str:
+        return f"#{self.color:06x}"
+
+    @color_str.setter
+    def color_str(self, color: str):
+        self.color = int(color.removeprefix('#'), 16)
