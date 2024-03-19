@@ -13,11 +13,21 @@ class Statistics_data(tk.Container):
 
     def _update_statistics(self, queue):
         heading = {Player('Player', 0): {'wins': 'Wins', 'losses': 'Losses', 'draws': 'Draws', 'moves': 'Moves', 'emojis': 'Emojis'}}
+
+        highscores = {'wins': 0, 'losses': 0, 'draws': 0, 'moves': 0, 'emojis': 0}
+        for player, values in queue['statistics'].items():
+            for headline, value in values.items():
+                if value > highscores[headline]:
+                    highscores[headline] = value
+
         for i, (player, values) in enumerate((heading | queue['statistics']).items()):
             tk.Label(self, text=player.display_name).grid(sticky=tk.E+tk.W+tk.N+tk.S, column=0, row=i)
             for j, (headline, value) in enumerate(values.items()):
-                tk.Label(self, text=value).grid(sticky=tk.E+tk.W+tk.N+tk.S, column=j+1, row=i)
-
+                lbl = tk.Label(self, text=value)
+                if value == highscores[headline]:
+                    lbl.config(fg='green')
+                lbl.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=j+1, row=i)
+                
 class Statistics(base_frame):
     """
     The statistics menu. This screen is used to display the statistics of the players.
