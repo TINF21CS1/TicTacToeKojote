@@ -317,6 +317,7 @@ class GameClient:
 
     async def close(self):
         await self._websocket.close()
+        exit()
 
     async def terminate(self):
         msg = {

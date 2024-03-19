@@ -127,8 +127,6 @@ class GameClientUI(GameClient):
 
         if message:
             match message["message_type"]:
-                case "lobby/join":
-                    pass
                 case "lobby/ready":
                     await self.lobby_ready(**message["args"])
                 case "lobby/kick":
