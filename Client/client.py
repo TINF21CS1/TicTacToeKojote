@@ -81,7 +81,14 @@ class GameClient:
             self._json_schema = json.load(f)
 
     async def connect(self):
-        self._websocket = await connect(f"ws://{self._ip}:{str(self._port)}")
+        # Try 5 times to connect to the server
+        for i in range(5):
+            try:
+                self._websocket = await connect(f"ws://{self._ip}:{str(self._port)}")
+                break
+            except Exception as e:
+                logger.error(f"Could not connect to server. Attempt {i+1}/5. Retrying in 0.5 seconds...")
+                await asyncio.sleep(0.5)
 
     @classmethod
     async def create_game(cls, player: Player, port:int = 8765) -> tuple[GameClient, asyncio.Task, Thread]:
@@ -310,6 +317,7 @@ class GameClient:
 
     async def close(self):
         await self._websocket.close()
+        exit()
 
     async def terminate(self):
         msg = {

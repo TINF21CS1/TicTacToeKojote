@@ -32,6 +32,7 @@ class Join(base_frame):
         self.master.network_events['lobby/status'] = self._update_lobby
         self.master.network_events['game/start'] = self._start_game
         self.master.network_events['lobby/kick'] = self._lobby_kick
+        self.master.network_events['lobby/connect_error'] = lambda *args: self._connect_error() #error is thrown when the server is not reachable anymore
         self.bind('<Destroy>', lambda *args: self.on_destroy())
         self.ready = False
         if opponent not in [player_type.unknown, player_type.local]:
@@ -66,11 +67,21 @@ class Join(base_frame):
         self.btnExit.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=1)
         self.btnStatistics.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=5, row=2)
 
+    def _connect_error(self):
+        self.master.show_menu()
+        msg = messages(type='info', message=f'Connection to the server was lost!')
+        msg.display()
+
     def _menu(self):
         list(self.master.out_queue.values())[0].put({'message_type': 'server/terminate', 'args' :{} })
         self.master.show_menu()
 
     def _update_lobby(self, queue):
+        if(len(self.playerlist) > 0):
+            for player in self.playerlist:
+                for object in player:
+                    object.grid_forget()
+                    object.destroy()
         self.playerlist = []
         for player in queue['player']:
             rdy = '\u2611' if player.ready else ''
@@ -97,11 +108,13 @@ class Join(base_frame):
     def on_destroy(self):
         del self.master.network_events['lobby/status']
         del self.master.network_events['game/start']
+        del self.master.network_events['lobby/kick']
+        del self.master.network_events['lobby/connect_error']
 
     def _lobby_kick(self, queue):
+        self._menu()
         msg = messages(type='info', message=f'You have been kicked from the lobby by the host')
         msg.display()
-        self._menu()
 
     def _show_statistics(self):
         self.master.cache_current_frame()
