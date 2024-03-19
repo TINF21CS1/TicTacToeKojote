@@ -19,7 +19,6 @@ class availableClients(tk.Frame):
         for entry in self.widgets:
             for widget in entry:
                 widget.forget()
-        #reload self.network
         for i, client in enumerate(self.local + self.ai + self.network):
             name = tk.Label(self, text=client)
             button0 = tk.Button(self, text="Slot1")
@@ -72,6 +71,10 @@ class slot(tk.Frame):
         self.master.clear(self.slot)
 
 class CustomLobby(base_frame):
+    """
+    Custom lobby for the game. This class is used to display the custom lobby window and send messages to the server.
+    It is only used for internal testing.
+    """
     def __init__(self, master, *args):
         super().__init__(master)
         self.player = list()

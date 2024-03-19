@@ -63,16 +63,17 @@ class GameClientUI(GameClient):
                     "message_type": "lobby/status", 
                     "player": self._lobby_status
                 })
-                self._tk_root.event_generate("<<lobby/status>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "game/start":
                 self._out_queue.put({
                     "message_type": "game/start",
                     "starting_player": self._current_player,
-                    "starting_player_symbol": self._symbol == "X",
-                    "opponent": self._opponent,
-                    "opponent_symbol": self._symbol != "X"
+                    "player1": self._player,
+                    "player2": self._opponent,
+                    "player1_symbol": self._symbol == "X",
+                    "player2_symbol": self._symbol != "X"
                 })
-                self._tk_root.event_generate("<<game/start>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "game/end":
                 self._out_queue.put({
                     "message_type": "game/end",
@@ -80,7 +81,7 @@ class GameClientUI(GameClient):
                     "win": self._winner == self._player,
                     "final_playfield": self._playfield
                 })
-                self._tk_root.event_generate("<<game/end>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
                 await self.close()
             case "game/turn":
                 self.send_gamestate_to_ui()
@@ -89,28 +90,29 @@ class GameClientUI(GameClient):
                     "message_type": "game/error",
                     "error_message": self._error_history[-1]
                 })
-                self._tk_root.event_generate("<<game/error>>", when="tail")  
+                self._tk_root.event_generate("<<queue_input>>", when="tail")  
             case "chat/receive":
                 self._out_queue.put({
                     "message_type": "chat/receive",
                     "sender": self._chat_history[-1][0],
                     "message": self._chat_history[-1][1]
                 })
-                self._tk_root.event_generate("<<chat/receive>>", when="tail")
+                self._tk_root.event_generate("<<queue_input>>", when="tail")
             case "lobby/kick":
-                self._out_queue.put({
-                    "message_type": "lobby/kick",
-                })
-                self._tk_root.event_generate("<<lobby/kick>>", when="tail")
+                if self._kicked:
+                    self._out_queue.put({
+                        "message_type": "lobby/kick",
+                    })
+                    self._tk_root.event_generate("<<queue_input>>", when="tail")
         return
     
     def send_gamestate_to_ui(self):
         self._out_queue.put({
             "message_type": "game/turn",
-            "next_player": int(self._current_player == self._opponent),
+            "next_player": self._current_player.uuid,
             "playfield": self._playfield
         })
-        self._tk_root.event_generate("<<game/turn>>", when="tail")
+        self._tk_root.event_generate("<<queue_input>>", when="tail")
     
     async def await_commands(self):
         # Send messages to the server
@@ -125,8 +127,6 @@ class GameClientUI(GameClient):
 
         if message:
             match message["message_type"]:
-                case "lobby/join":
-                    pass
                 case "lobby/ready":
                     await self.lobby_ready(**message["args"])
                 case "lobby/kick":
@@ -134,7 +134,7 @@ class GameClientUI(GameClient):
                 case "game/make_move":
                     await self.game_make_move(**message["args"])
                 case "chat/message":
-                    pass
+                    await self.chat_message(**message["args"])
                 case "server/terminate":
                     await self.terminate()
                 case "game/gamestate":
@@ -144,7 +144,7 @@ class GameClientUI(GameClient):
                         "message_type": "statistics/statistics",
                         "statistics": self._statistics
                     })
-                    self._tk_root.event_generate("<<statistics/statistics>>", when="tail")
+                    self._tk_root.event_generate("<<queue_input>>", when="tail")
                 case _:
                     logger.error(f"Unknown message type received from UI in in_queue: {message['message_type']}")
                     return
@@ -154,11 +154,31 @@ class GameClientUI(GameClient):
 async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int) -> None:
     """The function that is run in the client thread. It connects to the server. It sends and receives messages."""
 
-    client = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
+    for _ in range(5):
+        try:
+            client = await GameClientUI.join_game(player=player, ip=ip, tk_root=tk_root, out_queue=out_queue, in_queue=in_queue, port=port)
 
-    while client._websocket.open:
-        await asyncio.create_task(client.listen())
-        await asyncio.create_task(client.await_commands())
+            out_queue.put({"message_type": "lobby/connect"})
+            tk_root.event_generate("<<queue_input>>", when="tail")
+
+            while client._websocket.open:
+                try:
+                    await asyncio.create_task(client.listen())
+                    await asyncio.create_task(client.await_commands())
+                except Exception as e:
+                    logger.error(e)
+                    out_queue.put({"message_type": "python/error", "error": e})
+                    tk_root.event_generate("<<queue_input>>", when="tail")
+            break
+        
+        # If the client is not able to connect to the server, try again
+        except Exception as e:
+            logger.error(e)
+            await asyncio.sleep(1)
+    
+    # If the client is not able to connect to the server after 5 tries, send an error message to the UI
+    out_queue.put({"message_type": "python/error", "error": ConnectionError("Could not connect to server after 5 tries. Please try again later.")})
+    tk_root.event_generate("<<queue_input>>", when="tail")
 
 def asyncio_thread_wrapper(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int):
     """Wrapper function to run the client thread function in an asyncio event loop."""

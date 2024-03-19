@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class Lobby:
     def __init__(self, admin:Player, port: int = 8765) -> None:
         self._players = {}
-        #self._players = {admin.uuid : admin}
+        self._admin = admin
         self._game = None
         self._inprogress = False
         self._port = port
@@ -83,7 +83,6 @@ class Lobby:
                             "message_type": "lobby/kick",
                             "kick_player_uuid": message_json["kick_player_uuid"],
                         }))
-
  
                     case "lobby/ready":
 
@@ -148,9 +147,10 @@ class Lobby:
 
 
                     case "server/terminate":
-                        logger.info("Server Termination Requested")
+                        logger.info("Server Termination Requested. Checking if game is in progress.")
 
                         if self._inprogress:
+                            logger.info("Game in progress. Terminating game.")
                             if self._game.players.index(self._players[message_json["player_uuid"]]) == 1:
                                 self._game.state.set_winner(2)
                             elif self._game.players.index(self._players[message_json["player_uuid"]]) == 2:
@@ -160,15 +160,18 @@ class Lobby:
                             
                             await self._end_game()
                         
-                        else:
+                        elif message_json["player_uuid"] == str(self._admin.uuid):
                             # still in lobby, can terminate without game end.
+                            logger.info("Not in game. Sender was host. Terminating server.")
                             websockets.broadcast(self._connections, json.dumps({
                                 "message_type": "game/error",
                                 "error_message": "Server terminated.",
                             }))
+
                             exit()
 
-                        
+                        else:
+                            logger.info("Not in game. Sender was not host. Ignoring termination request.")
 
                     case _:
                         await websocket.send(json.dumps({"message_type": "error", "error": "Unknown message type"}))
@@ -183,10 +186,10 @@ class Lobby:
 
                 else:
                     # request a ping from everyone and delete player list to wait for join messages.
+                    self._players = {}
                     websockets.broadcast(self._connections, json.dumps({
                             "message_type": "lobby/ping",
                         }))
-                    self._players = {}
 
                 # End this connection loop
                 break

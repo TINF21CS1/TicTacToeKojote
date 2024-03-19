@@ -2,6 +2,9 @@ from tkinter import messagebox as mb
 
 
 class messages:
+    """
+    Class for the different message boxes
+    """
     def __init__(self, type : str = "error", message : str = None):
         """"
         Constructor for the messages class
@@ -52,9 +55,7 @@ class messages:
         Displays a message box for a move, if no message provided, it will display a default message
         :param move:
         """
-        message = "Illegal Move!"
-
-        mb.showinfo("Move", message)
+        mb.showinfo("Move", self.message)
 
 
     def set_message(self, message : str):

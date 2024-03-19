@@ -61,6 +61,7 @@ class GameClient:
         self._player: Player = player
         self._player_number: int = None
         self._symbol: str = None
+        self._kicked: bool = False
 
         # Opponent info
         self._opponent: Player = None
@@ -80,7 +81,14 @@ class GameClient:
             self._json_schema = json.load(f)
 
     async def connect(self):
-        self._websocket = await connect(f"ws://{self._ip}:{str(self._port)}")
+        # Try 5 times to connect to the server
+        for i in range(5):
+            try:
+                self._websocket = await connect(f"ws://{self._ip}:{str(self._port)}")
+                break
+            except Exception as e:
+                logger.error(f"Could not connect to server. Attempt {i+1}/5. Retrying in 0.5 seconds...")
+                await asyncio.sleep(0.5)
 
     @classmethod
     async def create_game(cls, player: Player, port:int = 8765) -> tuple[GameClient, asyncio.Task, Thread]:
@@ -152,6 +160,10 @@ class GameClient:
 
             if message_type == "game/end":
                 await self.terminate()
+                break
+            elif self._kicked:
+                await self.close()
+                break
 
     def get_player_by_uuid(self, uuid:str) -> Player:
         for player in self._lobby_status:
@@ -216,8 +228,8 @@ class GameClient:
                     await self.join_lobby()
                 case "lobby/kick":
                     if str(self._player.uuid) == message_json["kick_player_uuid"]:
-                        logger.info("You have been kicked from the lobby.")
-                        await self.close()
+                        logger.info("You have been kicked from the lobby. Closing after processing the message...")
+                        self._kicked = True
                 case _:
                     logger.error(f"Unknown message type: {message_json['message_type']}")
                     raise ValidationError("Game start message received, but lobby does not contain 2 players. This should not happen and should be investigated.")
@@ -305,6 +317,7 @@ class GameClient:
 
     async def close(self):
         await self._websocket.close()
+        exit()
 
     async def terminate(self):
         msg = {

@@ -9,6 +9,9 @@ from .profile import Profile
 from .credits import Credits
 
 class Menu(base_frame):
+    """
+    The main menu of the game. This screen is used to navigate to the different parts of the game.
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()

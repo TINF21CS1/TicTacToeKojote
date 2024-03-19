@@ -24,6 +24,9 @@ class AIContext():
         thread = Thread(target=self._strategy.thread_entry, daemon=True)
         thread.start()
         return thread
+    
+    def get_uuid(self):
+        return self._strategy.get_uuid()
 
 if __name__ == "__main__":
     weak_ai = ai_strategy.WeakAIStrategy()
