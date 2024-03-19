@@ -55,9 +55,7 @@ class messages:
         Displays a message box for a move, if no message provided, it will display a default message
         :param move:
         """
-        message = "Illegal Move!"
-
-        mb.showinfo("Move", message)
+        mb.showinfo("Move", self.message)
 
 
     def set_message(self, message : str):
