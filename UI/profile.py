@@ -96,7 +96,7 @@ class Profile(base_frame):
     def __new__(cls, master, *args, **kwargs):
         if len(master.players) == 0:
             return NewProfile(master, *args, **kwargs)
-        return super().__new__(cls, *args, **kwargs)
+        return super().__new__(cls)
     
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
