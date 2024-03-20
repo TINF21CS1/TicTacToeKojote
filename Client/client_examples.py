@@ -4,23 +4,6 @@ from Server.player import Player
 from Client.client import *
 from uuid import UUID
 
-async def new_server_example():
-    # Setting up the game
-    player = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff)
-    client, listening_task, server_thread = await GameClient.create_game(player)
-
-    # Do something with the client
-    await client.lobby_ready()
-    await client.game_make_move(0, 0)
-    await client.chat_message("Hello World")
-
-    # Closing the connection
-    await client.close()
-
-    # Wrapping up the listening task and the server thread
-    await listening_task
-    server_thread.join(timeout=1)
-
 async def client_join_example():
     # Setting up the connection
     player = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff)
@@ -38,4 +21,4 @@ async def client_join_example():
     await listening_task
 
 if __name__ == "__main__":
-    asyncio.run(new_server_example())
+    asyncio.run(client_join_example())
