@@ -1,0 +1,34 @@
+@startuml Rule-Based System
+
+class "GameState" as WM
+
+class "Game" as IE
+
+class "RuleBase" as KB
+
+class "Lobby" as UI
+
+WM --> IE: Current state
+IE --> KB: Validate action and state
+KB --> IE: Validated / Error
+IE --> WM: Update state
+IE --> UI: Return state
+UI --> IE: Request state
+
+note right of WM
+  Working Memory
+end note
+
+note right of IE
+  Inference Engine
+end note
+
+note right of KB
+  Knowledge Base
+end note
+
+note right of UI
+  User Interface
+end note
+
+@enduml
