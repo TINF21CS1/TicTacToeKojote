@@ -79,6 +79,7 @@ class NewProfile(base_frame):
                     self.master.players[i] = Player.with_color_str(self.etrName.val, self.color_str)
         else:
             self.master.players.append(Player.with_color_str(self.etrName.val, self.color_str))
+        self.master.player = len(self.master.players) - 1
         ProfileIO.set_profiles(self.master.players, self.master.player)
         self.master.show(self.next)
 
@@ -96,7 +97,7 @@ class Profile(base_frame):
     def __new__(cls, master, *args, **kwargs):
         if len(master.players) == 0:
             return NewProfile(master, *args, **kwargs)
-        return super().__new__(cls, *args, **kwargs)
+        return super().__new__(cls)
     
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
@@ -146,9 +147,9 @@ class Profile(base_frame):
     
     def _delete(self):
         del self.master.players[self.master.player]
-        self.master.player = 0
-        self.master.show(Profile)
+        self.master.player = 0 if(len(self.master.players) > 0) else None
         ProfileIO.set_profiles(self.master.players, self.master.player)
+        self.master.show(Profile)
 
     def _dropdown_changed(self, *args):
         for i, player in enumerate(self.master.players):

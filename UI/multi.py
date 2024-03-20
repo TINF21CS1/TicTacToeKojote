@@ -264,7 +264,7 @@ class Multiplayer(base_frame):
     def __new__(cls, master, *args, **kwargs):
         if(len(master.players) == 0 or master.player == None):
             return Profile(master, *args, return_to=Multiplayer, **kwargs)
-        return super().__new__(cls, *args, **kwargs)
+        return super().__new__(cls)
 
     def __init__(self, master, *args):
         super().__init__(master)
