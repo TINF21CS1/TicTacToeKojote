@@ -1,6 +1,6 @@
 # TicTacToeKojote
 
-This is a simple TicTacToe game written in Python. IT can be played by two players in a GUI. However, it only works on Windows.
+This is a simple TicTacToe game written in Python. It can be played by two players in a GUI. However, it works best on Windows. Bugs may occur on other operating systems.
 
 ## Installation
 - Install Python 3.11 or higher from [python.org](https://www.python.org/downloads/)
