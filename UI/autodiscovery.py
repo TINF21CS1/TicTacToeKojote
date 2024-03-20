@@ -26,6 +26,9 @@ def discover_games(timeout: int = 5) -> dict:
             else:
                 logger.error(f"Service {name} found, no info")
 
+        def remove_service(self, zc: Zeroconf, type_: str, name: str) -> None:
+            logger.info(f"Service {name} removed")
+
 
     zeroconf = Zeroconf()
     listener = MyListener()

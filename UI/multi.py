@@ -196,14 +196,17 @@ class LocalProfileSelection(base_frame):
 
 
 def reload(tkinter_obj: tk.Widget, queue: Queue):
-    print('hiu')
     for i in range(10):
         servers = discover_games(i+1)
         queue.put(servers)
-        tkinter_obj.event_generate('<<lobby/reload>>')
-        print(servers)
-    tkinter_obj.event_generate('<<thread/exit>>')
-    print('dead')
+        try:
+            tkinter_obj.event_generate('<<lobby/reload>>')
+        except tk.TclError:
+            pass
+    try:
+        tkinter_obj.event_generate('<<thread/exit>>')
+    except tk.TclError:
+        pass
     exit()
 
 class Lobby_Overview(tk.Container):
@@ -217,7 +220,7 @@ class Lobby_Overview(tk.Container):
         self.queue = Queue()
         self.thread = False
         self.servers = {}
-        self.master.master.network_events['lobby/connect'] = self._connect
+        self.master.master.network_events['lobby/connect'] = self._lobby_connect
         self.master.master.network_events['lobby/connect_error'] = self._connect_error
         self.bind('<<lobby/reload>>', lambda *args: self._finish_reload())
         self.bind('<<thread/exit>>', lambda *args: self._thread_reset())
@@ -259,7 +262,7 @@ class Lobby_Overview(tk.Container):
     def _connect(self, ip):
         root = self.master.master
         root.out_queue = {root.players[root.player].uuid: Queue()}
-        root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
+        root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=ip)
         self.etrAddress.config(state=tk.DISABLED)
         self.btnConnect.config(text="Connecting...", state=tk.DISABLED)
 
