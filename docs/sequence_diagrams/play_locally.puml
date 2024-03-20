@@ -9,6 +9,7 @@ Client->p: Display Multiplayer Menu
 p->Client: Click Create local Game Button
 Client->p: Display Profile selection screen
 p->Client: Select Profiles for both players
+Client->Client: Host Server locally
 p->Client: Click Start Game Button
 Client->p: Display Playfield
 
