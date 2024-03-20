@@ -8,7 +8,9 @@ import websockets
 import logging
 import json
 from jsonschema import validate, ValidationError
-from uuid import UUID
+import uuid
+from zeroconf import ServiceInfo, Zeroconf
+import socket
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,6 +27,14 @@ class Lobby:
 
         with open("./json_schema/client_to_server.json", "r") as f:
             self._json_schema = json.load(f)
+
+        # MDNS
+        #https://stackoverflow.com/a/74633230
+        self._mdns = Zeroconf()
+        ip = socket.inet_aton(socket.gethostbyname(socket.gethostname())) # this is a dirty hack and also doesnt work dual stack :'(
+        wsInfo = ServiceInfo(type_ = '_tictactoe._tcp.local.', name = admin.display_name+'s-Server'+'._tictactoe._tcp.local.', port = self._port, addresses = [ip])
+        self._mdns.register_service(wsInfo)
+
 
     async def handler(self, websocket):
         
@@ -50,7 +60,7 @@ class Lobby:
                             await websocket.send("Game in progress, cannot join") # TODO jsonify
                             break
 
-                        self._players[message_json["profile"]["uuid"]] = Player(uuid=UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
+                        self._players[message_json["profile"]["uuid"]] = Player(uuid=uuid.UUID(message_json["profile"]["uuid"]), display_name=message_json["profile"]["display_name"], color=message_json["profile"]["color"])
 
                         # send new lobby status
                         websockets.broadcast(self._connections, json.dumps({
@@ -90,6 +100,7 @@ class Lobby:
                             self._game = Game(player1 = list(self._players.values())[0], player2 = list(self._players.values())[1], rule_base = rulebase)
 
                             self._inprogress = True
+                            self._mdns.unregister_all_services()
                             
                             websockets.broadcast(self._connections, json.dumps({
                                 "message_type": "game/start",
@@ -207,5 +218,5 @@ class Lobby:
         asyncio.run(self.start_server())
 
 if __name__ == "__main__":
-    lobby = Lobby(port = 8765, admin = Player(uuid=UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff, ready=True))
+    lobby = Lobby(port = 8765, admin = Player(uuid=uuid.UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff, ready=True))
     lobby.run()

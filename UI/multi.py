@@ -1,8 +1,8 @@
 #import tkinter as tk
 from .lib import tttk_tk as tk
-from uuid import UUID
+from threading import Thread
 from queue import Queue
-
+from sys import exit
 from .base_frame import base_frame
 from .field_frame import Field
 from .profile import Profile, NewProfile
@@ -11,6 +11,7 @@ from .field_frame import player_type
 from Server.main import server_thread
 from AI.ai_context import AIContext
 from AI.ai_strategy import WeakAIStrategy, AdvancedAIStrategy
+from .autodiscovery import discover_games
 from .chat import Chat
 from .messages import messages
 from .gamefield import input_methods
@@ -193,6 +194,21 @@ class LocalProfileSelection(base_frame):
         self.master.out_queue[player2.uuid].put({'message_type': 'lobby/ready', 'args' : {'ready': True}})
         self.master.show(Join, display=False, opponent=player_type.local, local_players=[player1.uuid, player2.uuid],quiet=True)
 
+
+def reload(tkinter_obj: tk.Widget, queue: Queue):
+    for i in range(10):
+        servers = discover_games(i+1)
+        queue.put(servers)
+        try:
+            tkinter_obj.event_generate('<<lobby/reload>>')
+        except tk.TclError:
+            pass
+    try:
+        tkinter_obj.event_generate('<<thread/exit>>')
+    except tk.TclError:
+        pass
+    exit()
+
 class Lobby_Overview(tk.Container):
     """
     Class for the lobby overview. This screen is part of the multiplayer screen and used to display the available lobbies and to join them.
@@ -201,44 +217,52 @@ class Lobby_Overview(tk.Container):
         super().__init__(master)
         self._create_widgets()
         self._display_widgets()
+        self.queue = Queue()
+        self.thread = False
+        self.servers = {}
         self.master.master.network_events['lobby/connect'] = self._lobby_connect
         self.master.master.network_events['lobby/connect_error'] = self._connect_error
+        self.bind('<<lobby/reload>>', lambda *args: self._finish_reload())
+        self.bind('<<thread/exit>>', lambda *args: self._thread_reset())
         self.bind('<Destroy>', lambda *args: self.on_destroy())
+        self._start_reload()
 
     def _create_widgets(self):
         self.frame = tk.Frame(self)
         self.innerframe = self.frame.widget
         self.lblHeading = tk.Label(self.innerframe, text="Join public lobbies", font=self.master.master.title_font)
-
-        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self.manually())
+        self.btnReload = tk.Button(self.innerframe, text="\u21BB", command=lambda *args: self._start_reload(), border=0)
+        self.wrapper = tk.Container(self.innerframe)
+        self.btnManual = tk.Button(self.innerframe, text="Join by address", command=lambda *args: self._manually())
         self.etrAddress = tk.Entry(self.innerframe)
-        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda *args: self._connect())
+        self.btnConnect = tk.Button(self.innerframe, text="Connect", command=lambda ip=self.etrAddress.get(), *args: self._connect(ip))
         self.master.master.bind('<Return>', lambda *args: self._enter())
 
     def _display_widgets(self):
         self.frame.pack(expand=True, fill=tk.BOTH)
-        self.innerframe.columnconfigure([0, 2, 4], weight=1)
+        self.innerframe.columnconfigure([0, 2, 4, 5], weight=1)
         self.innerframe.columnconfigure([1, 3], weight=5)
         self.innerframe.rowconfigure([0, 4], weight=2)
         self.innerframe.rowconfigure([1, 3], weight=1)
         self.innerframe.rowconfigure([2], weight=40)
         self.lblHeading.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=0, columnspan=3)
-        self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=3)
+        self.btnReload.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=4, row=0)
+        self.btnManual.grid(sticky=tk.E+tk.W+tk.N+tk.S, column=1, row=4, columnspan=4)
 
-    def manually(self):
+    def _manually(self):
         self.btnManual.grid_forget()
         self.etrAddress.grid(column=1, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
-        self.btnConnect.grid(column=3, row=10, sticky=tk.E+tk.W+tk.N+tk.S)
+        self.btnConnect.grid(column=3, row=10, columnspan=2, sticky=tk.E+tk.W+tk.N+tk.S)
         self.etrAddress.focus_set()
 
     def _enter(self):
         if(self.focus_get() == self.etrAddress.widget):
             self._connect()
 
-    def _connect(self):
+    def _connect(self, ip):
         root = self.master.master
         root.out_queue = {root.players[root.player].uuid: Queue()}
-        root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=self.etrAddress.get())
+        root.network_client = client_thread(root, in_queue=list(root.out_queue.values())[0], out_queue=root.in_queue, player=root.players[root.player], ip=ip)
         self.etrAddress.config(state=tk.DISABLED)
         self.btnConnect.config(text="Connecting...", state=tk.DISABLED)
 
@@ -256,6 +280,29 @@ class Lobby_Overview(tk.Container):
         del self.master.master.network_events['lobby/connect']
         del self.master.master.network_events['lobby/connect_error']
 
+    def _start_reload(self):
+        if(self.thread):
+            return
+        Thread(target=reload, args=(self, self.queue), daemon=True).start()
+        self.thread = True
+
+    def _finish_reload(self):
+        servers = self.queue.get()
+        if(servers == self.servers):
+            return
+        self.servers = servers
+        self.wrapper.destroy()
+        self.wrapper = tk.Container(self.innerframe)
+        self.wrapper.columnconfigure([0], weight=1)
+        self.wrapper.columnconfigure([1], weight=0)
+        for i, (server, ip) in enumerate(self.servers.items()):
+            tk.Label(self.wrapper, text=server).grid(column=0, row=i, sticky=tk.W+tk.N+tk.S)
+            tk.Button(self.wrapper, text="Join", command=lambda ip=ip, *args: self._connect(ip)).grid(column=1, row=i, sticky=tk.E+tk.W+tk.N+tk.S)
+        self.wrapper.grid(column=1, row=2, columnspan=4, sticky=tk.E+tk.W+tk.N+tk.S)
+
+    def _thread_reset(self):
+        self.thread = False
+
 class Multiplayer(base_frame):
     """
     Class for the multiplayer screen. This screen is used to select the multiplayer mode and to create or join lobbies.
@@ -271,7 +318,7 @@ class Multiplayer(base_frame):
         self.master.out_queue = {}
         self._create_widgets()
         self._display_widgets()
-        self.address_toogle = False
+
 
     def _create_widgets(self):
         self.lblTitle = tk.Label(self, text='Multiplayer', font=self.master.title_font)
