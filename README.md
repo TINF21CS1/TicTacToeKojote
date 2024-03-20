@@ -10,6 +10,8 @@ This is a simple TicTacToe game written in Python. IT can be played by two playe
 - Install Python 3.11 or higher from [python.org](https://www.python.org/downloads/)
 - Install the required packages by running `pip install -r requirements.txt` from the root directory of the project
 - Run the game by executing `python main.py` from the root directory of the project
+- To play against other players in the network, you have to configure your local firewall to allow incoming traffic on port 8765
+    - Alternatively, you can turn off the firewall on both clients
 
 ## Features
 
