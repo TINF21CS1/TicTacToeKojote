@@ -1,0 +1,15 @@
+@startuml
+title Play locally
+
+actor Player as p
+database Client
+
+p->Client: Click Multiplayer Button
+Client->p: Display Multiplayer Menu
+p->Client: Click Create local Game Button
+Client->p: Display Profile selection screen
+p->Client: Select Profiles for both players
+p->Client: Click Start Game Button
+Client->p: Display Playfield
+
+@enduml

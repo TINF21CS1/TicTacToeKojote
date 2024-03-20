@@ -1,0 +1,13 @@
+@startuml
+title Delete Player Profile
+
+actor Player
+database Client
+
+Player->Client: Click Profile Button
+Client->Player: Show Profile
+Player->Client: Click Delete Profile Button
+Client->Client: Delete Profile from Disk
+Client->Player: Show Profile Creation Prompt
+
+@enduml

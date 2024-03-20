@@ -1,0 +1,17 @@
+@startuml
+title Send Chat Message
+
+actor Player as p
+database Client
+database Server as s
+actor Player2 as p2
+
+p->Client: Click on the message entry box
+p->p: Enter message
+p->Client: Click Send Button
+Client->s: Send chat message
+s->p2: Send chat message
+s-> Client: Send chat message
+Client->p: Display chat message
+
+@enduml

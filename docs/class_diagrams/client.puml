@@ -1,0 +1,64 @@
+@startuml Client
+!pragma useIntermediatePackages false
+
+class Client.client.GameClient {
+    - _ip: str
+    - _port: int
+    - _player: Player
+    - _player_number: int
+    - _symbol: str
+    - _opponent: Player
+    - _opponent_number: int
+    - _starting_player: Player
+    - _current_player: Player
+    - _lobby_status: list[str]
+    - _playfield: list[list[int]]
+    - _statistics: Server.statistics.Statistics
+    - _chat_history: list[tuple[Player, str]]
+    - _winner: Player
+    - _error_history: list[str]
+    - _json_schema: Any
+
+    + None GameClient(ip:str, port:int, player:Player)
+    - None connect()
+    + tuple[GameClient, asyncio.Task, Thread] create_game(player: Player, port:int = 8765)
+    + tuple[GameClient, asyncio.Task] join_game(player: Player, ip:str, port:int = 8765)
+    + None listen()
+    + Player get_player_by_uuid(uuid:str)
+    - None _preprocess_message(message:str)
+    - None _message_handler(message_type: str)
+    + None join_lobby()
+    + None lobby_ready(ready:bool = True)
+    + None lobby_kick(player_to_kick_index:int)
+    + None game_make_move(x:int, y:int)
+    + None chat_message(message:str)
+    + None close()
+    + None terminate()
+}
+
+class Client.ui_client.GameClientUI {
+    - _tk_root: tk.Tk
+    - _in_queue: queue.Queue
+    - _out_queue: queue.Queue
+
+    + None GameClientUI(ip:str, port:int, player:Player, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue)
+    + tuple[GameClientUI, asyncio.Task, asyncio.Task] join_game(player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765)
+    - None listen()
+    - None _message_handler(message_type: str)
+    - None await_commands()
+    - None send_gamestate_to_ui()
+}
+
+class Client.profile_save.Profile {
+    + list[Player] get_profiles()
+    + None set_profiles(players:list[Player], selected:int)
+    + None delete_all_profiles()
+}
+
+class Server.statistics.Statistics {
+}
+
+Client.client.GameClient <|-- Client.ui_client.GameClientUI
+Client.client.GameClient *-- Server.statistics.Statistics
+@enduml
+

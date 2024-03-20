@@ -1,0 +1,21 @@
+@startuml
+title Join Game
+
+actor Player as p
+database Client
+database Server as s
+
+p->Client: Click Multiplayer Button
+Client->p: Display Multiplayer Menu
+p->Client: Click Join by address Button
+Client->p: Show IP-Address Input field
+p->Client: Enter IP-Address
+p->Client: Click Connect Button
+Client->s: Join Lobby
+s->Client: Send Server information
+Client->p: Display Game Lobby
+p->Client: Click Ready Button
+Client->s: Get Ready
+s->s: Wait for other Player to get ready
+
+@enduml

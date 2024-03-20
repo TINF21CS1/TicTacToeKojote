@@ -1,0 +1,10 @@
+@startuml
+title View Player Profile
+
+actor Player
+database Client
+
+Player->Client: Click Profile Button
+Client->Player: Show Profile
+
+@enduml

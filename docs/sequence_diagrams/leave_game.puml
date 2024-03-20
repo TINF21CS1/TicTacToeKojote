@@ -1,0 +1,17 @@
+@startuml
+title Leave Game
+
+actor Player as p
+database Client
+database Server as s
+actor Player2 as p2
+
+p->Client: Click Menu Button
+Client->s: Player disconnected
+Client->s: Close connection
+Client->p: Show Main Menu
+s->p2: You have won
+s->p2: Close Connection
+s->s: Terminate
+
+@enduml

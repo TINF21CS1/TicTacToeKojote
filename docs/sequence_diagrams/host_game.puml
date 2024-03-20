@@ -1,0 +1,15 @@
+@startuml
+title Host Game
+
+actor Player as p
+database Client
+
+p->Client: Click Multiplayer Button
+Client->p: Display Multiplayer Menu
+p->Client: Click Create a new online game Button
+Client->Client: Host Server locally
+Client->p: Display Multiplayer Lobby
+Client->Network: Send advertisements
+Client->Client: Wait for other players to join
+
+@enduml

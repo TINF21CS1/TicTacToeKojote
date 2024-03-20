@@ -1,0 +1,15 @@
+@startuml
+title Create Player Profile
+
+actor Player
+database Client
+
+Player->Client: Click Profile Button
+Client->Player: Show Profile Creation Prompt
+Player->Client: Set Name
+Player->Client: Set Color
+Player->Client: Click Create Profile Button
+Client->Client: Save Profile on Disk
+Client->Player: Show Profile
+
+@enduml
