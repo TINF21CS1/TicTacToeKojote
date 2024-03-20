@@ -93,7 +93,7 @@ class Lobby:
                             "players":  [player.as_dict() for player in self._players.values()],
                         }))
 
-                        if all([player.ready for player in self._players.values()]) and len(self._connections) == 2:
+                        if all([player.ready for player in self._players.values()]) and len(self._connections) == 2 and len(self._players) >= 2:
                             # TODO add error messages for why game cant start with not enough or too many ready players
                             # all players are ready, start the game
                             rulebase = RuleBase()
