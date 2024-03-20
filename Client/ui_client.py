@@ -17,20 +17,44 @@ class GameClientUI(GameClient):
     """A class to represent a game client that connects to a server and sends and receives messages. This class is specifically designed to be used with a tkinter UI.
 
     Attributes:
-        _tk_root (tk.Tk): The root of the tkinter application.
-        _in_queue (Queue): The queue to receive messages from the server.
-        _out_queue (Queue): The queue to send messages to the server.
+        _tk_root (tk.Tk): The tkinter root window
+        _in_queue (Queue): A queue to receive messages from the UI
+        _out_queue (Queue): A queue to send messages to the UI
 
     For the rest of the attributes and methods see the `GameClient` class.
     """
+
     def __init__(self, ip:str, port:int, player:Player, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue) -> None:
+        """Initialize the GameClientUI object.
+
+        Args:
+            ip (str): The IP address of the server
+            port (int): The port of the server
+            player (Player): The player object
+            tk_root (tk.Tk): The tkinter root window
+            out_queue (Queue): A queue to send messages to the UI
+            in_queue (Queue): A queue to receive messages from the UI
+        """
         self._tk_root = tk_root
         self._in_queue = in_queue
         self._out_queue = out_queue
         super().__init__(ip, port, player)
     
     @classmethod
-    async def join_game(cls, player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765) -> tuple[GameClientUI, asyncio.Task, asyncio.Task]:
+    async def join_game(cls, player: Player, ip: str, tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, port: int = 8765) -> GameClientUI:
+        """Create a new GameClientUI object and connect to the server.
+
+        Args:
+            player (Player): The player object
+            ip (str): The IP address of the server
+            tk_root (tk.Tk): The tkinter root window
+            out_queue (Queue): A queue to send messages to the UI
+            in_queue (Queue): A queue to receive messages from the UI
+            port (int, optional): The port of the server. Defaults to 8765.
+
+        Returns:
+            The GameClientUI object
+        """
         
         client = cls(ip, port, player, tk_root, out_queue, in_queue)
         await client.connect()
@@ -107,6 +131,7 @@ class GameClientUI(GameClient):
         return
     
     def send_gamestate_to_ui(self):
+        """Send the gamestate to the UI."""
         self._out_queue.put({
             "message_type": "game/turn",
             "next_player": self._current_player.uuid,
@@ -115,7 +140,7 @@ class GameClientUI(GameClient):
         self._tk_root.event_generate("<<queue_input>>", when="tail")
     
     async def await_commands(self):
-        # Send messages to the server
+        """Wait for commands from the UI and send them to the server."""
         try:
             logger.debug("Trying to get message from in_queue")
             message: dict = self._in_queue.get_nowait()
@@ -152,7 +177,16 @@ class GameClientUI(GameClient):
             self._in_queue.task_done()
 
 async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int) -> None:
-    """The function that is run in the client thread. It connects to the server. It sends and receives messages."""
+    """The function that is run in the client thread. It connects to the server. It sends and receives messages.
+
+    Args:
+        tk_root (tk.Tk): The tkinter root window
+        out_queue (Queue): A queue to send messages to the UI
+        in_queue (Queue): A queue to receive messages from the UI
+        player (Player): The player object
+        ip (str): The IP address of the server
+        port (int): The port of the server
+    """
 
     for _ in range(5):
         try:
@@ -181,11 +215,32 @@ async def client_thread_function(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue,
     tk_root.event_generate("<<queue_input>>", when="tail")
 
 def asyncio_thread_wrapper(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int):
-    """Wrapper function to run the client thread function in an asyncio event loop."""
+    """Wrapper function to run the client thread function in an asyncio event loop.
+    
+    Args:
+        tk_root (tk.Tk): The tkinter root window
+        out_queue (Queue): A queue to send messages to the UI
+        in_queue (Queue): A queue to receive messages from the UI
+        player (Player): The player object
+        ip (str): The IP address of the server
+        port (int): The port of the server
+    """
     asyncio.run(client_thread_function(tk_root, out_queue, in_queue, player, ip, port))
 
 def client_thread(tk_root:tk.Tk, out_queue:Queue, in_queue:Queue, player: Player, ip:str, port:int = 8765) -> Thread:
-    """Start a new client thread that connects to the server and sends and receives messages."""
+    """Start a new client thread that connects to the server and sends and receives messages.
+    
+    Args:
+        tk_root (tk.Tk): The tkinter root window
+        out_queue (Queue): A queue to send messages to the UI
+        in_queue (Queue): A queue to receive messages from the UI
+        player (Player): The player object
+        ip (str): The IP address of the server
+        port (int, optional): The port of the server. Defaults to 8765.
+        
+    Returns:
+        The client thread
+    """
     thread = Thread(target=asyncio_thread_wrapper, args=(tk_root, out_queue, in_queue, player, ip , port), daemon=True)
     thread.start()
     return thread

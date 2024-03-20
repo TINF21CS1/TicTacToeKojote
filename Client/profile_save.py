@@ -7,14 +7,13 @@ path=os.path.abspath('Client/Data/profiles.json')
 
 class Profile:
     """
-    This class is used to handle the profiles.json file. It is used to get, set, and add profiles to the file.
+    This class is used to save and load profiles
     """
 
     @staticmethod
     def get_profiles():
         """
-        This method returns all the profiles from the file
-        :return: An array of all profiles
+        This method returns a list of profiles from the file
         """
         Profile._check_folder()
         if exists(path):
@@ -33,6 +32,9 @@ class Profile:
 
     @staticmethod
     def set_profiles(players: list, selected: int):
+        """
+        This method saves the profiles to the file
+        """
         Profile._check_folder()
         with open(path, 'w+') as file:
                 entry = []
@@ -52,6 +54,9 @@ class Profile:
 
     @staticmethod
     def _check_folder():
+        """
+        This method checks if the folder for the profiles exists and creates it if it doesn't
+        """
         dir = os.path.abspath('Client/Data/')
         if not os.path.exists(os.path.abspath(dir)):
             try:
