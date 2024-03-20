@@ -4,12 +4,16 @@ class RuleBase:
     """
     Represents the rule base for a Tic-Tac-Toe game.
 
-    Args:
+    Parameters:
         playfield_dimensions (tuple[int, int]): The dimensions of the playfield (default: (3, 3)).
 
     Attributes:
         playfield_dimensions (tuple[int, int]): The dimensions of the playfield.
 
+    Functions:
+        is_move_valid(state: GameState, new_position: tuple[int, int]) -> bool: Check if a move is valid.
+        check_win(state: GameState) -> None: Check if there is a winner in the current game state.
+        is_game_state_valid(state: GameState) -> bool: Check if the current game state is valid.
     """
 
     def __init__(self, playfield_dimensions: tuple[int, int] = (3,3)):

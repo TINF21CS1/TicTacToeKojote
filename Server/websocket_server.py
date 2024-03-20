@@ -16,6 +16,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class Lobby:
+    """
+    This class represents an instance of the gameserver.
+
+    Parameters:
+        admin (Player): The player object of the admin user.
+        port (int): The port the server is running on. Default is 8765. (This also shouldnt be changed, since many parts of the client depend on this port.)
+    
+    Functions:
+        handler(websocket) -> None: Handles incoming websocket messages from the client.
+        run() -> None: Runs the server async.
+    
+    Private Functions:
+        _end_game() -> None: Ends the game and sends the final playfield and winner to the clients. Then closes the server.
+        start_server() -> None: Starts the server.
+    """
+
     def __init__(self, admin:Player, port: int = 8765) -> None:
         self._players = {}
         self._admin = admin
@@ -37,6 +53,9 @@ class Lobby:
 
 
     async def handler(self, websocket):
+        """
+        Handle all websocket messages and pass them to the appropriate game function.
+        """
         
         self._connections.add(websocket)
 
@@ -210,12 +229,12 @@ class Lobby:
         await asyncio.sleep(1)
         exit()
 
-    async def start_server(self):
+    async def _start_server(self):
         async with websockets.serve(self.handler, host = "", port = self._port):
             await asyncio.Future()  # run forever
 
     def run(self):
-        asyncio.run(self.start_server())
+        asyncio.run(self._start_server())
 
 if __name__ == "__main__":
     lobby = Lobby(port = 8765, admin = Player(uuid=uuid.UUID("c4f0eccd-a6a4-4662-999c-17669bc23d5e"), display_name="admin", color=0xffffff, ready=True))

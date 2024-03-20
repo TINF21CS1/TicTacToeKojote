@@ -4,19 +4,20 @@ class GameState:
     """
     Represents the state of a Tic-Tac-Toe game.
 
-    Attributes:
-        _playfield (list[list[int]]): The playfield of the game, represented as a 2D list.
-        _finished (bool): Indicates whether the game has finished.
-        _winner (int): The number of the winning player, if any.
+    Parameters:
+        playfield_dimensions (tuple[int, int]): The dimensions of the playfield (default: (3, 3)).
+
+    Properties:
+        winner (int): The index of the winning player.
+        finished (bool): True if the game has finished, False otherwise.
+        playfield (list[list[int]]): The playfield of the game.
+        current_player (int): The index of the current player.
+        playfield_dimensions (tuple[int, int]): The dimensions of the playfield.
 
     Methods:
-        __init__(self, starting_player: int, playfiled_dimensions: (int, int) = (3,3)): Initializes a new instance of the GameState class.
         set_player_position(self, player: int, new_position: (int, int)): Sets the position of a player on the playfield.
         set_winner(self, winner: int): Sets the winner of the game.
-        winner(self) -> int: Returns the number of the winning player.
-        finished(self) -> bool: Returns True if the game has finished, False otherwise.
-        playfield(self) -> list[list[int]]: Returns the playfield of the game.
-        playfield_value(self, position: (int, int)) -> int: Returns the value at the specified position on the playfield.
+        playfield_value(self, position: (int, int)): Returns the value at the specified position on the playfield.
     """
 
     _playfield: list[list[int]]
