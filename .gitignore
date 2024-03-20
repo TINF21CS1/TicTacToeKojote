@@ -51,4 +51,4 @@ l10n/
 launch.json
 venv
 *.db
-profiles.json
+Client/Data/profiles.json

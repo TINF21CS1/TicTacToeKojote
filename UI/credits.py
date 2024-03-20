@@ -2,9 +2,13 @@
 from .lib import tttk_tk as tk
 
 from .base_frame import base_frame
-from .field_frame import Field
 
 class Credits(base_frame):
+    """
+    The credits screen of the game. This screen is used to display the names of the developers of the game. 
+    It also contains a hidden developer options menu. This menu can be accessed by clicking the "created by" label 
+    three times. This menu is used to test the game and is not intended for the end user.
+    """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
         self._create_widgets()
