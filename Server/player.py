@@ -11,7 +11,12 @@ class Player:
         uuid (UUID): The UUID of the player.
         display_name (str): The display name of the player.
         color (int): The color of the player.
+        color_str (str): The color of the player as a html string.
         ready (bool): Whether the player is ready to start the game.
+
+    Class Methods:
+        from_dict(player_dict: dict) -> Player: Create a Player object from a dictionary.
+        with_color_str(display_name: str, color_str: str, uuid: UUID = None, ready: bool = False) -> Player: Create a Player object with an html string as color instead of an int.
     """
     def __init__(self, display_name: str, color: int, uuid: UUID = None, ready:bool = False):
         self.uuid: UUID = uuid if uuid else uuid4()

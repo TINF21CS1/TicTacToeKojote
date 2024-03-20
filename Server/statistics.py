@@ -9,27 +9,28 @@ class Statistics:
     """
     Handle Statistics and Writing to permanent storage.
 
-    Methods:
-    get_statistics() -> list: returns all statistics
-    increment_emojis(player: Player, message: str) -> None: counts the emojis in the given message and updates the emoji statistics of a profile by its player object
-    increment_moves(player: Player) -> None: increments the moves of a profile by its player object
-    increment_games(player_list: list[Player], winner: int) -> None: increments the wins and losses of both players by their player objects
+    Parameters:
+        path (str): path to db file, default is './Data/statistics.db'
 
-    Private Methods:
-    _increment_win(player: Player) -> None: increments the wins of a profile by its player object
-    _increment_loss(player: Player) -> None: increments the losses of a profile by its player object
-    _increment_draws(player: Player) -> None: increments the draws of a profile by its player object
-    _check_add_profile(player: Player) -> None: checks if a profile with the given uuid exists and adds it if it doesn't
-    _check_profile(uuid: str) -> bool: checks if a profile with the given uuid exists
-    _add_profile(player: Player) -> None: adds a new profile to the database
+    Functions:
+        get_statistics() -> list: returns all statistics
+        increment_emojis(player: Player, message: str) -> None: counts the emojis in the given message and updates the emoji statistics of a profile by its player object
+        increment_moves(player: Player) -> None: increments the moves of a profile by its player object
+        increment_games(player_list: list[Player], winner: int) -> None: increments the wins and losses of both players by their player objects
+
+    Private Functions:
+        _increment_win(player: Player) -> None: increments the wins of a profile by its player object
+        _increment_loss(player: Player) -> None: increments the losses of a profile by its player object
+        _increment_draws(player: Player) -> None: increments the draws of a profile by its player object
+        _check_add_profile(player: Player) -> None: checks if a profile with the given uuid exists and adds it if it doesn't
+        _check_profile(uuid: str) -> bool: checks if a profile with the given uuid exists
+        _add_profile(player: Player) -> None: adds a new profile to the database
     """
 
 
     def __init__(self, path: str = os.path.abspath('Server/Data/statistics.db')) -> None:
         """
-        Initializes the statistics object by creating a connection to the database
-        and creating the table if it doesn't exist
-        :param path: path to db file, default is './Data/statistics.db'
+        Initializes the statistics object by creating a connection to the database and creating the table if it doesn't exist
         """
         self.path = path
         self.conn = sqlite3.connect(self.path)
@@ -52,7 +53,9 @@ class Statistics:
     def get_statistics(self) -> list:
         """
         Returns the statistics of all players
-        :return: all statistics
+
+        Returns:
+            (list): all statistics
         """
         with self.conn:
             self.cursor.execute(f"""
@@ -63,10 +66,11 @@ class Statistics:
 
     def increment_emojis(self, player: Player, message: str) -> None:
         """
-        Counts the emojis in the given message and updates the emoji
-        statistics of a profile by its uuid
-        :param player:
-        :param message: message that is checked for emojis
+        Counts the emojis in the given message and updates the emoji statistics of a profile
+
+        Parameters:
+            player (Player): player object of the profile that sent the message
+            message (str): message that is checked for emojis
         """
 
         self._check_add_profile(player)
@@ -81,8 +85,10 @@ class Statistics:
 
     def increment_moves(self, player: Player) -> None:
         """
-        Increments the moves of a profile by its uuid
-        :param player:
+        Increments the moves of a profile
+
+        Parameters:
+            player (Player): player object of the profile that made the move
         """
 
         self._check_add_profile(player)
@@ -97,8 +103,10 @@ class Statistics:
     def increment_games(self, player_list: list[Player], winner: int) -> None:
         """
         Increments the wins and losses of both players by their player objects
-        :param player_list: list of None, player1, player2
-        :param winner: 0 if draw, 1 if player1 wins, 2 if player2 wins
+
+        Parameters:
+            player_list (list[Player]): list of None, player1, player2
+            winner (int): 0 if draw, 1 if player1 wins, 2 if player2 wins
         """
 
         self._check_add_profile(player_list[1])
@@ -119,7 +127,9 @@ class Statistics:
     def _increment_win(self, player: Player) -> None:
         """
         Increments the wins of a profile by its uuid
-        :param player: player object of the profile that is updated
+
+        Parameters:
+            player (Player): player object of the profile that is updated
         """
 
         self._check_add_profile(player)
@@ -136,7 +146,9 @@ class Statistics:
     def _increment_loss(self, player: Player) -> None:
         """
         Increments the losses of a profile by its uuid
-        :param player: player object of the profile that is updated
+
+        Parameters:
+            player (Player): player object of the profile that is updated
         """
 
         self._check_add_profile(player)
@@ -153,7 +165,9 @@ class Statistics:
     def _increment_draws(self, player: Player) -> None:
         """
         Increments the draws of a profile by its uuid
-        :param player: player object of the profile that is updated
+
+        Parameters:
+            player (Player): player object of the profile that is updated
         """
 
         self._check_add_profile(player)
@@ -171,8 +185,9 @@ class Statistics:
     def _check_add_profile(self, player: Player) -> None:
         """
         Checks if a profile with the given uuid exists and adds it if it doesn't
-        :param uuid: uuid of the profile that is checked
-        :return: True if the profile exists, False if it doesn't
+
+        Parameters:
+            player (Player): player object of the profile that is checked
         """
         if not self._check_profile(str(player.uuid)):
             self._add_profile(player)
@@ -180,8 +195,9 @@ class Statistics:
     def _check_profile(self, uuid_str: str) -> bool:
         """
         Checks if a profile with the given uuid exists
-        :param uuid: uuid of the profile that is checked
-        :return: True if the profile exists, False if it doesn't
+        
+        Parameters:
+            uuid_str (str): uuid of the profile that should be checked
         """
         with self.conn:
             self.cursor.execute(f"""
@@ -193,7 +209,9 @@ class Statistics:
     def _add_profile(self, player: Player) -> None:
         """
         Adds a new profile to the database
-        :param player: player object of the profile that is added
+
+        Parameters:
+            player (Player): player object of the profile that is added
         """
         with self.conn:
             self.cursor.execute(f"""
